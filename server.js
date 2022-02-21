@@ -1,5 +1,5 @@
 const express = require("express");
-const db = require("./db.js");
+const { db } = require("./db.js");
 const dotenv = require("dotenv");
 
 const app = express();
@@ -15,7 +15,8 @@ app.use("/images", express.static(path.join(__dirname, "/images")));
 
 dotenv.config();
 
-db();
+db.connect().then(() => console.log("Database connected successfully"))
+.catch(error => console.log(error));
 
 const storage = multer.diskStorage({
     //    destination:(req, file, callback function to handle error)
@@ -35,7 +36,7 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
 
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
-app.use("/api/communities", communityRoutes);
+app.use("/api/:community/posts", communityRoutes);
 
 // if (process.env.NODE_ENV === "production") {
 //     app.use(express.static("frontend/build"));

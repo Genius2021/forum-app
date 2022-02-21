@@ -5,11 +5,12 @@ const communitySchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    postId: {
-        type: String,
-        required: true,
-    },
-    username:{
+    // creator:{
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "Admin",
+    //     required:true,
+    // }
+    creator:{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required:true,

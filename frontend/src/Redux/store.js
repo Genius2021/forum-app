@@ -1,9 +1,10 @@
 import { createStore, compose, applyMiddleware, combineReducers } from "redux";
 import thunk from "redux-thunk";
-import { userRegisterReducer, userSigninReducer } from "./reducers/userReducer";
-import { getPostsReducer } from "./reducers/postReducer";
-import { sidebarStateReducer } from "./reducers/sidebarReducers";
-import { messageReducer, modalReducer } from "./reducers/generalReducers";
+import { userRegisterReducer, userSigninReducer } from "./Users/reducers/userReducer";
+import { getPostsReducer } from "./Users/reducers/postReducer";
+import { sidebarStateReducer } from "./Users/reducers/sidebarReducers";
+import { communityPaginationReducer, homePaginationReducer, messageReducer, modalReducer } from "./Users/reducers/generalReducers";
+import { createCommunityPostReducer, deleteCommunityPostReducer, editCommunityPostReducer, getACommunityPostReducer, getCommunityPostsReducer, seenPostReducer } from "./Users/reducers/communityReducers";
 
 
 
@@ -22,6 +23,14 @@ const reducer = combineReducers({
     sidebarState: sidebarStateReducer,
     message : messageReducer,
     modal: modalReducer,
+    createCommunityPost: createCommunityPostReducer,
+    deleteCommunityPost: deleteCommunityPostReducer,
+    editCommunityPost: editCommunityPostReducer,
+    getCommunityPosts: getCommunityPostsReducer,
+    getACommunityPost: getACommunityPostReducer,
+    communityPagination: communityPaginationReducer,
+    homePagination: homePaginationReducer,
+    seenPost: seenPostReducer,
 });
 
 

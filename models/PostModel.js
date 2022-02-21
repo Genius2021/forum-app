@@ -4,7 +4,6 @@ const postSchema = new mongoose.Schema({
     title:{
         type: String,
         required: true,
-        unique:true,
     },
     description:{
         type: String,
@@ -20,9 +19,16 @@ const postSchema = new mongoose.Schema({
         required:true,
     },
     community:{
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Community",
         required:true,
     },
+    actions:[{
+        likes: {type: Number, required: false, default: 0},
+        isShared: {type: Boolean, required: false, default: false},
+        views: { type: Number, required: false, default: 0},
+        isPinnedToDashboard:{ type: Boolean, required: false, default: false}
+    }],
 
 }, {timestamps: true});
 

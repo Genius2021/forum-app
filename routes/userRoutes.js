@@ -8,7 +8,8 @@ const userRouter = express.Router();
 //AuthRoutes
 userRouter.get("/:id", expressAsyncHandler(oneUser));
 
-userRouter.get("/", isAuth, isAdmin, expressAsyncHandler(allUsers));
+// userRouter.get("/", isAuth, isAdmin, expressAsyncHandler(allUsers));
+userRouter.get("/", expressAsyncHandler(allUsers));
 
 userRouter.post("/login", expressAsyncHandler(userLogin));
 
@@ -16,9 +17,11 @@ userRouter.post("/register", expressAsyncHandler(userRegister));
 
 userRouter.put("/profile", isAuth, expressAsyncHandler(userProfile));
 
-userRouter.delete("/delete", isAuth, expressAsyncHandler(deleteUser));
+// userRouter.delete("/delete", isAuth, expressAsyncHandler(deleteUser));
+userRouter.delete("/delete", expressAsyncHandler(deleteUser));
 
-userRouter.post("/create", isAuth, isAdmin, expressAsyncHandler(createUser));
+//This should be for an Admin. To be able to create a user.
+// userRouter.post("/create", isAuth, isAdmin, expressAsyncHandler(createUser));
 
 
 

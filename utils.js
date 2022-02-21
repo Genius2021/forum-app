@@ -3,10 +3,10 @@ require("dotenv").config();
 
 const generateToken = (user) => {
     return jwt.sign({
-        _id: user._id,
-        firstName: user.firstName,
-        email: user.email,
-        isAdmin: user.isAdmin,
+        user_id: user.user_id,
+        firstname: user.firstname,
+        username: user.username,
+        is_admin: user.is_admin,
     }, process.env.JWT_SECRET, { expiresIn: "7d", })
 }
 
@@ -29,7 +29,7 @@ const isAuth = (req, res, next) => {
 }
 
 const isAdmin = (req, res, next) =>{
-   if(req.user && req.user.isAdmin){
+   if(req.user && req.user.is_admin){
        next();
    }else{
        res.status(401).send({message: "Invalid Admin Token"});
@@ -39,14 +39,59 @@ const isAdmin = (req, res, next) =>{
 
 const capitalize = (string) =>{
     const lowercase = string?.toLowerCase();
-    const capitalize = lowercase[0].toUpperCase();
-     const answer = lowercase.replace(lowercase[0], capitalize)
+    const capital = lowercase[0].toUpperCase();
+    const answer = lowercase.replace(lowercase[0], capital)
     return answer;
 }
+
+
+function capitalizeStringWithDash(string){
+    if(string.includes('-')){
+         const ans = string.split("-").map(x =>{
+            if(x === "and"){
+                return "and"
+            }else{           
+                return capitalize(x);
+            }
+            
+        })
+        return ans.join(" ").toString();
+    }else{
+        return capitalize(string);
+
+    }
+        
+}
+
+function capitalizeLowercaseStringWithSpace(string){
+    if(string.includes('-')){
+        const ans = string.split(" ").map(x =>{
+            if(x === "and"){
+                return "and"
+            }else{
+                return capitalize(x);
+       
+            }
+            
+        })
+        return ans.join(" ").toString();
+
+    }else{
+        return capitalize(string);
+ 
+    }
+    
+
+}
+
+
+
 
 module.exports = {
     isAdmin,
     isAuth,
     generateToken,
-    capitalize
+    capitalize,
+    capitalizeStringWithDash,
+    capitalizeLowercaseStringWithSpace,
 }

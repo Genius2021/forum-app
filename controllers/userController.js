@@ -1,6 +1,6 @@
-const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const { generateToken, capitalize } = require("../utils.js");
+const { db } = require("../db.js");
 
 
 //find all users
@@ -11,28 +11,43 @@ const allUsers = async (req, res) =>{
     const username = req.query.username;
 
     if(id){
-        const userById = await User.find({ id });
-        res.status(200).send(userById);
+        const userById = await db.query("SELECT * FROM users WHERE user_id = $1;", [id] )
+        if(userById.rowCount > 0){
+            res.status(200).send(userById.rows[0]);
+        }else{
+            res.status(404).json("User was not found");
+        }
+    }else if(username){
+        const userByUsername = await db.query("SELECT * FROM users WHERE username = $1;", [username] )
+        if(userByUsername.rowCount > 0){
+            res.status(200).send(userByUsername.rows[0]);
+        }else{
+            res.status(404).json("User was not found");
+        }
+    }else{
+        const users = await db.query("SELECT * FROM users;")
+        res.status(200).send(users.rows);
     }
-
-    if(username){
-        const userByUsername = await User.find({ username });
-        res.staus(200).send(userByUsername);
-    }
-
-    const users = await User.find({});
-    res.status(200).send(users);
 }
 
 
 
 //find single user
     const oneUser = async (req, res) =>{
+        const id = req.params.id
     try{
-        const users = await User.findById(req.params.id);
-        res.status(200).send(users)
+        if(id){
+            const userById = await db.query("SELECT * FROM users WHERE user_id = $1;", [id] )
+            if(userById.rowCount > 0){
+                res.status(200).send(userById.rows[0]);
+            }else{
+                res.status(404).json("User was not found");
+            }
+        }else{
+            res.status(404).json("No ID was found")
+        }    
     } catch (error) {
-        res.status(404).json("Post not found");
+        res.status(404).json("User was not found");
     }
 
 }
@@ -41,84 +56,90 @@ const allUsers = async (req, res) =>{
 
 const userLogin = async (req, res) =>{
     console.log("backend userlogin")
-        const user = await User.findOne({ email: req.body.email });
-        if (user) {
-            if (bcrypt.compareSync(req.body.password, user.password)) {
-                res.status(200).send({
-                    _id: user._id,
-                    firstname: user.firstname,
-                    email: user.email,
-                    picture: user.picture,
-                    isAdmin: user.isAdmin,
-                    token: generateToken(user),
-                    message: `Welcome back Big Boss! ${capitalize(user.username)}, you are now logged in!`,
-                });
 
+        const { email, password } = req.body;
+        try {
+            const result = await db.query("SELECT user_id, firstname, is_admin, password, username, email FROM users WHERE email = $1;", [email] )
+            if(result.rowCount > 0){
+                console.log("there was a result")
+                console.log(result)
+                if(bcrypt.compareSync(password, result.rows[0].password)){
+                    console.log("Password matched")
+                    const createdUser = {...result.rows[0]}
+                    res.status(201).send({
+                        user_id: result.rows[0].user_id,
+                        firstname: result.rows[0].firstname,
+                        username: result.rows[0].username,
+                        profile_pic: result.rows[0].profile_pic,
+                        is_admin: result.rows[0].is_admin,
+                        token: generateToken(createdUser),
+                        message: `Welcome back Big Boss! ${capitalize(result.rows[0].username)}, you are now logged in!`,
+                    });
+                }else{
+                    res.status(403).send({ message: "Invalid password" });
+                }
             }else{
-                res.status(403).send({ message: "Invalid password" });
+                res.status(204).send({ message: "No User with such credentials exist!" });
             }
-        }else{
-            res.status(204).send({ message: "No User with such credentials exist!" });
+        }catch(error){
+            res.status(500).json(error)
         }
-    
 }
 
 const userRegister = async (req, res) =>{
-    try{
-        const salt = await bcrypt.genSalt(10)
-        const hashedPass = await bcrypt.hash(req.body.password, salt);
-        const user = new User({
-            firstname: req.body.firstname,
-            lastname: req.body.lastname,
-            username: req.body.username,
-            email: req.body.email,
-            picture: req.body.profilePic,
-            password: hashedPass,
-            isAdmin: req.body.isAdmin,
-        });
-    
-        const createdUser = await user.save();
-        res.status(201).send({
-            _id: createdUser._id,
-            firstname: createdUser.firstname,
-            email: createdUser.email,
-            picture: createdUser.picture,
-            isAdmin: createdUser.isAdmin,
-            token: generateToken(createdUser),
-            message: `Congratulations ${createdUser.firstname}, you have successfully registered! Now, proceed to Log in.`
-        });
-    }catch(error){
-        res.status(500).json(error)
-    }
+
+        const { firstname, lastname, username, email, password, profile_pic } = req.body;
+        try {
+            const search = await db.query("SELECT username, email FROM users WHERE username = $1 OR email= $2;", [username, email] )
+            if(search.rowCount > 0){
+                res.status(409).json({ message: "A user with that Email or Username, already exists!" });
+
+            }else{
+                const salt = await bcrypt.genSalt(10);
+                const hashedPass = await bcrypt.hash(password, salt);
+                const last_login = new Date();
+                const result = await db.query("INSERT INTO users (firstname, lastname, username, email, password, profile_pic, last_login) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;", [firstname, lastname, username, email, hashedPass.toString() , profile_pic, last_login] )
+                console.log("successfully inserted a document");
+                const createdUser = {...result.rows[0]}
+                res.status(201).send({
+                    user_id: result.rows[0].user_id,
+                    firstname: result.rows[0].firstname,
+                    username: result.rows[0].username,
+                    profile_pic: result.rows[0].profile_pic,
+                    is_admin: result.rows[0].is_admin,
+                    token: generateToken(createdUser),
+                    message: `Congratulations ${result.rows[0].firstname}, you have successfully registered! Now, proceed to Log in.`
+                });
+            }
+            
+        } catch (err) {
+            res.status(500).json(err);
+        }
 }
 
 
 const userProfile = async (req, res) =>{
-    const user = await User.findById(req.user._id);
-    if (user) {
+    const user = await db.query("SELECT (user_id, password, firstname, lastname, profile_pic) FROM users WHERE user_id = $1;", [req.user.user_id] )
+    const {password, firstname, lastname, profile_pic} = user.rows[0];
+    if (user.rowCount > 0) {
         if (req.body.currentPassword){
-            if (bcrypt.compareSync(req.body.currentPassword, user.password)){
+            if (bcrypt.compareSync(req.body.currentPassword, password)){
                 const salt = await bcrypt.genSalt(10)
                 const hashedPass = await bcrypt.hash(req.body.password, salt);
-                user.firstname = req.body.newFirstname || user.firstname;
-                user.lastname = req.body.newLastname || user.lastname;
-                user.password = hashedPass || user.password;
-                user.picture = req.body.filename || user.picture;
+                firstname = req.body.newFirstname || firstname;
+                lastname = req.body.newLastname || lastname;
+                password = hashedPass || password;
+                profile_pic = req.body.filename || profile_pic;
 
                 try {
-                       const updatedUser = await User.findByIdAndUpdate(req.user._id, {
-                           $set: user,
-                       }, {new: true});
-
-                        //    OR
-                    // const updatedUser = await user.save();
-
-                    res.status(200).send({
-                        _id: updatedUser._id,
-                        firstname: updatedUser.firstname,
-                        email: updatedUser.email,
-                        picture: updatedUser.picture,
-                        isAdmin: updatedUser.isAdmin,
+                    const insertion = await db.query("INSERT INTO users firstname, lastname, password, profile_pic VALUES ($1, $2, $3, $4) RETURNING *;", [firstname, lastname, password.toString() , profile_pic])
+                    const updatedUser = {...insertion.rows[0]}
+                    res.status(201).send({
+                        user_id: insertion.rows[0].user_id,
+                        firstname: insertion.rows[0].firstname,
+                        username: insertion.rows[0].username,
+                        profile_pic: insertion.rows[0].profile_pic,
+                        is_admin: insertion.rows[0].is_admin,
                         token: generateToken(updatedUser),
                         message: "Boss!, you have successfully updated your profile.",
                     });
@@ -142,9 +163,10 @@ const userProfile = async (req, res) =>{
 }
 
 const deleteUser = async (req, res) =>{
-    const user = await User.findById(req.user._id);
-    if (user) {
-        await User.findByIdAndDelete(req.user._id);
+    const result = await db.query("SELECT user_id FROM users WHERE user_id = $1;", [req.user.user_id] )
+
+    if (result) {
+        const result = await db.query("DELETE FROM users WHERE user_id = $1;", [req.user.user_id] )
         res.status(200).send({message: "You have successfully deleted your account. Tell us more, why you left."})
     }else{
         res.status(204).send({message: "User does not exist!"});

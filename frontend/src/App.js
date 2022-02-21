@@ -1,12 +1,14 @@
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import Sidebar from "./components/Sidebar";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Community from "./pages/Community";
-import Register from "./pages/Register";
+import Navbar from "./Users/components/Navbar";
+import Sidebar from "./Users/components/Sidebar";
+import Home from "./Users/pages/Home";
+import Login from "./Users/pages/Login";
+import Community from "./Users/pages/Community";
+import Register from "./Users/pages/Register";
 import Box from '@mui/material/Box';
-import Post from "./components/CardComponent";
+import Post from "./Users/components/CardComponent";
+import CreatePost from "./Users/pages/CreatePost";
+import SinglePost from "./Users/pages/SinglePost";
 
 
 export default function App() {
@@ -20,9 +22,9 @@ export default function App() {
             <Route path="/" exact component={Home} />
             <Route path="/login" component={Login} />
             <Route path="/register" component={Register} />
-            {/* <Route exact path="/:community" component={Community} /> */}
-            <Route path="/posts/:id" component={Post} />
-            <Route path="/communities/:community" component={Community} />
+            <Route exact path="/communities/:community" component={Community} />
+            <Route exact path="/communities/:community/create-post" component={CreatePost} />
+            <Route path="/communities/:community/:id" component={SinglePost} />
           </Switch>
         </Box>
       </Router>
