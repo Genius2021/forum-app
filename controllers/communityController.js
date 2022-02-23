@@ -4,9 +4,11 @@ const { capitalizeStringWithDash } = require("../utils.js");
 
 
 const createACommunityPost = async (req, res) => {
-    const { title, description, picture, author, community_name, likes, is_shared, views, is_pinned_to_dashboard} = req.body;
+    const { title, description, picture, author, community } = req.body;
+    const capitalizeCommunity = capitalizeStringWithDash(community);
     try {
-        const insertion = await db.query("INSERT INTO posts(title, description, picture, author, community_name, likes, is_shared, views, is_pinned_to_dashboard) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;", [title, description, picture, author, community_name, likes, is_shared, views, is_pinned_to_dashboard ] )
+        // const insertion = await db.query("INSERT INTO posts(title, description, picture, author, community_name, likes, is_shared, views, is_pinned_to_dashboard) VALUES ($1, $2, $3, $4, $5) RETURNING *;", [title, description, picture, author, community ] )
+        const insertion = await db.query("INSERT INTO posts(title, description, picture, author, community_name ) VALUES ($1, $2, $3, $4, $5) RETURNING *;", [title, description, picture, author, capitalizeCommunity ] )
         const createdPost = insertion.rows[0]
         res.status(200).json(createdPost);
     } catch (err) {
@@ -71,8 +73,19 @@ const deleteACommunityPost = async (req, res) => {
 
  const getSingleCommunityPost = async (req, res) =>{
     const id = req.params.id
+    const communityFromParams = capitalizeStringWithDash(req.baseUrl.split("/")[2])
+
     try{
-        if(id){
+        if(communityFromParams && id ){
+            const postByCommunityAndId = await db.query("SELECT * FROM posts WHERE post_id = $1 AND community_name = $2 ;", [id, communityFromParams]);
+            if(postByCommunityAndId.rowCount > 0){
+                post = postByCommunityAndId.rows[0]
+                res.status(200).json(post)
+            }else{
+                res.status(404).json("Post was not found");
+            }
+
+        }else if(id){
             const postById = await db.query("SELECT * FROM posts INNER JOIN community ON posts.community_name = community.community_name INNER JOIN users ON posts.author = users.username WHERE post_id = $1;", [id])                                                                                                                                                                                                                                                                                                                                                                                                   
             if(postById.rowCount > 0){
                 postById = postById.rows[0]

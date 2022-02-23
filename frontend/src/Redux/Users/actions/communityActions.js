@@ -41,7 +41,6 @@ export const viewACommunityPost = ( id, community) => async (dispatch) => {
     try {
         const { data } = await axios.get(`/${community}/posts/${id}`);
         dispatch({ type: GET_A_COMMUNITY_POST_SUCCESS, payload: data });
-        window.location.replace(`/communities/${community}/posts/${data.post_id}`);
         // localStorage.setItem("postDetails", JSON.stringify(data));
     } catch (error) {
         dispatch({
@@ -55,7 +54,6 @@ export const createCommunityPost = (title, description, picture, author, communi
     dispatch({ type: CREATE_COMMUNITY_POST_REQUEST });
 
     try {
-        CommunityImageUpload(picture);
         const { data } = await axios.post(`/${community}/posts/create-post`, { title, description, picture, author, community });
         dispatch({ type: CREATE_COMMUNITY_POST_SUCCESS, payload: data });
         // localStorage.setItem("postDetails", JSON.stringify(data));

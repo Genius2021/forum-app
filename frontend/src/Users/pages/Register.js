@@ -67,6 +67,10 @@ export default function Register(props) {
       }
   }
 
+  const visibility ={
+    fontSize:"2rem",
+  }
+
   useEffect(() => {
       if (registerInfo) {
           props.history.push(redirect);
@@ -89,15 +93,15 @@ export default function Register(props) {
         noValidate
         autoComplete="off"
         >
-        <Typography variant="h2" sx={{textAlign: "center", marginBottom: "20px", color:"#555555"}}>Register now, for Free!</Typography>
+        <Typography variant="h2" sx={{textAlign: "center", marginBottom: "20px", fontSize:"2.5rem", color:"#555555"}}>Register now, for Free!</Typography>
         { loading && <LoadingComponent loading={loading} ></LoadingComponent> }
         { error && <AlertComponent typeOfAlert="error">{error}</AlertComponent> }
         <TextField required id="outlined-basic" label="firstname" variant="outlined" autoFocus InputProps={{style:{fontSize: "1.2rem", color: "#777777" }}} InputLabelProps={{style:{fontSize: "1.5rem"}}} onChange={e => setFirstname(e.target.value)} />
         <TextField id="outlined-basic" label="lastname" variant="outlined" InputProps={{style:{fontSize: "1.2rem", color: "#777777" }}} InputLabelProps={{style:{fontSize:"1.5rem"}}} onChange={e => setLastname(e.target.value)} />
         <TextField required id="outlined-basic" label="Username" variant="outlined" InputProps={{style:{fontSize: "1.2rem", color: "#777777" }}} InputLabelProps={{style:{fontSize:"1.5rem"}}} onChange={e => setUsername(e.target.value)} />
         <TextField required id="outlined-basic" label="Email" variant="outlined" InputProps={{style:{fontSize: "1.2rem", color: "#777777" }}} InputLabelProps={{style:{fontSize:"1.5rem"}}} onChange={e => setEmail(e.target.value)} />
-        <TextField required id="outlined-basic" label="Password" variant="outlined" type={ showPassword ? "text" : "password" } InputProps={{style:{fontSize: "1.2rem", color: "#777777" },  endAdornment: <InputAdornment position="end" sx={{ "&:hover": {cursor: "pointer"}, fontSize: "10px"}} onClick={handleShowPassword}>{ showPassword ? <VisibilityOff /> : <Visibility />}</InputAdornment> }} InputLabelProps={{style:{fontSize:"1.5rem"}}} onChange={e => setPassword(e.target.value)} />
-        <TextField required id="outlined-basic" label="Confirm Password" variant="outlined" type={ showConfirmPassword ? "text" : "password" } InputProps={{style:{fontSize: "1.2rem", color: "#777777" },  endAdornment: <InputAdornment position="end" sx={{ "&:hover": {cursor: "pointer"}}} onClick={handleShowConfirmPassword}>{ showConfirmPassword ? <VisibilityOff /> : <Visibility />}</InputAdornment> }} InputLabelProps={{style:{fontSize:"1.5rem"}}} onChange={e => setConfirmPassword(e.target.value)} />
+        <TextField required id="outlined-basic" label="Password" variant="outlined" type={ showPassword ? "text" : "password" } InputProps={{style:{fontSize: "1.2rem", color: "#777777" },  endAdornment: <InputAdornment position="end" sx={{ "&:hover": {cursor: "pointer"}, fontSize: "10px"}} onClick={handleShowPassword}>{ showPassword ? <VisibilityOff sx={visibility} /> : <Visibility sx={visibility} />}</InputAdornment> }} InputLabelProps={{style:{fontSize:"1.5rem"}}} onChange={e => setPassword(e.target.value)} />
+        <TextField required id="outlined-basic" label="Confirm Password" variant="outlined" type={ showConfirmPassword ? "text" : "password" } InputProps={{style:{fontSize: "1.2rem", color: "#777777" },  endAdornment: <InputAdornment position="end" sx={{ "&:hover": {cursor: "pointer"}}} onClick={handleShowConfirmPassword}>{ showConfirmPassword ? <VisibilityOff sx={visibility} /> : <Visibility sx={visibility} />}</InputAdornment> }} InputLabelProps={{style:{fontSize:"1.5rem"}}} onChange={e => setConfirmPassword(e.target.value)} />
         <FormControlLabel
           value="top"
           control={<Checkbox color="success"

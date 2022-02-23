@@ -34,7 +34,6 @@ export default function Advertisement(id) {
                         <Typography variant="body2">Advertisement Body</Typography>
                     </Box>
                 </Box>
-                
             </Card>
       )
 }
