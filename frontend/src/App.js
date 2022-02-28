@@ -15,7 +15,7 @@ export default function App() {
   return (
     <div className="App">
       <Router>
-        <Box sx={{ flexGrow: 1 }}>
+        {/* <Box sx={{ flexGrow: 1 }}> */}
           <Navbar />
           <Sidebar />
           <Switch>
@@ -26,7 +26,7 @@ export default function App() {
             <Route exact path="/communities/:community/create-post" component={CreatePost} />
             <Route path="/communities/:community/:id" component={SinglePost} />
           </Switch>
-        </Box>
+        {/* </Box> */}
       </Router>
     </div>
   );

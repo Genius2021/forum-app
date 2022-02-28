@@ -5,15 +5,17 @@ import HomeAdvertisement from "../components/Advertisement";
 import Communities from "../components/LeftbarComponent";
 import PageTitle from "../components/PageTitle";
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import AlertComponent from '../components/AlertComponent';
 import { capitalize } from '../../commonFunctions';
+import Button from '../components/Button';
 
 function SinglePost({location, match }) {
     const community = location.pathname.split("/")[2]
     const id = match.params.id;
     const dispatch = useDispatch();
     const { loading, post, error } = useSelector(state => state.getACommunityPost);
+    const [ comments, setComments ] = useState("")
 
     
   const style = {
@@ -22,9 +24,18 @@ function SinglePost({location, match }) {
     zIndex: 20,
   }
 
-useEffect(() => {
-    dispatch(viewACommunityPost(id, community));
-}, [dispatch, id, community, location]);
+  const textAreaStyle = {
+    color:"#666666", 
+    marginBottom:3,
+    position:"relative",
+    wordWrap: "breakWord",
+    resize:"vertical",
+
+  }
+
+  useEffect(() => {
+      dispatch(viewACommunityPost(id, community));
+  }, [dispatch, id, community, location]);
 
   return (
     <Grid container spacing={1} sx={{ justifyContent: "center" }}>
@@ -47,7 +58,7 @@ useEffect(() => {
                         <img src="/assets/images/img3.jpg" style={{ maxHeight:"40vh", maxWidth: "100%", borderRadius:"0.5rem", border:"1px solid #a4a4a4" }} alt="singlePost_image" />
                       </div>
                     <Paper variant="outlined" sx={{width:"60%", justifySelf:"center"}}>
-                   
+                        
                     </Paper>
                     <Card variant="outlined" sx={{mb:3}}>
                       <Paper >
@@ -61,10 +72,9 @@ useEffect(() => {
                     </div>
                     <Box sx={{fontWeight:"bold", color:"#555555", paddingLeft:"1rem"}}>Comments</Box>
                     <Card variant="outlined" sx={{mb:3, height:"200px"}}>
-                      <Box sx={{display:"flex", justifyContent:"end"}}><button type="submit">Add comment</button></Box>
                       <CardContent>
-                        {/* <textarea placeholder="What's on your mind?" value={description} rows="3" style={textAreaStyle} onChange={e => setDescription(e.target.value)} /> */}
-                        
+                        <textarea placeholder="Join the conversation." value={comments} rows="3" style={textAreaStyle} onChange={e => setComments(e.target.value)}>hihuujjnn</textarea>
+                        <Button smallContainedButton type="submit">Add comment</Button>
                       </CardContent>
                     </Card>
 
@@ -74,9 +84,7 @@ useEffect(() => {
             </Grid>
             <Grid item xs={11.5} sm={11} md={4} lg={3} >
               <Box sx={ style }>
-                <Box sx={ style }>
-                  <PageTitle name="#Trending Now" width="30vw" />
-                </Box>
+                  <PageTitle name="#Trending Now" />
                 <Communities />
                   <HomeAdvertisement />
                 <Communities />

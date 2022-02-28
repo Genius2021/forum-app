@@ -8,7 +8,6 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import {Link } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
 import { signin } from "../../Redux/Users/actions/userActions";
-import LoadingComponent  from "../components/LoadingComponent";
 import AlertComponent  from "../components/AlertComponent";
 import { clearMessage } from '../../Redux/Users/actions/generalActions';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -78,17 +77,16 @@ export default function Login(props) {
             justifyContent:"center",
             alignItems:"center",
             height: 'calc(100vh - 62.5px)',
-            '& > :not(style)': { width: '50vw'},
+            '& > :not(style)': { width: '60vw'},
             "& .css-1u3bzj6-MuiFormControl-root-MuiTextField-root": {marginTop: "15px"}
         }}
         noValidate
         autoComplete="off"
         >
         <Typography variant="h2" sx={{textAlign: "center", marginBottom: "20px", fontSize:"2.5rem", color:"#555555"}}>Welcome back Boss! Log In.</Typography>
-        {/* { loading && <LoadingComponent loading={loading} /> } */}
         { (errorMessage || error) && <AlertComponent typeOfAlert="error">{errorMessage || error }</AlertComponent> }
         { registerInfo && successMessage && <AlertComponent typeOfAlert="success">{ successMessage }</AlertComponent> }
-        <TextField required id="outlined-basic" label="Email" InputProps={{style:{fontSize: "1.2rem", color: "#777777" }}} InputLabelProps={{style:{fontSize: "1.5rem" }}} variant="outlined" autoFocus onChange={e => setEmail(e.target.value)} />
+        <TextField required id="outlined-basic" label="Email" InputProps={{style:{fontSize: "1.2rem", color: "#777777"}}} InputLabelProps={{style:{fontSize: "1.5rem" }}} variant="outlined" autoFocus onChange={e => setEmail(e.target.value)} />
         <TextField required id="outlined-basic" label="Password" variant="outlined" type={ showPassword ? "text": "password" } InputProps={{style:{fontSize: "1.2rem", color: "#777777" },  endAdornment: <InputAdornment position="end" sx={{ "&:hover": {cursor: "pointer"} }} onClick={handleShowPassword}>{ showPassword ? <VisibilityOff sx={visibility} /> : <Visibility sx={visibility} /> }</InputAdornment> }} InputLabelProps={{style:{fontSize:"1.5rem"}}} onChange={e => setPassword(e.target.value)}/>
         <FormControlLabel
           value="top"

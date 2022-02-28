@@ -1,22 +1,22 @@
 import React from 'react';
 import { styled, alpha } from '@mui/material/styles';
-import {Link } from "react-router-dom";
+import {Link, useLocation } from "react-router-dom";
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import InputBase from '@mui/material/InputBase';
-import Button from '@mui/material/Button';
+import Button from './Button';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
-import Stack from '@mui/material/Stack';
 import MoreIcon from '@mui/icons-material/MoreVert';
 import Tooltip from '@mui/material/Tooltip';
 import { closeSidebar, openSidebar } from '../../Redux/Users/actions/sidebarActions';
 import { useDispatch, useSelector } from 'react-redux';
 import AccountMenu from "./AccountMenu";
 import MyModal from './MyModal';
+import { Card } from '@mui/material';
 
 
 const Search = styled('div')(({ theme }) => ({
@@ -65,6 +65,9 @@ export default function Navbar() {
   const { userInfo } = useSelector(state => state.userSignin);
   const dispatch = useDispatch();
 
+  const location = useLocation().pathname.split("/")[1];
+  // console.log(location)
+
   const menuToggle = ()=> {
     sidebarState && dispatch(closeSidebar());
     !sidebarState && dispatch(openSidebar());
@@ -104,8 +107,8 @@ export default function Navbar() {
               inputProps={{ 'aria-label': 'search' }}
             />
           </Search>
-          <Box sx={{ flexGrow: 1 }} />
-          { userInfo && <AccountMenu /> }
+          {/* <Box sx={{ flexGrow: 1 }} /> */}
+          { userInfo && <AccountMenu sx={{display: "flex", justifyContent:"end"}} /> }
           { userInfo ? (<Box sx={{ display: { xs: 'flex', md: 'none' } }}>
             <Tooltip title={<Typography sx={{ fontSize: "1rem" }}>Show more</Typography>}>
               <IconButton
@@ -117,19 +120,16 @@ export default function Navbar() {
               </IconButton>
             </Tooltip>
           </Box>) : (
-                  <Stack direction="row" spacing={2}>
-                    <Link to="/login">
-                      <Button variant="outlined">
-                        Login
-                      </Button>
-                    </Link>
-                    <Link to="/register">
-                      <Button variant="contained">
-                        Sign Up
-                      </Button>
-                    </Link>
-                    
-                </Stack>
+            <>
+              { location === "login" ? (<Box sx={{display:"flex", alignItems:"center", justifyContent:"end", width:"100%"}}><Link to="/register"><Button mediumContainedButton >Signup</Button></Link></Box>)
+                                                    :
+                location === "register" ? (<Box sx={{display:"flex", alignItems:"center", justifyContent:"end", width:"100%"}}><Link to="/login"><Button mediumOutlinedButton >Login</Button></Link></Box>)
+                                                    :(
+                <Box sx={{display:"flex", alignItems:"center", justifyContent:"end", width:"100%"}}><Link to="/login" style={{marginRight:"0.3rem"}}><Button mediumOutlinedButton>Login</Button></Link><Link to="/register"><Button mediumContainedButton >Signup</Button></Link></Box>
+                                                    )
+              
+              }
+            </>
           )
          }
         <MyModal  question="Are you sure you want to continue?" />

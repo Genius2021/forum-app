@@ -2,7 +2,8 @@ import * as React from 'react';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
-import Button from '@mui/material/Button';
+import MUIBUTTON from '@mui/material/Button';
+import Button from './Button';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import {Link } from "react-router-dom";
@@ -22,20 +23,18 @@ export default function LeftbarComponent() {
                                 if(community.includes(" ")){
                                     // const joinedWords = community.split(" ").join("-").toString().toLowerCase();
                                     const joinedWords = community.split(" ").join("-").toString().toLowerCase();
-                                    return <Link key={index} to={`/communities/${joinedWords}`}><Button sx={{color:"#555555",  fontFamily:"Roboto"}}>{community}</Button></Link>
+                                    return <Link key={index} to={`/communities/${joinedWords}`}><MUIBUTTON sx={{color:"#555555",  fontFamily:"Roboto"}}>{community}</MUIBUTTON></Link>
                                 }
                                 community = community.toLowerCase()
-                                return <Link key={index} to={`/communities/${community}`}><Button sx={{color:"#555555",  fontFamily:"Roboto"}}>{community}</Button></Link>
+                                return <Link key={index} to={`/communities/${community}`}><MUIBUTTON sx={{color:"#555555",  fontFamily:"Roboto"}}>{community}</MUIBUTTON></Link>
                             })
                         }
                     </Typography>
                     </CardContent>
                     <CardActions sx={{display:"flex", justifyContent:"space-between"}}>
-                      <Link to="/suggestions"><Button size="small" sx={{color:"#3b5998"}}>Suggestions</Button></Link>
+                      <Link to="/suggestions"><Button smallOutlinedButton border='none'>Suggestions</Button></Link>
                       <Link to="/advertisement">
-                        <Typography variant="body2" sx={{cursor:"pointer", color:"white", backgroundColor:"#3b5998", opacity:"0.95", padding: "0.5rem 0.5rem", borderRadius:"0.5rem" }}>
-                        Advertise
-                        </Typography>
+                      <Button  smallContainedButton border="none">Advertise</Button>
                       </Link>
                     </CardActions>
                 </Card>

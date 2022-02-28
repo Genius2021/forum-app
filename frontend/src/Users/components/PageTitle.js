@@ -15,7 +15,7 @@ export default function PageTitle({ name, width, textAlign, paddingLeft }) {
       
   
   return (<Box sx={{ display:"flex", justifyContent:"center" }}>
-      <Paper elevation={2} sx={{ display:"flex", justifyContent:"center",alignItems:"center", padding:"0.5rem", width:`${width || "100%"}`, height: 30, mb: "1rem", position:"sticky" }}>
+      <Paper elevation={2} sx={{ display:"flex", justifyContent:"center",alignItems:"center", padding:"0.5rem", width:`${width || "100%"}`, height: 30, mb: "1rem", position:"sticky", }}>
         <Typography variant="h4" sx={{color:"#555555", width:"100%", textAlign:`${textAlign || "center"}`, paddingLeft:{paddingLeft}, fontSize:"1.5rem" }}>{ paddingLeft ? <div><span style={{fontWeight:"bold"}}>{boldenCommunity}</span>:{title}</div>: result ? capitalize(name) : name }</Typography>
       </Paper>
   </Box>);

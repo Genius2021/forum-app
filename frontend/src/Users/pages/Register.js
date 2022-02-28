@@ -5,7 +5,6 @@ import Checkbox from '@mui/material/Checkbox';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import {Link } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
 import { photoUpload, register } from '../../Redux/Users/actions/userActions';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -87,14 +86,13 @@ export default function Register(props) {
             justifyContent:"center",
             alignItems:"center",
             height: 'calc(100vh - 62.5px)',
-            '& > :not(style)': { width: '50vw'},
+            '& > :not(style)': { width: '60vw'},
             "& .css-1u3bzj6-MuiFormControl-root-MuiTextField-root": {marginTop: "15px"}
         }}
         noValidate
         autoComplete="off"
         >
         <Typography variant="h2" sx={{textAlign: "center", marginBottom: "20px", fontSize:"2.5rem", color:"#555555"}}>Register now, for Free!</Typography>
-        { loading && <LoadingComponent loading={loading} ></LoadingComponent> }
         { error && <AlertComponent typeOfAlert="error">{error}</AlertComponent> }
         <TextField required id="outlined-basic" label="firstname" variant="outlined" autoFocus InputProps={{style:{fontSize: "1.2rem", color: "#777777" }}} InputLabelProps={{style:{fontSize: "1.5rem"}}} onChange={e => setFirstname(e.target.value)} />
         <TextField id="outlined-basic" label="lastname" variant="outlined" InputProps={{style:{fontSize: "1.2rem", color: "#777777" }}} InputLabelProps={{style:{fontSize:"1.5rem"}}} onChange={e => setLastname(e.target.value)} />
