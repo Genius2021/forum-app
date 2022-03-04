@@ -1,7 +1,7 @@
 import { Box, Card, CardContent, Divider, Grid, Paper, Typography } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import HomeAdvertisement from "../components/Advertisement";
+import Advertisement from "../components/Advertisement";
 import Communities from "../components/LeftbarComponent";
 import BreadCrumb from "../components/BreadCrumb";
 import PageTitle from "../components/PageTitle";
@@ -67,7 +67,6 @@ export default function Community(props) {
                         <>
                           { posts?.map( post =>{
                             const postInArray = seenPostsArray.includes(post.post_id)
-                              console.log("the postInArray result is", postInArray)
                               let count = 0;
                               postViewsCounter.forEach(x =>{
                                 if(x.postId === post.post_id){
@@ -153,8 +152,7 @@ export default function Community(props) {
                 <PageTitle name="#Trending Now" width="30vw" />
               </Box>
               <Communities />
-              <HomeAdvertisement />
-              <Communities />
+              <Advertisement passedIndex={1} />
             </Box>
           </Grid>
         </Grid>

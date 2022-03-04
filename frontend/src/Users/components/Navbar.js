@@ -59,7 +59,14 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-export default function Navbar() {
+const toolbarStyles = styled(Toolbar)(({theme}) =>({
+  appBarSpacer: theme.mixins.toolbar
+}))
+
+// const classes = toolbarStyles()
+// const toolbarStyle = withStyles(toolbarStyles);
+
+ function Navbar() {
 
   const { sidebarState } = useSelector(state => state.sidebarState);
   const { userInfo } = useSelector(state => state.userSignin);
@@ -74,6 +81,7 @@ export default function Navbar() {
 }
 
   return (
+    <>
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="fixed" sx={{ backgroundColor: "white", color:"gray", boxShadow:"-1px 5px 9px -7px #000000" }}>
         <Toolbar>
@@ -135,7 +143,12 @@ export default function Navbar() {
         <MyModal  question="Are you sure you want to continue?" />
         </Toolbar>
       </AppBar>
-      <Toolbar />
     </Box>
+    <Toolbar />
+    </>
   );
 }
+
+
+
+export default Navbar

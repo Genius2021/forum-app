@@ -4,7 +4,7 @@ import { capitalize } from '../../commonFunctions';
 import { useState } from 'react';
 
 
-function TextEditor({ textSelection }) {
+function TextEditor({ TextSelectionActions, flexWrap, width, border}) {
 
    const [textColorPicker, setTextColorPicker] = useState("");
    const [backgroundColorPicker, setBackgroundColorPicker] = useState("");
@@ -18,7 +18,7 @@ function TextEditor({ textSelection }) {
          setBackgroundColorPicker(e.target.value);
       }
      
-      textSelection(e, el);
+      TextSelectionActions(e, el);
    }
 
     const style ={
@@ -80,7 +80,7 @@ function TextEditor({ textSelection }) {
       {command: 'insertHorizontalRule', tooltip: 'Horizontal Rule', type: 'button', className: 'HR'},
       {command: 'createLink', tooltip: 'Create link', type: 'button', className:  "fa fa-link"},
       {command: 'unlink', tooltip: 'Unlink', type: 'button', className:  "fa fa-unlink"},
-      {command: 'fontName', tooltip: 'FontName', type: 'select', name: 'fontname', options: ['Arial', 'Comic Sans MS', 'Courier', 'Sans-serif', 'Georgia', 'Times New Roman', 'Verdana']},
+      {command: 'fontName', tooltip: 'FontName', type: 'select', name: 'fontname', options: ['Arial', 'Comic Sans MS', 'Courier', 'Sans-serif', 'Georgia', 'Times New Roman', 'Verdana', 'Courier New', 'Segoe UI Mono', 'Tahoma', 'Trebuchet MS', 'Garamond', 'Brush Script MT', 'Helvetica', ]},
       {command: 'fontSize', tooltip: 'FontSize', type: 'select', name: 'fontsize', options: [1, 2, 3, 4, 5, 6, 7]},
       {command: 'insertImage', tooltip: 'Insert image', type: 'button', className:  "fa fa-file-image"},
       {command: 'viewSourceCode', tooltip: 'View source code', type: 'button', className:  "fa fa-code"},
@@ -90,8 +90,9 @@ function TextEditor({ textSelection }) {
 
   return (
     <>
-        <Card variant="outlined" sx={{ display:"flex", alignItems:"center"}}>
-            <Box sx={{display:"flex", alignItems:"center", padding:"0.8rem"}}>
+        <Card variant="outlined" sx={{ display:"grid", width: {width}, border:"none"}}>
+         {/* { width && <Typography sx={{textAlign:"center", marginTop:"0.3rem", fontSize:"1rem", color:"#555555", fontFamily:"Arial", alignSelf:"center"}}>Text Editor</Typography> } */}
+            <Box sx={{display:"flex", alignItems:"center",justifyContent:"center", mx:"auto",paddingTop: 0, flexWrap:{flexWrap}}}>
             {
                
                defaultElements.map((el, index)=>{
@@ -99,28 +100,28 @@ function TextEditor({ textSelection }) {
                      if(el.command === "insertHorizontalRule"){
                         return  <Tooltip key={index} title={<Typography sx={style}>{capitalize(el.tooltip)}</Typography>}>
                                  <Card elevation={0} sx={iconStyle}>
-                                    <i style={iconStyle}  onClick={(e)=> textSelection(e, el)}>HR</i>
+                                    <i style={iconStyle}  onClick={(e)=> TextSelectionActions(e, el)}>HR</i>
                                  </Card>
                              </Tooltip>
 
                      }else if(el.command === "foreColor"){
                         return  <Tooltip key={index} title={<Typography sx={style}>{capitalize(el.tooltip)}</Typography>}>
                                  <Card elevation={0} sx={iconStyle}>
-                                    {/* <i style={iconStyle} className={el.className} onClick={(e)=> textSelection(e, el)}></i> */}
+                                    {/* <i style={iconStyle} className={el.className} onClick={(e)=> TextSelectionActions(e, el)}></i> */}
                                     <div><label htmlFor="colorPicker"><i style={iconStyle} className={el.className}></i></label><input id="colorPicker" value={textColorPicker} onChange={(e) =>colorPickerHandler(e, el)} style={{display: "none" }} type="color" /></div>
                                  </Card>
                              </Tooltip>
                      }else if(el.command === "backColor"){
                         return  <Tooltip key={index} title={<Typography sx={style}>{capitalize(el.tooltip)}</Typography>}>
                                  <Card elevation={0} sx={iconStyle}>
-                                    {/* <i style={iconStyle} className={el.className} onClick={(e)=> textSelection(e, el)}></i> */}
+                                    {/* <i style={iconStyle} className={el.className} onClick={(e)=> TextSelectionActions(e, el)}></i> */}
                                     <div><label htmlFor="backgroundColorPicker"><i style={backStyle} className={el.className}></i></label><input id="backgroundColorPicker" value={backgroundColorPicker} onChange={(e) =>colorPickerHandler(e, el)} style={{display: "none" }} type="color" /></div>
                                  </Card>
                              </Tooltip>
                      }else{
                         return  <Tooltip key={index} title={<Typography sx={style}>{capitalize(el.tooltip)}</Typography>}>
                                  <Card elevation={0} sx={iconStyle}>
-                                    <i style={iconStyle} className={el.className} onClick={(e)=> textSelection(e, el)}></i>
+                                    <i style={iconStyle} className={el.className} onClick={(e)=> TextSelectionActions(e, el)}></i>
                                  </Card>
                              </Tooltip>
                      }
@@ -128,7 +129,7 @@ function TextEditor({ textSelection }) {
                   }else{
                      return <Tooltip key={index} title={<Typography sx={style}>{capitalize(el.tooltip)}</Typography>}>
                         <Card elevation={0}>
-                          <select style={selectStyle} name={el.name} onChange={(e)=> {textSelection(e, el)}}>
+                          <select style={selectStyle} name={el.name} onChange={(e)=> {TextSelectionActions(e, el)}}>
                               {
                                  el.options.map((op, index)=>{
                                     return <option key={index} style={{color:"#555555",fontSize:"1.15rem"}} value={op}>{op}</option>

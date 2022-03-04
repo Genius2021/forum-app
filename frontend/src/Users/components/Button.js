@@ -2,7 +2,7 @@ import React from 'react'
 
 function Button({type, children, border, fontSize, justifySelf, smallContainedButton, mediumContainedButton, largeContainedButton, smallOutlinedButton, mediumOutlinedButton, largeOutlinedButton }) {
 
-    const smallContainedButtonStyle ={
+    const smallContainedButtonStyle = {
         backgroundColor:"#3b5998",
         color:"white",
         padding: "0.5rem",
@@ -12,7 +12,7 @@ function Button({type, children, border, fontSize, justifySelf, smallContainedBu
         outline: "none",
         fontFamily: "Helvetica, Arial, sans-serif",
         justifySelf: `${justifySelf}`,
-        zIndex: 1000,
+        zIndex: -0,
     }
     const mediumContainedButtonStyle ={
         backgroundColor:"#3b5998",
@@ -24,10 +24,10 @@ function Button({type, children, border, fontSize, justifySelf, smallContainedBu
         outline: "none",
         fontFamily: "Helvetica, Arial, sans-serif",
         justifySelf: `${justifySelf}`,
-        zIndex:"1000",
+        zIndex:-0,
     }
 
-    const largeContainedButtonStyle ={
+    const largeContainedButtonStyle = {
         backgroundColor:"#3b5998",
         color:"white",
         padding: "1.2rem",
@@ -37,10 +37,10 @@ function Button({type, children, border, fontSize, justifySelf, smallContainedBu
         outline: "none",
         fontFamily: "Helvetica, Arial, sans-serif",
         justifySelf: `${justifySelf}`,
-        zIndex:"1000",
+        zIndex: -0,
     }
 
-    const smallOutlinedButtonStyle ={
+    const smallOutlinedButtonStyle = {
         backgroundColor:"white",
         color:"#3b5998",
         padding: "0.5rem",
@@ -50,7 +50,7 @@ function Button({type, children, border, fontSize, justifySelf, smallContainedBu
         outline: "none",
         fontFamily: "Helvetica, Arial, sans-serif",
         justifySelf: `${justifySelf}`,
-        zIndex:"1000",
+        zIndex: -0,
     }
 
     const mediumOutlinedButtonStyle ={
@@ -63,7 +63,7 @@ function Button({type, children, border, fontSize, justifySelf, smallContainedBu
         outline: "none",
         fontFamily: "Helvetica, Arial, sans-serif",
         justifySelf: `${justifySelf}`,
-        zIndex:"1000",
+        zIndex:-0,
     }
 
     const largeOutlinedButtonStyle ={
@@ -76,7 +76,7 @@ function Button({type, children, border, fontSize, justifySelf, smallContainedBu
         outline: "none",
         fontFamily: "Helvetica, Arial, sans-serif",
         justifySelf: `${justifySelf}`,
-        zIndex:"1000",
+        zIndex:-0,
     }
 
   return (

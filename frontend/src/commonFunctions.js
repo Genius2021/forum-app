@@ -5,3 +5,43 @@ export const capitalize = (string) =>{
      const answer = lowercase.replace(lowercase[0], capitalize)
     return answer;
 }
+
+
+
+export function capitalizeStringWithDash(string){
+    if(string.includes('-')){
+         const ans = string.split("-").map(x =>{
+            if(x === "and"){
+                return "and"
+            }else{           
+                return capitalize(x);
+            }
+            
+        })
+        return ans.join(" ").toString();
+    }else{
+        return capitalize(string);
+
+    }
+        
+}
+
+export function capitalizeLowercaseStringWithSpace(string){
+    if(string.includes('-')){
+        const ans = string.split(" ").map(x =>{
+            if(x === "and"){
+                return "and"
+            }else{
+                return capitalize(x);
+       
+            }
+            
+        })
+        return ans.join(" ").toString();
+
+    }else{
+        return capitalize(string);
+ 
+    }
+
+}

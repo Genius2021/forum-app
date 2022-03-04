@@ -68,18 +68,16 @@ export default function BasicCard({ post, is_viewed, viewCount }) {
           </Tooltip>
         }
         title={<Typography onClick={(e)=>viewPostHandler(e, post.post_id)} sx={{ color:"#444444", fontSize:"1.3rem",cursor:"pointer", "&:hover": {color:"#3b5998"}}}>{post ? post.title.substring(0, 65) : "Shrimp and Chorizo Paella" }</Typography>}
-        subheader={<Typography sx={{ display:"flex", alignItems:"center", fontSize: "0.9rem", color:"#777777", marginRight:0.3 }}>By<Link to={`/communities/${community}/posts/${ post ? post.author : "Goat Messi" }`}><Typography sx={{color:"#3b5998", cursor:"pointer",fontSize: "0.9rem",ml:0.3 }}>{ post ? post.author : "Goat Messi" }</Typography></Link> <Typography component="span" sx={dotStyle}>•</Typography > { post ? new Date(post?.created_on).toDateString().substring(4) : "September 14, 2016" } <Typography component="span" sx={dotStyle}>•</Typography > { post ? new Date(post?.created_on).toTimeString().substring(0,5) : "11:20pm" }</Typography>}
+        subheader={<Typography sx={{ display:"flex", alignItems:"center", fontSize: "0.9rem", color:"#777777", marginRight:0.3 }}>By<Link to={`/communities/${community}/posts/${ post ? post.author : "Goat Messi" }`}><Typography sx={{color:"#3b5998", cursor:"pointer",fontSize: "0.9rem",ml: 0.3 }}>{ post ? post.author : "Goat Messi" }</Typography></Link> <Typography component="span" sx={dotStyle}>•</Typography > { post ? new Date(post?.created_on).toDateString().substring(4) : "September 14, 2016" } <Typography component="span" sx={dotStyle}>•</Typography > { post ? new Date(post?.created_on).toTimeString().substring(0,5) : "11:20pm" }</Typography>}
       />
       <CardActions disableSpacing sx={{ display:"flex", justifyContent:"space-between" }}>
       <Tooltip title={<Typography sx={{ fontSize: "1rem" }}>{ favouriteIcon ? "Unlike" : "Like" }</Typography>}>
-          <IconButton aria-label="add to favorites" size="small" onClick={handleFavouriteIcon} sx={{ display:"flex", justifyContent: "center", alignItems:"center", color:`${ favouriteIcon && "red"}`, backgroundColor:`${ favouriteIcon && "rgba(0, 0, 0, 0.04)"}` }}>
-            <FavoriteIcon />
-          </IconButton>
+        <IconButton aria-label="add to favorites" size="small" onClick={handleFavouriteIcon} sx={{ display:"flex", justifyContent: "center", alignItems:"center", color:`${ favouriteIcon && "red"}`, backgroundColor:`${ favouriteIcon && "rgba(0, 0, 0, 0.04)"}` }}>
+          <FavoriteIcon />
+        </IconButton>
         </Tooltip>
         <Tooltip title={<Typography sx={{ fontSize: "1rem" }}>Share</Typography>}>
-        <IconButton aria-label="share" size="small" onClick={handleShareIcon} >
-          <ShareIcon />
-        </IconButton>
+          <span onClick={handleShareIcon}><i className="fas fa-share" style={{ color: "#777777", fontSize:"1.3rem", cursor:"pointer",}}></i><span style={{fontSize:"1.1rem", color: "#777777"}}>4</span></span>
         </Tooltip>
         <Box sx={{ display:"flex", alignItems:"center" }}>
           <Tooltip title={<Typography sx={{ fontSize: "1rem" }}>{is_viewed ? "Seen post" : "View post" }</Typography>}>

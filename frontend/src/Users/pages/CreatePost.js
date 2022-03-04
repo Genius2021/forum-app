@@ -7,6 +7,7 @@ import { createCommunityPost, CommunityImageUpload } from '../../Redux/Users/act
 import Advertisement from '../components/Advertisement';
 import Communities from "../components/LeftbarComponent";
 import PageTitle from '../components/PageTitle';
+import TextSelectionActions from '../components/TextSelectionActions';
 import Tooltip from '@mui/material/Tooltip';
 import TextEditor from '../components/TextEditor';
 import Button from '../components/Button';
@@ -46,23 +47,22 @@ function CreatePost(props) {
         }
     };
 
-    // let contentEditable = document.getElementById("iframeTextField")
 
     useEffect(()=>{
         const loadiframe = ()=>{
-          // document.getElementById("iframeTextField").contentDocument.designMode = 'on';
-          document.getElementById("iframeTextField").contentEditable = 'true';
-          document.getElementById("iframeTextField").contentDocument.body.focus();
+          const theiframe = document.getElementById("iframeTextField").contentDocument;
+          console.log(theiframe)
+          document.getElementById("iframeTextField").contentEditable = true;
           let editor = document.getElementById("iframeTextField")
           let editorDoc = editor.contentWindow.document;
           let editorDoc1 = document.getElementById("iframeTextField").contentDocument;
           let editorBody = editorDoc.body;
           if('spellcheck' in editorBody){
-            editorBody.spellcheck = "false";
+            editorBody.spellcheck = false;
           }
           
           if("contentEditable" in editorBody){
-            editorBody.contentEditable = "true";
+            editorBody.contentEditable = true;
             editorDoc1.designMode = 'on';
           }
          
@@ -75,97 +75,7 @@ function CreatePost(props) {
     }, [])
 
     
-      const textSelection = (e, currentElem)=>{
-      // e.target.value, e.target.selectedIndex ...the value gives you the value directly. But the selectedIndex gives you the index of the selected option
-        e.preventDefault();
-        let command = currentElem.command;
-        console.log(command, e.target)
-        let showCode = false;
-        if(currentElem.type === "button"){
-
-        if(currentElem.command === 'viewSourceCode'){
-
-          function execViewSourceCommand(element, contentEditable, showCode) {
-            if (!showCode) {
-              contentEditable.contentDocument.getElementsByTagName('body')[0].textContent = contentEditable.contentDocument.getElementsByTagName('body')[0].innerHTML;
-              showCode = true;
-            } else {
-              contentEditable.contentDocument.getElementsByTagName('body')[0].innerHTML = contentEditable.contentDocument.getElementsByTagName('body')[0].textContent;
-              showCode = false;
-            }
-        
-            return showCode;
-          }
-
-        //  execViewSourceCommand(currentElem, iframeState, showCode);
-
-        }else{
-
-          let isPrompt = false; 
-          let argument = null;
-
-          switch (command) {  
-
-            //for insert image
-            case 'insertImage':
-              argument = prompt('Enter your image URL: ');
-              isPrompt = true;
-              document.getElementById("iframeTextField").contentWindow.document.execCommand(command, false, argument); 
-              break;
-
-            case 'foreColor':
-              argument = e.target.value;
-              document.getElementById("iframeTextField").contentWindow.document.execCommand(command, false, argument); 
-              break;
-
-            case 'backColor':
-              argument = e.target.value;
-              document.getElementById("iframeTextField").contentWindow.document.execCommand(command, false, argument); 
-              break;
-           
-            //for bold and others
-            default:
-              document.getElementById("iframeTextField").contentWindow.document.execCommand(command, false, argument); 
-          }
-
-          // document.getElementById("iframeTextField").contentWindow.document.execCommand(command, false, null); 
-          // if ((isPrompt && argument !== null) || !isPrompt){
-          //   iframeState.execCommand(command, false, argument);
-          // }
-        }
-
-      }else{
-        let argument = null;
-        switch(command){
-
-          case 'fontName':
-            argument = e.target.value
-            document.getElementById("iframeTextField").contentWindow.document.execCommand(command, false, argument); 
-            break;
-
-          case 'fontSize':
-            argument = e.target.value
-            document.getElementById("iframeTextField").contentWindow.document.execCommand(command, false, argument); 
-            break;
-          case 'formatBlock':
-            argument = e.target.value
-            document.getElementById("iframeTextField").contentWindow.document.execCommand(command, false, argument); 
-            break;
-          }
-
-      }
-       
-      
-
-    }
-
-
-
     
-    
-
-
-
     const style = {
       position:"sticky", 
       top: "62.5px",
@@ -245,7 +155,7 @@ function CreatePost(props) {
                 </div>
                   <form style={{ display:"flex", flexDirection:"column", alignItems:"center"}}>
                       <div style={{display:"flex", width:"100%", justifyContent:"space-between"}}>
-                          <div style={{ display:"flex", width:"100%", justifyContent:"center", overflowX:"auto"}}><TextEditor textSelection={textSelection} /></div>
+                          <div style={{ display:"flex", width:"100%", justifyContent:"center", overflowX:"auto"}}><TextEditor TextSelectionActions={TextSelectionActions} /></div>
                           <label htmlFor="form__file" style={{display:"flex", alignItems:"center", justifyContent:"flex-end"}}>
                             <Tooltip title={<Typography sx={{ fontSize: "0.85rem" }}>Add images</Typography>}>
                               <ImageIcon sx={{ fontSize:"3rem",color:"#555555", cursor:"pointer", "&:hover":{color:"#333333"}}}/>
@@ -257,8 +167,8 @@ function CreatePost(props) {
                           <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Title of post" style={{marginBottom:10, fontFamily:"Roboto",color:"#666666"}} autoFocus />
                           <div id="iframeContainer" style={{display:"grid"}}>
                             <textarea placeholder="Your Writeup Here" ref={textAreaRef} value={description} rows="10" style={textAreaStyle} onChange={e => setDescription(e.target.value)} />
-                            <iframe name="iframeTextField" id="iframeTextField" ref={iframeAreaRef} value={description} style={iframeTextArea}></iframe>
-                            <div style={{ fontSize: "1.2rem", color:"#404040" }}>{ iframeAreaRef.current?.value.length || 0 } of 3000</div>
+                            <iframe name="iframeTextField" id="iframeTextField" title="iframeTextField" ref={iframeAreaRef} value={description} style={iframeTextArea}></iframe>
+                            {/* <div style={{ fontSize: "1.2rem", color:"#404040" }}>{ iframeAreaRef.current?.value.length || 0 } of 3000</div> */}
                             <Button type="submit" justifySelf="end"  largeContainedButton onClick={publishHandler}>Publish</Button>
                           </div>
                       </div>
@@ -271,7 +181,7 @@ function CreatePost(props) {
                   <PageTitle name="#Trending Now" width="30vw" />
                 </Box>
                 <Communities />
-                <Advertisement />
+                <Advertisement passedIndex={2} />
               </Box>
             </Grid>
         </Grid>

@@ -2,7 +2,7 @@ import Grid from '@mui/material/Grid';
 import CardComponent from "../components/CardComponent";
 import LeftbarComponent from "../components/LeftbarComponent";
 import SlideShow from "../components/SlideShow";
-import HomeAdvertisement from "../components/Advertisement";
+import Advertisement from "../components/Advertisement";
 import PageTitle from "../components/PageTitle";
 import Box from '@mui/material/Box';
 import React, { useEffect } from 'react';
@@ -49,7 +49,7 @@ export default function Home() {
               <Box sx={ style }>
                 <PageTitle name="Community Section" />
                 <LeftbarComponent />
-                <HomeAdvertisement />
+                <Advertisement general  topLeft passedIndex={2} />
               </Box>
           </Grid>
           <Grid item xs={10} sm={7} md={6} lg={6} sx={{mb:3}}>
@@ -71,7 +71,7 @@ export default function Home() {
             <Box sx={ style }>
               <PageTitle name="#Trending Now" />  
               <SlideShow />
-              <HomeAdvertisement />
+              <Advertisement general  center passedIndex={1} />
             </Box>
           </Grid>
         </Grid>

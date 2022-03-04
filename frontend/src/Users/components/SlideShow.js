@@ -52,7 +52,7 @@ export default function SlideShow() {
   };
 
   return (
-    <Box sx={{ maxWidth: 350, flexGrow: 1, mx:"auto",  }}>
+    <Box sx={{ maxWidth: 350, flexGrow: 1, mx:"auto" }}>
       <AutoPlaySwipeableViews
         axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
         index={activeStep}
@@ -70,7 +70,7 @@ export default function SlideShow() {
                   maxWidth: 350,
                   overflow: 'hidden',
                   width: '99%',
-                  border:"1px solid gray",
+                  border: "1px solid rgba(0, 0, 0, 0.12)",
                   borderRadius: "5px",
                 }}
                 src={step.imgPath}
