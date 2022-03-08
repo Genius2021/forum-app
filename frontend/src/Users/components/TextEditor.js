@@ -4,7 +4,7 @@ import { capitalize } from '../../commonFunctions';
 import { useState } from 'react';
 
 
-function TextEditor({ TextSelectionActions, flexWrap, width, border}) {
+function TextEditor({ TextSelectionActions, iframeName, flexWrap, width, border}) {
 
    const [textColorPicker, setTextColorPicker] = useState("");
    const [backgroundColorPicker, setBackgroundColorPicker] = useState("");
@@ -13,12 +13,12 @@ function TextEditor({ TextSelectionActions, flexWrap, width, border}) {
       e.preventDefault();
 
       if(el.command === 'foreColor'){
-          setTextColorPicker(e.target.value);
+         setTextColorPicker(e.target.value);
       }else if(el.command === 'backColor'){
          setBackgroundColorPicker(e.target.value);
       }
      
-      TextSelectionActions(e, el);
+      TextSelectionActions(e, el, iframeName);
    }
 
     const style ={
@@ -100,7 +100,7 @@ function TextEditor({ TextSelectionActions, flexWrap, width, border}) {
                      if(el.command === "insertHorizontalRule"){
                         return  <Tooltip key={index} title={<Typography sx={style}>{capitalize(el.tooltip)}</Typography>}>
                                  <Card elevation={0} sx={iconStyle}>
-                                    <i style={iconStyle}  onClick={(e)=> TextSelectionActions(e, el)}>HR</i>
+                                    <i style={iconStyle}  onClick={(e)=> TextSelectionActions(e, el, iframeName)}>HR</i>
                                  </Card>
                              </Tooltip>
 
@@ -121,7 +121,7 @@ function TextEditor({ TextSelectionActions, flexWrap, width, border}) {
                      }else{
                         return  <Tooltip key={index} title={<Typography sx={style}>{capitalize(el.tooltip)}</Typography>}>
                                  <Card elevation={0} sx={iconStyle}>
-                                    <i style={iconStyle} className={el.className} onClick={(e)=> TextSelectionActions(e, el)}></i>
+                                    <i style={iconStyle} className={el.className} onClick={(e)=> TextSelectionActions(e, el, iframeName)}></i>
                                  </Card>
                              </Tooltip>
                      }
@@ -129,7 +129,7 @@ function TextEditor({ TextSelectionActions, flexWrap, width, border}) {
                   }else{
                      return <Tooltip key={index} title={<Typography sx={style}>{capitalize(el.tooltip)}</Typography>}>
                         <Card elevation={0}>
-                          <select style={selectStyle} name={el.name} onChange={(e)=> {TextSelectionActions(e, el)}}>
+                          <select style={selectStyle} name={el.name} onChange={(e)=> {TextSelectionActions(e, el, iframeName)}}>
                               {
                                  el.options.map((op, index)=>{
                                     return <option key={index} style={{color:"#555555",fontSize:"1.15rem"}} value={op}>{op}</option>

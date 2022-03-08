@@ -15,7 +15,20 @@ import { CREATE_COMMUNITY_POST_FAIL,
       COMMUNITY_IMAGE_UPLOAD_SUCCESS,
       COMMUNITY_IMAGE_UPLOAD_FAIL,
       GET_COMMUNITY_POSTS_REQUEST, 
-    GET_COMMUNITY_POSTS_SUCCESS, 
+    GET_COMMUNITY_POSTS_SUCCESS,
+    POST_COMMUNITY_COMMENT_REQUEST,
+    POST_COMMUNITY_COMMENT_SUCCESS,
+    POST_COMMUNITY_COMMENT_FAIL,
+    GET_COMMUNITY_POST_COMMENTS_REQUEST,
+    GET_COMMUNITY_POST_COMMENTS_SUCCESS,
+    GET_COMMUNITY_POST_COMMENTS_FAIL,
+    NEW_POST,
+    LIKE_COMMUNITY_COMMENT_REQUEST,
+    LIKE_COMMUNITY_COMMENT_SUCCESS,
+    LIKE_COMMUNITY_COMMENT_FAIL,
+    SHARE_COMMUNITY_COMMENT_REQUEST,
+    SHARE_COMMUNITY_COMMENT_SUCCESS,
+    SHARE_COMMUNITY_COMMENT_FAIL,
     SEEN__POST} from "../constants/communityConstants";
     
     import axios from "axios";
@@ -55,9 +68,9 @@ export const createCommunityPost = (title, description, picture, author, communi
 
     try {
         const { data } = await axios.post(`/${community}/posts/create-post`, { title, description, picture, author, community });
-        dispatch({ type: CREATE_COMMUNITY_POST_SUCCESS, payload: data });
         // localStorage.setItem("postDetails", JSON.stringify(data));
-        window.location.replace(`communities/${community}/${data.post_id}`);
+        dispatch({ type: NEW_POST, payload: data });
+        window.location.replace(`/communities/${community}/${data.post_id}`);
     } catch (error) {
         dispatch({
             type: CREATE_COMMUNITY_POST_FAIL,
@@ -115,3 +128,66 @@ export const viewed = (is_viewed, post_id, count) => (dispatch) =>{
     console.log(is_viewed, post_id, count)
     dispatch({type: SEEN__POST, payload: { is_viewed, post_id, count, }})
 }
+
+export const postComment = (comment) => async (dispatch) => {
+    const { community_name, post_id, comment_id, ...rest} = comment;
+    dispatch({ type: POST_COMMUNITY_COMMENT_REQUEST });
+
+    try {
+        const { data } = await axios.post(`/${community_name}/posts/${post_id}/comments/${comment_id}`, rest );
+        dispatch({ type: POST_COMMUNITY_COMMENT_SUCCESS, payload: data });
+        // localStorage.setItem("postDetails", JSON.stringify(data));
+    } catch (error) {
+        dispatch({
+            type: POST_COMMUNITY_COMMENT_FAIL,
+            payload: error.response && error.response.data.message ? error.response.data.message : error.message,
+        });
+    }
+};
+
+
+export const getPostComments = (id, community) => async (dispatch) => {
+    dispatch({ type: GET_COMMUNITY_POST_COMMENTS_REQUEST });
+
+    try {
+        const { data } = await axios.get(`/${community}/posts/${id}/comments`);
+        dispatch({ type: GET_COMMUNITY_POST_COMMENTS_SUCCESS, payload: data });
+        // localStorage.setItem("postDetails", JSON.stringify(data));
+    } catch (error) {
+        dispatch({
+            type: GET_COMMUNITY_POST_COMMENTS_FAIL,
+            payload: error.response && error.response.data.message ? error.response.data.message : error.message,
+        });
+    }
+};
+
+// export const likeComment = (likeDetails) => async (dispatch) => {
+//     const { post_id: id, community, ...rest} = likeDetails;
+//     dispatch({ type: LIKE_COMMUNITY_COMMENT_REQUEST });
+
+//     try {
+//         const { data } = await axios.post(`/${community}/posts/${post_id}/comments/likes`, rest);
+//         dispatch({ type: LIKE_COMMUNITY_COMMENT_SUCCESS, payload: data });
+//     } catch (error) {
+//         dispatch({
+//             type: LIKE_COMMUNITY_COMMENT_FAIL,
+//             payload: error.response && error.response.data.message ? error.response.data.message : error.message,
+//         });
+//     }
+// };
+
+
+// export const shareComment = (shareDetails) => async (dispatch) => {
+//     const { post_id: id, community } = shareDetails;
+//     dispatch({ type: SHARE_COMMUNITY_COMMENT_REQUEST });
+
+//     try {
+//         const { data } = await axios.post(`/${community}/posts/${post_id}/comments/shares`);
+//         dispatch({ type: SHARE_COMMUNITY_COMMENT_SUCCESS, payload: data });
+//     } catch (error) {
+//         dispatch({
+//             type: SHARE_COMMUNITY_COMMENT_FAIL,
+//             payload: error.response && error.response.data.message ? error.response.data.message : error.message,
+//         });
+//     }
+// };

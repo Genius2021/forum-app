@@ -16,12 +16,12 @@ export const messageReducer = (state = {}, action) => {
     }
 }
 
-export const modalReducer = (state = { status: false}, action) => {
+export const modalReducer = (state = {typeOfModal: "", isOpen: false}, action) => {
     switch (action.type) {
         case OPEN__MODAL:
-            return { ...state, status: action.payload };
+            return { ...state, typeOfModal: action.payload, isOpen: true };
         case CLOSE__MODAL:
-            return {...state, status: action.payload };
+            return {...state, typeOfModal: action.payload, isOpen: false };
         default:
             return state;
     }

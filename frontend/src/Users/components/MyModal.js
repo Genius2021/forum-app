@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
@@ -17,42 +17,49 @@ const style = {
   bgcolor: 'background.paper',
   borderRadius: '0.5rem',
   boxShadow: 24,
+  border:"1px solid rgba(0, 0, 0, 0.12)",
   px: 3,
   pt: 2,
   pb:1.5,
 };
 
-export default function MyModal({ question, comment }) {
+export default function MyModal({ question, signOutAction, modalName, specificAction }) {
 
-  const { status } = useSelector(state => state.modal);
+  const { isOpen, typeOfModal} = useSelector(state => state.modal);
   const dispatch = useDispatch();
 
   const HandleProceed = () =>{
-    dispatch(signout());
-    dispatch(closeModal());
+    if(signOutAction){
+      dispatch(signout());
+      dispatch(closeModal(modalName));
+
+    }else{
+      // dispatch(specificAction) for instance, implement a delete action
+      dispatch(closeModal(modalName));
+      console.log("got to proceed")
+    }
   }
 
 
   return (
     <>
       <Modal
-        open={status}
+        open={typeOfModal === modalName && isOpen}
         // onClose={handleClose}
-        onClose={()=>(dispatch(closeModal()))}
+        // onClose={()=>(dispatch(closeModal(modalName)))}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
         <Box sx={style} >
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            {/* Quick One */}
+          {/* <Typography id="modal-modal-title" variant="h6" component="h2">
             {comment}
-          </Typography>
+          </Typography> */}
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
         {/* Are you sure you want to continue? */}
           {question}
           </Typography>
           <Box sx={{display:"flex", justifyContent:"flex-end", mt:2}}>
-            <Button variant="contained" onClick={()=>(dispatch(closeModal()))} size="small" startIcon={<CloseIcon /> } color="error" sx={{mr:"10px"}}>Cancel</Button>
+            <Button variant="contained" onClick={()=>(dispatch(closeModal(modalName)))} size="small" startIcon={<CloseIcon /> } color="error" sx={{mr:"10px"}}>Cancel</Button>
             <Button variant="outlined" onClick={HandleProceed}>Proceed</Button>
           </Box>
             

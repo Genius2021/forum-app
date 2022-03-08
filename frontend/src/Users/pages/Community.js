@@ -9,7 +9,7 @@ import AlertComponent from "../components/AlertComponent";
 import PaginationComponent from "../components/PaginationComponent";
 import BasicCard from "../components/BasicCard";
 import { getCommunityPosts } from "../../Redux/Users/actions/communityActions";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import CircularProgress from '@mui/material/CircularProgress';
 
 
@@ -18,7 +18,10 @@ export default function Community(props) {
   const { posts, loading, error, numOfPages } = useSelector(state => state.getCommunityPosts)
   const { value } = useSelector(state => state.communityPagination);
   const { seenPostsArray, postViewsCounter } = useSelector(state => state.seenPost)
+  const { newPost } = useSelector(state => state.createCommunityPost)
 
+  // const [allPosts, setAllPosts] = useState(posts)
+  
   const dispatch = useDispatch();
   let { search } = useLocation();
   const community = props.location.pathname.split("/")[2]
@@ -66,6 +69,7 @@ export default function Community(props) {
                       { loading ? (<Box textAlign="center"><CircularProgress sx={{color:"#3b5998"}} /></Box>) : error ? (<AlertComponent typeOfAlert="error" >{error}</AlertComponent>) : (
                         <>
                           { posts?.map( post =>{
+                            
                             const postInArray = seenPostsArray.includes(post.post_id)
                               let count = 0;
                               postViewsCounter.forEach(x =>{

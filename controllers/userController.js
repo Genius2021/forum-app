@@ -1,6 +1,8 @@
 const bcrypt = require("bcrypt");
 const { generateToken, capitalize } = require("../utils.js");
 const { db } = require("../db.js");
+const { v4: uuidv4 } = require("uuid");
+
 
 
 //find all users
@@ -58,11 +60,11 @@ const userLogin = async (req, res) =>{
     console.log("backend userlogin")
 
         const { email, password } = req.body;
+        console.log(email, password)
+
         try {
             const result = await db.query("SELECT user_id, firstname, is_admin, password, username, email FROM users WHERE email = $1;", [email] )
             if(result.rowCount > 0){
-                console.log("there was a result")
-                console.log(result)
                 if(bcrypt.compareSync(password, result.rows[0].password)){
                     console.log("Password matched")
                     const createdUser = {...result.rows[0]}
@@ -95,10 +97,11 @@ const userRegister = async (req, res) =>{
                 res.status(409).json({ message: "A user with that Email or Username, already exists!" });
 
             }else{
+                const user_id = uuidv4()
                 const salt = await bcrypt.genSalt(10);
                 const hashedPass = await bcrypt.hash(password, salt);
                 const last_login = new Date();
-                const result = await db.query("INSERT INTO users (firstname, lastname, username, email, password, profile_pic, last_login) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;", [firstname, lastname, username, email, hashedPass.toString() , profile_pic, last_login] )
+                const result = await db.query("INSERT INTO users (user_id, firstname, lastname, username, email, password, profile_pic, last_login) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;", [user_id, firstname, lastname, username, email, hashedPass.toString() , profile_pic, last_login] )
                 console.log("successfully inserted a document");
                 const createdUser = {...result.rows[0]}
                 res.status(201).send({

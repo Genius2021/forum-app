@@ -1,9 +1,10 @@
 const { db } = require("../db.js");
 const { capitalizeStringWithDash } = require("../utils.js");
+const { v4: uuidv4 } = require("uuid");
 
 
 
-const createACommunityPost = async (req, res) => {
+const CommunityCommentLike = async (req, res) => {
     const { title, description, picture, author, community } = req.body;
     const capitalizeCommunity = capitalizeStringWithDash(community);
     try {
@@ -16,6 +17,61 @@ const createACommunityPost = async (req, res) => {
     }
 }
 
+const CommunityCommentShare = async (req, res) => {
+    const { title, description, picture, author, community } = req.body;
+    const capitalizeCommunity = capitalizeStringWithDash(community);
+    try {
+        // const insertion = await db.query("INSERT INTO posts(title, description, picture, author, community_name, likes, is_shared, views, is_pinned_to_dashboard) VALUES ($1, $2, $3, $4, $5) RETURNING *;", [title, description, picture, author, community ] )
+        const insertion = await db.query("INSERT INTO posts(title, description, picture, author, community_name ) VALUES ($1, $2, $3, $4, $5) RETURNING *;", [title, description, picture, author, capitalizeCommunity ] )
+        const createdPost = insertion.rows[0]
+        res.status(200).json(createdPost);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+}
+
+const postAComment = async (req, res) => {
+    const comment_id = req.params.commentId
+    const post_id = req.params.id
+    const {author_id, is_admin, comment_text} = req.body
+    const capitalizeCommunity = capitalizeStringWithDash(req.baseUrl.split("/")[2])
+
+    try {
+        const insertion = await db.query("INSERT INTO comments(comment_id, post_id, community_name, author_id, is_admin, comment_text ) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;", [comment_id, post_id, capitalizeCommunity, author_id, is_admin, comment_text ])
+        const createdPost = insertion.rows[0]
+        res.status(200).json(createdPost);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+}
+
+const getAllComments = async (req, res) => {
+    const post_id = req.params.id
+    const capitalizeCommunity = capitalizeStringWithDash(req.baseUrl.split("/")[2])
+    try {
+        //NOTE: When doing an inner join, after the SELECT, you specify the columns in both table A and table B which you want. NOTE again, they come immediately after the SELECT syntax.
+        const allComments = await db.query("SELECT comment_id, post_id,community_name,author_id, comments.is_admin, comment_text, likes, shares, comments.created_on, edited_on, users.firstname, users.username  FROM comments INNER JOIN users ON comments.author_id = users.user_id WHERE post_id = $1 AND community_name = $2 ORDER BY comments.created_on DESC LIMIT 15;", [ post_id, capitalizeCommunity ])
+        const createdPost = allComments.rows
+        res.status(200).json(createdPost);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+}
+
+
+const createACommunityPost = async (req, res) => {
+  const { title, description, picture, author } = req.body;
+    const capitalizeCommunity = capitalizeStringWithDash(req.baseUrl.split("/")[2])
+
+    try {
+        const post_id = uuidv4()
+        const insertion = await db.query("INSERT INTO posts(post_id, title, description, picture, author, community_name ) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;", [post_id, title, description, picture, author, capitalizeCommunity ])
+        const createdPost = insertion.rows[0]
+        res.status(200).json(createdPost);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+}
 
 const editACommunityPost = async (req, res) => {
         const id = req.params.id;
@@ -122,18 +178,20 @@ const getCommunityPosts = async (req, res) => {
             documentsCount = count.rows[0].count;
             numOfPages = Math.ceil(documentsCount / pageLimit); //e.g there are 10 pages which will be sent to the frontend
                 posts = postByAuthor.rows
-                res.status(200).json({documentsCount, numOfPages , posts})
+                res.status(200).json({documentsCount, numOfPages , posts, pageLimit})
             }else{
                 res.status(404).json("Post was not found");
             }
         }else if(pageNumber && communityFromParams){
+            console.log("Just got here")
                 const doc = async(pageNumber=1)=>{
                 const count = await db.query('SELECT count(post_id) FROM posts WHERE community_name = $1', [communityFromParams])
-                const result = await db.query(`SELECT * FROM posts WHERE community_name = $1 ORDER BY posts.created_on LIMIT ${pageLimit} OFFSET ${skipNumber}`, [communityFromParams])
+                const result = await db.query(`SELECT * FROM posts WHERE community_name = $1 ORDER BY posts.created_on DESC LIMIT ${pageLimit} OFFSET ${skipNumber}`, [communityFromParams])
+                console.log(result)
                 documentsCount = count.rows[0].count;
                 numOfPages = Math.ceil(documentsCount / pageLimit); //e.g there are 10 pages which will be sent to the frontend
                 posts = result.rows;
-                res.status(200).json({documentsCount, numOfPages , posts})
+                res.status(200).json({documentsCount, numOfPages , posts, pageLimit})
             }
             doc(pageNumber);
 
@@ -145,7 +203,7 @@ const getCommunityPosts = async (req, res) => {
                 documentsCount = count.rows[0].count;
                 numOfPages = Math.ceil(documentsCount / pageLimit); //e.g there are 10 pages which will be sent to the frontend
                 posts = result.rows;
-                res.status(200).json({documentsCount, numOfPages , posts})
+                res.status(200).json({documentsCount, numOfPages , posts, pageLimit})
             }
     
                 documentReturn(pageNumber)
@@ -156,7 +214,7 @@ const getCommunityPosts = async (req, res) => {
                 documentsCount = count.rows[0].count;
                 numOfPages = Math.ceil(documentsCount / pageLimit); //e.g there are 10 pages which will be sent to the frontend
                 posts = postByCommunity.rows
-                res.status(200).json({documentsCount, numOfPages , posts})
+                res.status(200).json({documentsCount, numOfPages , posts, pageLimit})
             }else{
                 res.status(404).json("Post was not found");
             }
@@ -169,7 +227,7 @@ const getCommunityPosts = async (req, res) => {
                 documentsCount = count.rows[0].count;
                 numOfPages = Math.ceil(documentsCount / pageLimit); //e.g there are 10 pages which will be sent to the frontend
                 posts = postByTitle.rows
-                res.status(200).json({documentsCount, numOfPages , posts})
+                res.status(200).json({documentsCount, numOfPages , posts, pageLimit})
             }else{
                 res.status(404).json("Post was not found");
             }
@@ -180,12 +238,11 @@ const getCommunityPosts = async (req, res) => {
                 documentsCount = count.rows[0].count;
                 numOfPages = Math.ceil(documentsCount / pageLimit);
                 posts = result.rows
-                res.status(200).send({documentsCount, numOfPages , posts})
+                res.status(200).send({documentsCount, numOfPages , posts, pageLimit})
             }else{
                 res.status(404).json("Oops! Posts were not found");
             }
        }
-
         
     } catch (error) {
         res.status(404).json("Posts not found");
@@ -196,6 +253,10 @@ const getCommunityPosts = async (req, res) => {
 
 
 module.exports ={
+    CommunityCommentLike,
+    CommunityCommentShare,
+    getAllComments,
+    postAComment,
     getCommunityPosts,
     createACommunityPost,
     getSingleCommunityPost,

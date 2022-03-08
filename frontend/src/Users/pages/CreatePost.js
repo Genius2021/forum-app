@@ -34,8 +34,10 @@ function CreatePost(props) {
 
     const publishHandler = (e) => {
         e.preventDefault();
-        console.log(file)
-        const filename = Date.now() + file.name
+        let theForm = document.getElementById("postCreationForm");
+        theForm.elements["postCreationTextArea"].value = window.frames["postCreationiframe"].document.body.innerHTML;
+        const textAreaValue = document.getElementById("postCreationTextArea").value
+        const filename = Date.now() + file?.name
         if (file) {
             const data = new FormData();
             console.log(data);
@@ -43,19 +45,20 @@ function CreatePost(props) {
             data.append("file", file);
             console.log(data);
             // dispatch(CommunityImageUpload(data));
-            // dispatch(createCommunityPost(title, description, filename, username, community));
-        }
-    };
+          }
+
+        dispatch(createCommunityPost(title, textAreaValue, filename, username, community));
+      };
 
 
     useEffect(()=>{
         const loadiframe = ()=>{
-          const theiframe = document.getElementById("iframeTextField").contentDocument;
+          const theiframe = document.getElementById("postCreationiframe").contentDocument;
           console.log(theiframe)
-          document.getElementById("iframeTextField").contentEditable = true;
-          let editor = document.getElementById("iframeTextField")
+          document.getElementById("postCreationiframe").contentEditable = true;
+          let editor = document.getElementById("postCreationiframe")
           let editorDoc = editor.contentWindow.document;
-          let editorDoc1 = document.getElementById("iframeTextField").contentDocument;
+          let editorDoc1 = document.getElementById("postCreationiframe").contentDocument;
           let editorBody = editorDoc.body;
           if('spellcheck' in editorBody){
             editorBody.spellcheck = false;
@@ -80,16 +83,6 @@ function CreatePost(props) {
       position:"sticky", 
       top: "62.5px",
       zIndex: 20,
-    }
-
-    const textAreaStyle = {
-      color:"#666666", 
-      // width:"calc(100% - 2rem)", 
-      display:"none", 
-      marginBottom:3,
-      wordWrap: "breakWord",
-      resize:"vertical",
-
     }
 
     const iframeTextArea = {
@@ -153,9 +146,9 @@ function CreatePost(props) {
                         }) 
                   }
                 </div>
-                  <form style={{ display:"flex", flexDirection:"column", alignItems:"center"}}>
+                  <form id="postCreationForm" style={{ display:"flex", flexDirection:"column", alignItems:"center"}}>
                       <div style={{display:"flex", width:"100%", justifyContent:"space-between"}}>
-                          <div style={{ display:"flex", width:"100%", justifyContent:"center", overflowX:"auto"}}><TextEditor TextSelectionActions={TextSelectionActions} /></div>
+                          <div style={{ display:"flex", width:"100%", justifyContent:"center", overflowX:"auto"}}><TextEditor iframeName="postCreationiframe" TextSelectionActions={TextSelectionActions} /></div>
                           <label htmlFor="form__file" style={{display:"flex", alignItems:"center", justifyContent:"flex-end"}}>
                             <Tooltip title={<Typography sx={{ fontSize: "0.85rem" }}>Add images</Typography>}>
                               <ImageIcon sx={{ fontSize:"3rem",color:"#555555", cursor:"pointer", "&:hover":{color:"#333333"}}}/>
@@ -166,8 +159,8 @@ function CreatePost(props) {
                       <div style={{display:"grid", width:"100%"}}>
                           <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Title of post" style={{marginBottom:10, fontFamily:"Roboto",color:"#666666"}} autoFocus />
                           <div id="iframeContainer" style={{display:"grid"}}>
-                            <textarea placeholder="Your Writeup Here" ref={textAreaRef} value={description} rows="10" style={textAreaStyle} onChange={e => setDescription(e.target.value)} />
-                            <iframe name="iframeTextField" id="iframeTextField" title="iframeTextField" ref={iframeAreaRef} value={description} style={iframeTextArea}></iframe>
+                            <textarea id="postCreationTextArea" style={{display:"none"}} />
+                            <iframe name="postCreationiframe" id="postCreationiframe" title="iframeTextField" value={description} style={iframeTextArea}></iframe>
                             {/* <div style={{ fontSize: "1.2rem", color:"#404040" }}>{ iframeAreaRef.current?.value.length || 0 } of 3000</div> */}
                             <Button type="submit" justifySelf="end"  largeContainedButton onClick={publishHandler}>Publish</Button>
                           </div>

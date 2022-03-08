@@ -125,7 +125,7 @@ export default function Sidebar() {
                 component="div"
                 sx={{ display: { xs: 'block' }, textAlign:"center", marginTop:"5px"}}
             >
-                LAG-BOOK
+                DING
             </Typography>
               <CloseIcon
                  sx={{fontSize: 25, alignSelf:"flex-end", cursor:"pointer",}}

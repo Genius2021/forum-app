@@ -25,12 +25,12 @@ export const clearMessage = () => (dispatch) =>{
     dispatch({type: USER_SIGNIN_ERROR_MESSAGE_CLEAR })
 }
 
-export const closeModal = () => (dispatch) =>{
-    dispatch({type: CLOSE__MODAL, payload: false})
+export const closeModal = (typeOfModal) => (dispatch) =>{
+    dispatch({type: CLOSE__MODAL, payload: typeOfModal})
 }
 
-export const openModal = () => (dispatch) =>{
-    dispatch({type: OPEN__MODAL , payload: true})
+export const openModal = (typeOfModal) => (dispatch) =>{
+    dispatch({type: OPEN__MODAL , payload: typeOfModal})
 }
 
 export const changeCommunityPaginationValue = (value) => (dispatch) =>{

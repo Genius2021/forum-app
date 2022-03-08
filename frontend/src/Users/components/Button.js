@@ -1,6 +1,6 @@
 import React from 'react'
 
-function Button({type, children, border, fontSize, justifySelf, smallContainedButton, mediumContainedButton, largeContainedButton, smallOutlinedButton, mediumOutlinedButton, largeOutlinedButton }) {
+function Button({type, children, border, fontSize, onClick, justifySelf, smallContainedButton, mediumContainedButton, largeContainedButton, smallOutlinedButton, mediumOutlinedButton, largeOutlinedButton }) {
 
     const smallContainedButtonStyle = {
         backgroundColor:"#3b5998",
@@ -87,7 +87,7 @@ function Button({type, children, border, fontSize, justifySelf, smallContainedBu
         (mediumOutlinedButton && mediumOutlinedButtonStyle) || 
         (largeOutlinedButton && largeOutlinedButtonStyle)
     
-    } type={type}>{children}</button>
+    } type={type} onClick={onClick}>{children}</button>
   )
 }
 

@@ -16,6 +16,7 @@ import MailIcon from '@mui/icons-material/Mail';
 import Badge from '@mui/material/Badge';
 import { useDispatch, useSelector } from 'react-redux';
 import { openModal } from '../../Redux/Users/actions/generalActions';
+import MyModal from './MyModal';
 
 
 export default function AccountMenu() {
@@ -24,10 +25,9 @@ export default function AccountMenu() {
 
   const dispatch = useDispatch();
 
-  const logoutHandler = (e)=>{
-    dispatch(openModal());
+  const logoutHandler = ()=>{
+    dispatch(openModal("navbarModal"));
   }
-
 
 
   const [anchorEl, setAnchorEl] = React.useState(null);

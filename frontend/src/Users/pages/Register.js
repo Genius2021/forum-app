@@ -62,6 +62,7 @@ export default function Register(props) {
               data.append("file", file);
               dispatch(photoUpload(data));
         }
+        
           dispatch(register(firstname, lastname, username, email, filename, password));
       }
   }

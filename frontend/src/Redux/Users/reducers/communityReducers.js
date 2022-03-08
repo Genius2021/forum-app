@@ -16,15 +16,22 @@ import { CREATE_COMMUNITY_POST_FAIL,
      GET_COMMUNITY_POSTS_FAIL, 
      GET_COMMUNITY_POSTS_REQUEST, 
      GET_COMMUNITY_POSTS_SUCCESS, 
+     POST_COMMUNITY_COMMENT_REQUEST,
+     POST_COMMUNITY_COMMENT_SUCCESS,
+     POST_COMMUNITY_COMMENT_FAIL,
+     GET_COMMUNITY_POST_COMMENTS_REQUEST,
+     GET_COMMUNITY_POST_COMMENTS_SUCCESS,
+     GET_COMMUNITY_POST_COMMENTS_FAIL,
+     NEW_POST,
      SEEN__POST} from "../constants/communityConstants";
 
 
-export const createCommunityPostReducer = (state = {}, action) => {
+export const createCommunityPostReducer = (state = {newPost: {}}, action) => {
     switch (action.type) {
         case CREATE_COMMUNITY_POST_REQUEST:
             return { ...state, loading: true };
         case CREATE_COMMUNITY_POST_SUCCESS:
-            return { ...state, loading: false, newPostSuccess: true, createDetails: action.payload}
+            return { ...state, loading: false, newPostSuccess: true, newPost: action.payload}
         case CREATE_COMMUNITY_POST_FAIL:
             return { ...state, loading: false, error: action.payload }
         default:
@@ -71,7 +78,7 @@ export const editCommunityPostReducer = (state = {}, action) => {
     }
 }
 
-export const getCommunityPostsReducer = (state = {posts: [], documentsCount: null }, action) => {
+export const getCommunityPostsReducer = (state = {posts: [], documentsCount: null, pageLimit: null }, action) => {
     switch (action.type) {
         case GET_COMMUNITY_POSTS_REQUEST:
             return { ...state, loading: true };
@@ -79,6 +86,12 @@ export const getCommunityPostsReducer = (state = {posts: [], documentsCount: nul
             return { ...state, loading: false, success: true, posts: action.payload.posts, documentsCount: action.payload.documentsCount, numOfPages: action.payload.numOfPages }
         case GET_COMMUNITY_POSTS_FAIL:
             return { ...state, loading: false, error: action.payload }
+        case NEW_POST:
+            let documentsCount = state.documentsCount++;
+            let newPost = action.payload;
+            let numOfPages = Math.ceil(documentsCount / state.pageLimit);
+
+            return {...state, posts:[newPost, ...state.posts], numOfPages}
         default:
             return state;
     }
@@ -116,15 +129,41 @@ export const seenPostReducer = (state = { seenPostsArray:[], postViewsCounter:[{
                     object = { postId: action.payload.post_id, count: action.payload.count+1, time: new Date() }
                 }else{
 
-                    object =  { postId: x.postId, count: x.count+1, time: new Date()}
+                    object =  { postId: x.postId, count: x.count+1, time: new Date() }
                 }
             })
                 console.log(state)
-            //So, there is a difference between ...state.filter() and state.filter()  One uses a spread and the other does not...Take NOTE
+            //So, there is a difference between ...state.filter() and state.filter() One uses a spread and the other does not...Take NOTE
             return {...state, seenPostsArray: [ ...state.seenPostsArray.filter(x => (x.postId !== action.payload.post_id)), action.payload.post_id ], postViewsCounter: [...state.postViewsCounter, object ]};
         default:
             return state;
     }
 }
 
+
+export const postCommentReducer = (state = {comment: {}}, action) => {
+    switch (action.type) {
+        case POST_COMMUNITY_COMMENT_REQUEST:
+            return { ...state, loading: true };
+        case POST_COMMUNITY_COMMENT_SUCCESS:
+            return { ...state, loading: false, success: true, comment: action.payload}
+        case POST_COMMUNITY_COMMENT_FAIL:
+            return { ...state, loading: false, error: action.payload }
+        default:
+            return state;
+    }
+}
+
+export const getAllCommentsReducer = (state = {comments: []}, action) => {
+    switch (action.type) {
+        case GET_COMMUNITY_POST_COMMENTS_REQUEST:
+            return { ...state, loading: true };
+        case GET_COMMUNITY_POST_COMMENTS_SUCCESS:
+            return { ...state, loading: false, success: true, comments: action.payload}
+        case GET_COMMUNITY_POST_COMMENTS_FAIL:
+            return { ...state, loading: false, error: action.payload }
+        default:
+            return state;
+    }
+}
 

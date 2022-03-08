@@ -2,6 +2,7 @@ import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import { capitalize } from "../../commonFunctions"
+import { openModal } from '../../Redux/Users/actions/generalActions';
 
 
 export default function PageTitle({ name, width, textAlign, paddingLeft }) {

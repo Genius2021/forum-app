@@ -1,5 +1,5 @@
 
- const TextSelectionActions = (e, currentElem)=>{
+ const TextSelectionActions = (e, currentElem, iframeName)=>{
     // e.target.value, e.target.selectedIndex ...the value gives you the value directly. But the selectedIndex gives you the index of the selected option
       e.preventDefault();
       let command = currentElem.command;
@@ -34,25 +34,25 @@
           case 'insertImage':
             argument = prompt('Enter your image URL: ');
             isPrompt = true;
-            document.getElementById("iframeTextField").contentWindow.document.execCommand(command, false, argument); 
+            document.getElementById(iframeName).contentWindow.document.execCommand(command, false, argument); 
             break;
 
           case 'foreColor':
             argument = e.target.value;
-            document.getElementById("iframeTextField").contentWindow.document.execCommand(command, false, argument); 
+            document.getElementById(iframeName).contentWindow.document.execCommand(command, false, argument); 
             break;
 
           case 'backColor':
             argument = e.target.value;
-            document.getElementById("iframeTextField").contentWindow.document.execCommand(command, false, argument); 
+            document.getElementById(iframeName).contentWindow.document.execCommand(command, false, argument); 
             break;
          
           //for bold and others
           default:
-            document.getElementById("iframeTextField").contentWindow.document.execCommand(command, false, argument); 
+            document.getElementById(iframeName).contentWindow.document.execCommand(command, false, argument); 
         }
 
-        // document.getElementById("iframeTextField").contentWindow.document.execCommand(command, false, null); 
+        // document.getElementById(iframeName).contentWindow.document.execCommand(command, false, null); 
         // if ((isPrompt && argument !== null) || !isPrompt){
         //   iframeState.execCommand(command, false, argument);
         // }
@@ -64,16 +64,16 @@
 
         case 'fontName':
           argument = e.target.value
-          document.getElementById("iframeTextField").contentWindow.document.execCommand(command, false, argument); 
+          document.getElementById(iframeName).contentWindow.document.execCommand(command, false, argument); 
           break;
 
         case 'fontSize':
           argument = e.target.value
-          document.getElementById("iframeTextField").contentWindow.document.execCommand(command, false, argument); 
+          document.getElementById(iframeName).contentWindow.document.execCommand(command, false, argument); 
           break;
         case 'formatBlock':
           argument = e.target.value
-          document.getElementById("iframeTextField").contentWindow.document.execCommand(command, false, argument); 
+          document.getElementById(iframeName).contentWindow.document.execCommand(command, false, argument); 
           break;
         }
 

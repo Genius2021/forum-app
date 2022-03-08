@@ -17,6 +17,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import AccountMenu from "./AccountMenu";
 import MyModal from './MyModal';
 import { Card } from '@mui/material';
+import { signout } from '../../Redux/Users/actions/userActions';
+import { closeModal } from '../../Redux/Users/actions/generalActions';
 
 
 const Search = styled('div')(({ theme }) => ({
@@ -140,7 +142,7 @@ const toolbarStyles = styled(Toolbar)(({theme}) =>({
             </>
           )
          }
-        <MyModal  question="Are you sure you want to continue?" />
+        <MyModal  question="Are you sure you want to continue?" signOutAction modalName="navbarModal" /> 
         </Toolbar>
       </AppBar>
     </Box>

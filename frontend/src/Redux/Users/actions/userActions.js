@@ -8,7 +8,6 @@ export const signin = (email, password) => async (dispatch) => {
     dispatch({ type: USER_SIGNIN_REQUEST, payload: { email, password } });
     try {
         const { data } = await axios.post("/users/login", { email, password });
-        
         if(data.user_id){
         const { message, ...rest } = data
         dispatch({ type: USER_SIGNIN_SUCCESS, payload: rest });

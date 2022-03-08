@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { viewACommunityPost } from '../../Redux/Users/actions/communityActions';
+import { likeComment, shareComment, getPostComments, postComment, viewACommunityPost } from '../../Redux/Users/actions/communityActions';
 import { Avatar, Box, Card, CardContent, CardHeader, CircularProgress, Divider, Grid, Paper, Typography } from "@mui/material";
 import Advertisement from "../components/Advertisement";
 import Communities from "../components/LeftbarComponent";
@@ -13,18 +13,24 @@ import { Link } from 'react-router-dom';
 import TextEditor from '../components/TextEditor';
 import CardMedia from '@mui/material/CardMedia';
 import Tooltip from '@mui/material/Tooltip';
+import { v4 as uuidv4 } from "uuid";
+import MyModal from '../components/MyModal';
+import { openModal } from '../../Redux/Users/actions/generalActions';
 
 
-function SinglePost({location, match }) {
+function SinglePost({location, match, history }) {
     const community = location.pathname.split("/")[2]
     const id = match.params.id;
     const dispatch = useDispatch();
     const { loading, post, error } = useSelector(state => state.getACommunityPost);
-    const [ comments, setComments ] = useState("")
+    const { comment } = useSelector(state => state.postCommunityComment);
+    let { comments } = useSelector(state => state.getAllComments);
+    const { userInfo } = useSelector(state => state.userSignin);
+    const { seenPostsArray, postViewsCounter } = useSelector(state => state.seenPost);
+    const [actions, setActions]=([])
 
-    const { seenPostsArray, postViewsCounter } = useSelector(state => state.seenPost)
-
-
+    // console.log(comments)
+    let liked;
     
   const style = {
     position:"sticky", 
@@ -33,37 +39,18 @@ function SinglePost({location, match }) {
   }
 
   const iconStyle = {
-    color: "#777777", 
     fontSize:"1.3rem",
     cursor:"pointer", 
     marginRight:"1.3rem",
-  
   }
 
   const dotStyle = { 
-    marginRight: "0.1rem", 
-    marginLeft: "0.1rem", 
-    fontSize: "1.1rem", 
+    marginRight: "0.3rem", 
+    marginLeft: "0.3rem", 
+    fontSize: "1rem", 
     color:"#777777",
     display: 'inline-block',
     paddingTop: "0.3rem"
-  }
-
-  const textAreaStyle = {
-    color:"#666666", 
-    resize:"vertical",
-    display:"none",
-    width:"100%",
-    borderRadius: "0.5rem",
-    border: "1px solid rgba(0, 0, 0, 0.12)",
-    outline: "none",
-    borderLeft: 0,
-    borderTop: 0,
-    fontFamily: "Times New Roman, Arial, sans-serif",
-    marginBottom: 3,
-    backgroundColor:"white",
-
-
   }
 
   const iframeTextArea = {
@@ -102,9 +89,6 @@ function SinglePost({location, match }) {
           if('designMode' in editorDoc1){
           editorDoc1.designMode = "on";
         }
-  
-      
-  
       }
         loadiframe();
 
@@ -116,6 +100,7 @@ function SinglePost({location, match }) {
 
   useEffect(() => {
       dispatch(viewACommunityPost(id, community));
+      dispatch(getPostComments(id, community));      
   }, [dispatch, id, community, location]);
 
   
@@ -127,7 +112,51 @@ function SinglePost({location, match }) {
         }
        
       })                   
+
+      const addCommentHandler = (e)=>{
+        e.preventDefault();
+        let theForm = document.getElementById("theForm");
+        theForm.elements["myTextArea"].value = window.frames["iframeTextField"].document.body.innerHTML;
+        const textAreaValue = document.getElementById("myTextArea").value
+        if(!userInfo){
+          history.push("/login")
+        }else{
+          if(textAreaValue === ""){
+            alert("Boss, you left the comment box blank.")
+          }else{
+            const thisComment = {
+              comment_id: uuidv4(),
+              post_id: id,
+              community_name: community,
+              author_id: userInfo.user_id,
+              is_admin: userInfo.is_admin,
+              comment_text: textAreaValue,              
+            }
+            console.log(thisComment)
+            dispatch(postComment(thisComment))
+            // setComments([thisComment, ...comments])
+          }
+        } 
+      }
+
+      const handleDelete = ()=>{
+        dispatch(openModal("deleteCommentModal"));
+      }
       
+
+      const postDate = new Date(post.created_on).toString().split(" ");
+      const month = postDate[1];
+      const day = postDate[2];
+
+      const ActionHandler =(e)=>{
+        if(e.target.name === "like"){
+        // dispatch(likeComment({ post_id: id, likeCount: likeCount++, community, liked_by: userInfo.username}))
+      }
+        if(e.target.name === "share"){
+          // dispatch(shareComment({ post_id: id, shareCount: shareCount++, community, shared_by: userInfo.username}))
+        }
+
+      }
 
 
   return (
@@ -152,22 +181,24 @@ function SinglePost({location, match }) {
                       </div>
                     <Paper variant="outlined" sx={{width:"70%", display:"flex", justifyContent:"space-between", mx: "auto", alignItems:"center", padding:"0.3rem", borderBottom:"none"}}>
                       <Box sx={{display:"flex", alignItems:"center"}}>
+                      <Link to={`/users/${post.author}`}>
                         <Avatar sx={{width: "2.5rem", height:"2.5rem", marginRight:"0.3rem"}} ></Avatar>
+                      </Link>
                         <div style={{display:"flex", flexDirection:"column", justifyContent:"center"}}>
                           {/* <Typography sx={{justifySelf:"start", color:"#555555", fontSize:"0.85rem", lineHeight: 1,}}>Posted by</Typography> */}
-                          <Link to="/profile" style={{fontSize:"1.1rem", color:"#3b5998"}}>{post.author}</Link>
+                          <Link to={`/users/${post.author}`} style={{fontSize:"1rem", color:"#3b5998"}}>{post.author}</Link>
                         </div>
                       </Box>
-                      <span style={{fontSize:"1.1rem", color:"#555555" }}>{new Date(post.created_on).toLocaleDateString()}</span>
+                      <span style={{fontSize:"1rem", color:"#555555" }}>{`${month} ${day}`}</span>
                       <Box sx={{display:"flex", alignItems:"center", color:"#777777", marginRight:"0.5rem"}}>
                         <span  style={{marginRight:"2rem"}}><i className="fas fa-eye" style={{my: "auto", marginRight:"0.3rem", fontSize:"1rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
-                        <span><i className="fas fa-thumbs-up" style={{my: "auto", marginRight:"0.3rem", fontSize:"1rem"}}></i><span style={{fontSize:"1.1rem"}}>8</span></span>
+                        <span><i className="fas fa-thumbs-up" style={{my: "auto", marginRight:"0.3rem", fontSize:"1rem", cursor:"pointer" }}></i><span style={{fontSize:"1.1rem"}}>8</span></span>
                       </Box>
                     </Paper>
                     <Card variant="outlined" sx={{mb:3}}>
-                      <Paper sx={{padding:"none"}} >
-                        <CardContent sx={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:0, inset: {bottom: 4} }}>
-                          <Typography sx={{color:"#555555", fontFamily:"Roboto", width:"100%", textAlign:"center", padding:"0.3rem", fontSize:"1.5rem" }}>{post.description}</Typography>
+                      <Paper sx={{padding:"0.3rem"}} >
+                        <CardContent sx={{display:"flex", justifyContent:"space-between", alignItems:"center", inset: {bottom: 4} }}>
+                          <Typography sx={{color:"#555555", fontFamily:"Roboto", width:"100%", textAlign:"center", fontSize:"1.5rem" }} dangerouslySetInnerHTML={{__html: post?.description }} />
                         </CardContent>
                       </Paper>
                     </Card>
@@ -187,30 +218,180 @@ function SinglePost({location, match }) {
                     </div>
                     <Card variant="outlined" sx={{mb:3, padding: 0}}>
                       <CardContent sx={{padding: 0, paddingBottom: "0 !important"}}>
-                        <form style={{ display:"flex", flexDirection:"column", width: "100%",}}>
-                          <textarea placeholder="Join the conversation." value={comments} rows="5" style={textAreaStyle} onChange={e => setComments(e.target.value)} />
+                        <form id="theForm" style={{ display:"flex", flexDirection:"column", width: "100%",}}>
+                          <textarea id="myTextArea" style={{display:"none"}} />
                           <iframe name="iframeTextField" id="iframeTextField" title="iframeTextField" style={iframeTextArea}></iframe>
-                            <Button smallContainedButton type="submit" border="none" justifySelf="end">Add comment</Button>
+                            <Button smallContainedButton type="submit" border="none" justifySelf="end" onClick={addCommentHandler}>Add comment</Button>
                         </form>
                       </CardContent>
                     </Card>
                     <Card sx={{paddingBottom:0}}>
                       <CardContent sx={{paddingBottom:0}}>
-                          <TextEditor flexWrap="wrap" width="100%" border="none" TextSelectionActions={TextSelectionActions} />
+                          <TextEditor flexWrap="wrap" width="100%" border="none" TextSelectionActions={TextSelectionActions} iframeName="iframeTextField" />
                       </CardContent>
                     </Card>
                       <Divider variant="middle" sx={{my:"2rem"}}> <Typography sx={{fontSize:"1rem", margin:"0.2rem", color:"#666666"}}>Comments below</Typography></Divider>
+                      {
+                        comments.map((comment, index)=>{
+                          const commentDate = new Date(comment?.created_on).toString().split(" ");
+                          const commentMonth = commentDate[1];
+                          const commentDay = commentDate[2];
+                          const time = commentDate[4];
+                          const furtherBreaking = time.split(":")
+                          const hours = furtherBreaking[0];
+                          const minutes = furtherBreaking[1];
+
+                          const AmOrPm = (time)=>{
+                              const number = parseInt(time.split(":")[0])
+                              if(number === 12){
+                                return "pm";
+                              }else if(number > 12){
+                                return "pm"
+                              }else{
+                                return "am";
+                              }
+                          }
+
+                          const htmlDecode = (input)=>{
+                            let parsed_doc = new DOMParser().parseFromString(input, "text/html");
+                            // let resulting_nodes = [...parsed_doc.body.childNodes]
+                            // console.log([parsed_doc.body.childNodes])
+
+                            // return doc.body;
+                            // return document.getElementById("commentText").body.append([...parsed_doc.body.childNodes])
+                            
+                          }
+                          
+                          // htmlDecode(comment?.comment_text)
+
+
+                          return <Card key={index} sx={{mb:3}}>
+                          <CardContent sx={{padding: 0 }}>
+                            <Box sx={{width:{md: "90%"}, mx:"auto"}}>
+                            <CardMedia
+                                component="img"
+                                // height="300"
+                                image="/assets/images/img6.jpg"
+                                alt="passport"
+                                sx={{borderRadius:'0.5rem', maxHeight:"400px"}}
+                              />
+                              <div id="actions" style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+                                <Typography sx={{fontSize:"1.5rem", margin:"0.2rem", marginLeft:"0.5rem"}}>
+                                  <span style={{color:"#ffd700", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
+                                  <span style={{color:"#c0c0c0", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
+                                  <span style={{color:"#cd7f32"}}><i className="fas fa-medal"></i></span>
+                                </Typography>
+                                <Typography component="span" sx={{ color: "#777777", display:"flex", alignItems:"center", letterSpacing:0, }}><Link to={`/users/${comment?.username}`} style={{color:"#3b5998"}}>@{comment?.username}</Link><span style={dotStyle}>•</span><span>{`${commentMonth} ${commentDay}`}</span><span style={dotStyle}>•</span><span>{`${hours}:${minutes}  ${AmOrPm(time)}`}</span></Typography >
+                                <Typography style={{ color: "#777777", marginRight:"0.5rem"}}>
+                                  <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Share</Typography>}>
+                                    <span style={iconStyle}><i className="fas fa-share" name="share" onClick={ActionHandler} style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>{comment?.shares}</span></span>
+                                  </Tooltip>
+                                  <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer" }}>Comment</Typography>}>
+                                    <span style={iconStyle}><i className="far fa-comment" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                                  </Tooltip>
+                                  <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer"}}>Reply this</Typography>}>
+                                    <span style={iconStyle}><i className="fas fa-reply" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                                  </Tooltip>
+                                  <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer", }}>I Like this</Typography>}>
+                                    <span style={{color: "#777777", fontSize:"1.5rem", cursor:"pointer", }}><i className="fas fa-thumbs-up" name="like" onClick={ActionHandler} style={{ marginRight:"0.2rem", color: `${liked && "green"}` }}></i><span style={{fontSize:"1.1rem"}}>{comment?.likes}</span></span>
+                                  </Tooltip>
+                                </Typography>
+                              </div>
+                              {/* <Card variant="outlined" sx={{mb:3, border:"none", }}> */}
+                                {/* <Paper > */}
+                                  <CardContent sx={{ padding:0, px:"0.5rem", paddingBottom: "0 !important" }}>
+                                    <div dangerouslySetInnerHTML={{__html: comment?.comment_text }} sx={{color:"#555555", fontFamily:"Arial, Sans-serif", width:"100%", textAlign:"center", padding:"0.2rem", fontSize:"1rem", }} />
+                                    <span style={{display:"flex", justifyContent:"space-between"}}>
+                                    <Button smallContainedButton>Next post</Button>
+                                    <Typography style={{ color: "#777777", }}>
+                                      <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Delete comment</Typography>}>
+                                        <span onClick={handleDelete} style={iconStyle}>
+                                          <i className="far fa-trash-alt" style={{marginRight:"0.2rem"}}></i>
+                                        </span>
+                                      </Tooltip>
+                                      <MyModal  question="Are you sure you want to delete this comment?" modalName="deleteCommentModal" />
+                                      <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Edit comment</Typography>}>
+                                        <span style={{fontSize:"1.3rem", cursor:"pointer",}}><i className="far fa-edit" style={{marginRight:"0.2rem"}}></i></span>
+                                      </Tooltip>
+                                    </Typography>
+                                  </span>
+                                  </CardContent>                      
+                            </Box>
+                            
+                          </CardContent>
+                        </Card>
+                        })
+
+                      }
+                    
                     <Card sx={{mb:3}}>
                       <CardContent sx={{padding: 0 }}>
                         <Box sx={{width:{md: "90%"}, mx:"auto"}}>
                         <CardMedia
                             component="img"
-                            height="300"
+                            // height="300"
                             image="/assets/images/img6.jpg"
                             alt="passport"
-                            sx={{borderRadius:'0.5rem'}}
+                            sx={{borderRadius:'0.5rem', maxHeight:"400px"}}
                           />
-                          <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+                          <div id="actions" style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+                            <Typography sx={{fontSize:"1.5rem", margin:"0.2rem", marginLeft:"0.5rem"}}>
+                              <span style={{color:"#ffd700", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
+                              <span style={{color:"#c0c0c0", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
+                              <span style={{color:"#cd7f32"}}><i className="fas fa-medal"></i></span>
+                            </Typography>
+                            <Typography component="span" sx={{ color: "#777777", display:"flex", alignItems:"center", letterSpacing:0, }}><Link to="/communities/politics/posts/nikki" style={{color:"#3b5998"}}>@Nikki</Link><span style={dotStyle}>•</span><span>Feb 25</span><span style={dotStyle}>•</span><span>11:24 am</span></Typography >
+                            <Typography style={{ color: "#777777", marginRight:"0.5rem"}}>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Share</Typography>}>
+                                <span style={iconStyle}><i className="fas fa-share" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                              </Tooltip>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer" }}>Comment</Typography>}>
+                                <span style={iconStyle}><i className="far fa-comment" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                              </Tooltip>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer"}}>Reply this</Typography>}>
+                                <span style={iconStyle}><i className="fas fa-reply" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                              </Tooltip>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer", }}>I Like this</Typography>}>
+                                <span style={{color: "#777777", fontSize:"1.5rem", cursor:"pointer", }}><i className="fas fa-thumbs-up" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>8</span></span>
+                              </Tooltip>
+                            </Typography>
+                          </div>
+                          {/* <Card variant="outlined" sx={{mb:3, border:"none", }}> */}
+                            {/* <Paper > */}
+                              <CardContent sx={{ padding:0, px:"0.5rem", paddingBottom: "0 !important" }}>
+                                <Typography sx={{color:"#555555", fontFamily:"Arial, Sans-serif", width:"100%", textAlign:"center", padding:"0.2rem", fontSize:"1.3rem", }}>
+                                ccruing to ce the 15s, but also the leap intoed in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.ia from the Crude oil value chain have been suboptimal despite being the largest Crude oil producer in Africa and sixth-largest in the world. The “black gold” was discovered in commercial quantity at Oloibiri in 1956. At discovery, the lack of indigenous expertise, technology, and capital made foreign participation in the Oil and gas industry inevitable. Following the find, Oil became the largest contributor to revenue. For instance, from 2016 to 2017, it accounted for over 50 percent of revenue but the value addition to Gross Domestic Product (GDP) was less than 10 percent (Directorate of Planning, Research and Statistics, 2019). The implication is that services around the Oil and gas industry are not harnessed (Kingsley, 2020). In addit
+                                </Typography>
+                                <span style={{display:"flex", justifyContent:"space-between"}}>
+                                  <Button smallContainedButton>Next post</Button>
+                                  <Typography style={{ color: "#777777", }}>
+                                    <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Delete comment</Typography>}>
+                                      <span onClick={handleDelete} style={iconStyle}>
+                                        <i className="far fa-trash-alt" style={{marginRight:"0.2rem"}}></i>
+                                      </span>
+                                    </Tooltip>
+                                    <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Edit comment</Typography>}>
+                                      <span style={{fontSize:"1.3rem", cursor:"pointer",}}><i className="far fa-edit" style={{marginRight:"0.2rem"}}></i></span>
+                                    </Tooltip>
+                                  </Typography>
+                                </span>
+                                
+                              </CardContent>                      
+                        </Box>
+                        
+                      </CardContent>
+                    </Card>
+                    <Card sx={{mb:3}}>
+                      <CardContent sx={{padding: 0 }}>
+                        <Box sx={{width:{md: "90%"}, mx:"auto"}}>
+                        <CardMedia
+                            component="img"
+                            // height="300"
+                            image="/assets/images/img5.jpg"
+                            alt="passport"
+                            sx={{borderRadius:'0.5rem', maxHeight:"400px"}}
+                          />
+                          <div id="actions" style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
                             <Typography sx={{fontSize:"1.5rem", margin:"0.2rem", marginLeft:"0.5rem"}}>
                               <span style={{color:"#ffd700", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
                               <span style={{color:"#c0c0c0", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
@@ -227,16 +408,22 @@ function SinglePost({location, match }) {
                               <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer"}}>Reply this</Typography>}>
                                 <span style={iconStyle}><i className="fas fa-reply" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
                               </Tooltip>
-                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer", }}>Like this</Typography>}>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer", }}>I Like this</Typography>}>
                                 <span style={{color: "#777777", fontSize:"1.5rem", cursor:"pointer", }}><i className="fas fa-thumbs-up" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>8</span></span>
                               </Tooltip>
                             </Typography>
                           </div>
                           {/* <Card variant="outlined" sx={{mb:3, border:"none", }}> */}
                             {/* <Paper > */}
-                              <CardContent sx={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:0, px:"0.5rem" }}>
+                              <CardContent sx={{ padding:0, px:"0.5rem", paddingBottom: "0 !important" }}>
                                 <Typography sx={{color:"#555555", fontFamily:"Arial, Sans-serif", width:"100%", textAlign:"center", padding:"0.2rem", fontSize:"1.3rem", }}>
                                 ccruing to ce the 15s, but also the leap intoed in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.ia from the Crude oil value chain have been suboptimal despite being the largest Crude oil producer in Africa and sixth-largest in the world. The “black gold” was discovered in commercial quantity at Oloibiri in 1956. At discovery, the lack of indigenous expertise, technology, and capital made foreign participation in the Oil and gas industry inevitable. Following the find, Oil became the largest contributor to revenue. For instance, from 2016 to 2017, it accounted for over 50 percent of revenue but the value addition to Gross Domestic Product (GDP) was less than 10 percent (Directorate of Planning, Research and Statistics, 2019). The implication is that services around the Oil and gas industry are not harnessed (Kingsley, 2020). In addit
+                                </Typography>
+                                <Button smallContainedButton>Next post</Button>
+                                <Typography style={{ color: "#777777", marginRight:"0.5rem"}}>
+                                  <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Edit comment</Typography>}>
+                                    <span style={iconStyle}><i className="far fa-edit" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                                  </Tooltip>
                                 </Typography>
                               </CardContent>                      
                         </Box>
@@ -248,18 +435,18 @@ function SinglePost({location, match }) {
                         <Box sx={{width:{md: "90%"}, mx:"auto"}}>
                         <CardMedia
                             component="img"
-                            height="300"
-                            image="/assets/images/img5.jpg"
+                            // height="300"
+                            image="/assets/images/GCFR2.jpg"
                             alt="passport"
-                            sx={{borderRadius:'0.5rem'}}
+                            sx={{borderRadius:'0.5rem', maxHeight:"400px"}}
                           />
-                          <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
-                            <Typography sx={{fontSize:"2rem", margin:"0.2rem", marginLeft:"0.5rem"}}>
-                                <span style={{color:"#ffd700", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
-                                <span style={{color:"#c0c0c0", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
-                                <span style={{color:"#cd7f32"}}><i className="fas fa-medal"></i></span>
+                          <div id="actions" style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+                            <Typography sx={{fontSize:"1.5rem", margin:"0.2rem", marginLeft:"0.5rem"}}>
+                              <span style={{color:"#ffd700", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
+                              <span style={{color:"#c0c0c0", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
+                              <span style={{color:"#cd7f32"}}><i className="fas fa-medal"></i></span>
                             </Typography>
-                            
+                            <Typography component="span" sx={{ color: "#777777", display:"flex", alignItems:"center", letterSpacing:0, }}><Link to="/communities/politics/posts/nikki" style={{color:"#3b5998"}}>@Nikki</Link><span style={dotStyle}>•</span><span>Feb 25</span><span style={dotStyle}>•</span><span>11:24 am</span></Typography >
                             <Typography style={{ color: "#777777", marginRight:"0.5rem"}}>
                               <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Share</Typography>}>
                                 <span style={iconStyle}><i className="fas fa-share" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
@@ -270,59 +457,22 @@ function SinglePost({location, match }) {
                               <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer"}}>Reply this</Typography>}>
                                 <span style={iconStyle}><i className="fas fa-reply" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
                               </Tooltip>
-                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer", }}>Like this</Typography>}>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer", }}>I Like this</Typography>}>
                                 <span style={{color: "#777777", fontSize:"1.5rem", cursor:"pointer", }}><i className="fas fa-thumbs-up" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>8</span></span>
                               </Tooltip>
-                            </Typography> 
-                          </div>
-                          {/* <Card variant="outlined" sx={{mb:3, border:"none", }}> */}
-                            {/* <Paper > */}
-                              <CardContent sx={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:0, px:"0.5rem" }}>
-                                <Typography sx={{color:"#555555", fontFamily:"Arial, Sans-serif", width:"100%", textAlign:"center", padding:"0.2rem", fontSize:"1.3rem", }}>
-                                ccruing to ce the 15s, but also the leap intoed in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.ia from the Crude oil value chain have been suboptimal despite being the largest Crude oil producer in Africa and sixth-largest in the world. The “black gold” was discovered in commercial quantity at Oloibiri in 1956. At discovery, the lack of indigenous expertise, technology, and capital made foreign participation in the Oil and gas industry inevitable. Following the find, Oil became the largest contributor to revenue. For instance, from 2016 to 2017, it accounted for over 50 percent of revenue but the value addition to Gross Domestic Product (GDP) was less than 10 percent (Directorate of Planning, Research and Statistics, 2019). The implication is that services around the Oil and gas industry are not harnessed (Kingsley, 2020). In addit
-                                </Typography>
-                              </CardContent>                      
-                        </Box>
-                        
-                      </CardContent>
-                    </Card>
-                    <Card sx={{mb:3}}>
-                      <CardContent sx={{padding: 0 }}>
-                        <Box sx={{width:{md: "90%"}, mx:"auto"}}>
-                        <CardMedia
-                            component="img"
-                            height="300"
-                            image="/assets/images/love2.jpg"
-                            alt="passport"
-                            sx={{borderRadius:'0.5rem'}}
-                          />
-                          <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
-                            <Typography sx={{fontSize:"2rem", margin:"0.2rem", marginLeft:"0.5rem"}}>
-                                <span style={{color:"#ffd700", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
-                                <span style={{color:"#c0c0c0", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
-                                <span style={{color:"#cd7f32"}}><i className="fas fa-medal"></i></span>
                             </Typography>
-                            
-                            <Typography style={{ color: "#777777", marginRight:"0.5rem"}}>
-                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Share</Typography>}>
-                                <span style={iconStyle}><i className="fas fa-share" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
-                              </Tooltip>
-                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer" }}>Comment</Typography>}>
-                                <span style={iconStyle}><i className="fas fa-comment" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
-                              </Tooltip>
-                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer"}}>Reply this</Typography>}>
-                                <span style={iconStyle}><i className="fas fa-reply" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
-                              </Tooltip>
-                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer", }}>Like this</Typography>}>
-                                <span style={{color: "#777777", fontSize:"1.5rem", cursor:"pointer", }}><i className="fas fa-thumbs-up" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>8</span></span>
-                              </Tooltip>
-                            </Typography> 
                           </div>
                           {/* <Card variant="outlined" sx={{mb:3, border:"none", }}> */}
                             {/* <Paper > */}
-                              <CardContent sx={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:0, px:"0.5rem" }}>
+                              <CardContent sx={{ padding:0, px:"0.5rem", paddingBottom: "0 !important" }}>
                                 <Typography sx={{color:"#555555", fontFamily:"Arial, Sans-serif", width:"100%", textAlign:"center", padding:"0.2rem", fontSize:"1.3rem", }}>
                                 ccruing to ce the 15s, but also the leap intoed in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.ia from the Crude oil value chain have been suboptimal despite being the largest Crude oil producer in Africa and sixth-largest in the world. The “black gold” was discovered in commercial quantity at Oloibiri in 1956. At discovery, the lack of indigenous expertise, technology, and capital made foreign participation in the Oil and gas industry inevitable. Following the find, Oil became the largest contributor to revenue. For instance, from 2016 to 2017, it accounted for over 50 percent of revenue but the value addition to Gross Domestic Product (GDP) was less than 10 percent (Directorate of Planning, Research and Statistics, 2019). The implication is that services around the Oil and gas industry are not harnessed (Kingsley, 2020). In addit
+                                </Typography>
+                                <Button smallContainedButton>Next post</Button>
+                                <Typography style={{ color: "#777777", marginRight:"0.5rem"}}>
+                                  <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Edit comment</Typography>}>
+                                    <span style={iconStyle}><i className="far fa-edit" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                                  </Tooltip>
                                 </Typography>
                               </CardContent>                      
                         </Box>
@@ -334,18 +484,18 @@ function SinglePost({location, match }) {
                         <Box sx={{width:{md: "90%"}, mx:"auto"}}>
                         <CardMedia
                             component="img"
-                            height="300"
+                            // height="300"
                             image="/assets/images/Atiku.jpg"
                             alt="passport"
-                            sx={{borderRadius:'0.5rem'}}
+                            sx={{borderRadius:'0.5rem', maxHeight:"400px"}}
                           />
-                          <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
-                            <Typography sx={{fontSize:"2rem", margin:"0.2rem", marginLeft:"0.5rem"}}>
-                                <span style={{color:"#ffd700", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
-                                <span style={{color:"#c0c0c0", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
-                                <span style={{color:"#cd7f32"}}><i className="fas fa-medal"></i></span>
+                          <div id="actions" style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+                            <Typography sx={{fontSize:"1.5rem", margin:"0.2rem", marginLeft:"0.5rem"}}>
+                              <span style={{color:"#ffd700", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
+                              <span style={{color:"#c0c0c0", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
+                              <span style={{color:"#cd7f32"}}><i className="fas fa-medal"></i></span>
                             </Typography>
-                            
+                            <Typography component="span" sx={{ color: "#777777", display:"flex", alignItems:"center", letterSpacing:0, }}><Link to="/communities/politics/posts/nikki" style={{color:"#3b5998"}}>@Nikki</Link><span style={dotStyle}>•</span><span>Feb 25</span><span style={dotStyle}>•</span><span>11:24 am</span></Typography >
                             <Typography style={{ color: "#777777", marginRight:"0.5rem"}}>
                               <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Share</Typography>}>
                                 <span style={iconStyle}><i className="fas fa-share" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
@@ -356,16 +506,22 @@ function SinglePost({location, match }) {
                               <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer"}}>Reply this</Typography>}>
                                 <span style={iconStyle}><i className="fas fa-reply" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
                               </Tooltip>
-                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer", }}>Like this</Typography>}>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer", }}>I Like this</Typography>}>
                                 <span style={{color: "#777777", fontSize:"1.5rem", cursor:"pointer", }}><i className="fas fa-thumbs-up" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>8</span></span>
                               </Tooltip>
-                            </Typography> 
+                            </Typography>
                           </div>
                           {/* <Card variant="outlined" sx={{mb:3, border:"none", }}> */}
                             {/* <Paper > */}
-                              <CardContent sx={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:0, px:"0.5rem" }}>
+                              <CardContent sx={{ padding:0, px:"0.5rem", paddingBottom: "0 !important" }}>
                                 <Typography sx={{color:"#555555", fontFamily:"Arial, Sans-serif", width:"100%", textAlign:"center", padding:"0.2rem", fontSize:"1.3rem", }}>
                                 ccruing to ce the 15s, but also the leap intoed in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.ia from the Crude oil value chain have been suboptimal despite being the largest Crude oil producer in Africa and sixth-largest in the world. The “black gold” was discovered in commercial quantity at Oloibiri in 1956. At discovery, the lack of indigenous expertise, technology, and capital made foreign participation in the Oil and gas industry inevitable. Following the find, Oil became the largest contributor to revenue. For instance, from 2016 to 2017, it accounted for over 50 percent of revenue but the value addition to Gross Domestic Product (GDP) was less than 10 percent (Directorate of Planning, Research and Statistics, 2019). The implication is that services around the Oil and gas industry are not harnessed (Kingsley, 2020). In addit
+                                </Typography>
+                                <Button smallContainedButton>Next post</Button>
+                                <Typography style={{ color: "#777777", marginRight:"0.5rem"}}>
+                                  <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Edit comment</Typography>}>
+                                    <span style={iconStyle}><i className="far fa-edit" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                                  </Tooltip>
                                 </Typography>
                               </CardContent>                      
                         </Box>
@@ -377,18 +533,18 @@ function SinglePost({location, match }) {
                         <Box sx={{width:{md: "90%"}, mx:"auto"}}>
                         <CardMedia
                             component="img"
-                            height="300"
+                            // height="300"
                             image="/assets/images/chess.jpg"
                             alt="passport"
-                            sx={{borderRadius:'0.5rem'}}
+                            sx={{borderRadius:'0.5rem', maxHeight:"400px"}}
                           />
-                          <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
-                            <Typography sx={{fontSize:"2rem", margin:"0.2rem", marginLeft:"0.5rem"}}>
-                                <span style={{color:"#ffd700", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
-                                <span style={{color:"#c0c0c0", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
-                                <span style={{color:"#cd7f32"}}><i className="fas fa-medal"></i></span>
+                          <div id="actions" style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+                            <Typography sx={{fontSize:"1.5rem", margin:"0.2rem", marginLeft:"0.5rem"}}>
+                              <span style={{color:"#ffd700", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
+                              <span style={{color:"#c0c0c0", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
+                              <span style={{color:"#cd7f32"}}><i className="fas fa-medal"></i></span>
                             </Typography>
-                            
+                            <Typography component="span" sx={{ color: "#777777", display:"flex", alignItems:"center", letterSpacing:0, }}><Link to="/communities/politics/posts/nikki" style={{color:"#3b5998"}}>@Nikki</Link><span style={dotStyle}>•</span><span>Feb 25</span><span style={dotStyle}>•</span><span>11:24 am</span></Typography >
                             <Typography style={{ color: "#777777", marginRight:"0.5rem"}}>
                               <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Share</Typography>}>
                                 <span style={iconStyle}><i className="fas fa-share" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
@@ -399,16 +555,22 @@ function SinglePost({location, match }) {
                               <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer"}}>Reply this</Typography>}>
                                 <span style={iconStyle}><i className="fas fa-reply" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
                               </Tooltip>
-                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer", }}>Like this</Typography>}>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer", }}>I Like this</Typography>}>
                                 <span style={{color: "#777777", fontSize:"1.5rem", cursor:"pointer", }}><i className="fas fa-thumbs-up" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>8</span></span>
                               </Tooltip>
-                            </Typography> 
+                            </Typography>
                           </div>
                           {/* <Card variant="outlined" sx={{mb:3, border:"none", }}> */}
                             {/* <Paper > */}
-                              <CardContent sx={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:0, px:"0.5rem" }}>
+                              <CardContent sx={{ padding:0, px:"0.5rem", paddingBottom: "0 !important" }}>
                                 <Typography sx={{color:"#555555", fontFamily:"Arial, Sans-serif", width:"100%", textAlign:"center", padding:"0.2rem", fontSize:"1.3rem", }}>
                                 ccruing to ce the 15s, but also the leap intoed in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.ia from the Crude oil value chain have been suboptimal despite being the largest Crude oil producer in Africa and sixth-largest in the world. The “black gold” was discovered in commercial quantity at Oloibiri in 1956. At discovery, the lack of indigenous expertise, technology, and capital made foreign participation in the Oil and gas industry inevitable. Following the find, Oil became the largest contributor to revenue. For instance, from 2016 to 2017, it accounted for over 50 percent of revenue but the value addition to Gross Domestic Product (GDP) was less than 10 percent (Directorate of Planning, Research and Statistics, 2019). The implication is that services around the Oil and gas industry are not harnessed (Kingsley, 2020). In addit
+                                </Typography>
+                                <Button smallContainedButton>Next post</Button>
+                                <Typography style={{ color: "#777777", marginRight:"0.5rem"}}>
+                                  <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Edit comment</Typography>}>
+                                    <span style={iconStyle}><i className="far fa-edit" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                                  </Tooltip>
                                 </Typography>
                               </CardContent>                      
                         </Box>
@@ -420,18 +582,18 @@ function SinglePost({location, match }) {
                         <Box sx={{width:{md: "90%"}, mx:"auto"}}>
                         <CardMedia
                             component="img"
-                            height="300"
+                            // height="300"
                             image="/assets/images/business3.jpg"
                             alt="passport"
-                            sx={{borderRadius:'0.5rem'}}
+                            sx={{borderRadius:'0.5rem', maxHeight:"400px"}}
                           />
-                          <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
-                            <Typography sx={{fontSize:"2rem", margin:"0.2rem", marginLeft:"0.5rem"}}>
-                                <span style={{color:"#ffd700", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
-                                <span style={{color:"#c0c0c0", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
-                                <span style={{color:"#cd7f32"}}><i className="fas fa-medal"></i></span>
+                          <div id="actions" style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+                            <Typography sx={{fontSize:"1.5rem", margin:"0.2rem", marginLeft:"0.5rem"}}>
+                              <span style={{color:"#ffd700", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
+                              <span style={{color:"#c0c0c0", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
+                              <span style={{color:"#cd7f32"}}><i className="fas fa-medal"></i></span>
                             </Typography>
-                            
+                            <Typography component="span" sx={{ color: "#777777", display:"flex", alignItems:"center", letterSpacing:0, }}><Link to="/communities/politics/posts/nikki" style={{color:"#3b5998"}}>@Nikki</Link><span style={dotStyle}>•</span><span>Feb 25</span><span style={dotStyle}>•</span><span>11:24 am</span></Typography >
                             <Typography style={{ color: "#777777", marginRight:"0.5rem"}}>
                               <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Share</Typography>}>
                                 <span style={iconStyle}><i className="fas fa-share" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
@@ -442,22 +604,162 @@ function SinglePost({location, match }) {
                               <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer"}}>Reply this</Typography>}>
                                 <span style={iconStyle}><i className="fas fa-reply" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
                               </Tooltip>
-                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer", }}>Like this</Typography>}>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer", }}>I Like this</Typography>}>
                                 <span style={{color: "#777777", fontSize:"1.5rem", cursor:"pointer", }}><i className="fas fa-thumbs-up" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>8</span></span>
                               </Tooltip>
-                            </Typography> 
+                            </Typography>
                           </div>
                           {/* <Card variant="outlined" sx={{mb:3, border:"none", }}> */}
                             {/* <Paper > */}
-                              <CardContent sx={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:0, px:"0.5rem" }}>
+                              <CardContent sx={{ padding:0, px:"0.5rem", paddingBottom: "0 !important" }}>
                                 <Typography sx={{color:"#555555", fontFamily:"Arial, Sans-serif", width:"100%", textAlign:"center", padding:"0.2rem", fontSize:"1.3rem", }}>
                                 ccruing to ce the 15s, but also the leap intoed in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.ia from the Crude oil value chain have been suboptimal despite being the largest Crude oil producer in Africa and sixth-largest in the world. The “black gold” was discovered in commercial quantity at Oloibiri in 1956. At discovery, the lack of indigenous expertise, technology, and capital made foreign participation in the Oil and gas industry inevitable. Following the find, Oil became the largest contributor to revenue. For instance, from 2016 to 2017, it accounted for over 50 percent of revenue but the value addition to Gross Domestic Product (GDP) was less than 10 percent (Directorate of Planning, Research and Statistics, 2019). The implication is that services around the Oil and gas industry are not harnessed (Kingsley, 2020). In addit
+                                </Typography>
+                                <Button smallContainedButton>Next post</Button>
+                                <Typography style={{ color: "#777777", marginRight:"0.5rem"}}>
+                                  <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Edit comment</Typography>}>
+                                    <span style={iconStyle}><i className="far fa-edit" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                                  </Tooltip>
                                 </Typography>
                               </CardContent>                      
                         </Box>
                         
                       </CardContent>
                     </Card>
+                    <Card sx={{mb:3}}>
+                      <CardContent sx={{padding: 0 }}>
+                        <Box sx={{width:{md: "90%"}, mx:"auto"}}>
+                        <CardMedia
+                            component="img"
+                            // height="300"
+                            image="/assets/images/img4.jpg"
+                            alt="passport"
+                            sx={{borderRadius:'0.5rem', maxHeight:"400px"}}
+                          />
+                          <div id="actions" style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+                            <Typography sx={{fontSize:"1.5rem", margin:"0.2rem", marginLeft:"0.5rem"}}>
+                              <span style={{color:"#ffd700", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
+                              <span style={{color:"#c0c0c0", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
+                              <span style={{color:"#cd7f32"}}><i className="fas fa-medal"></i></span>
+                            </Typography>
+                            <Typography component="span" sx={{ color: "#777777", display:"flex", alignItems:"center", letterSpacing:0, }}><Link to="/communities/politics/posts/nikki" style={{color:"#3b5998"}}>@Nikki</Link><span style={dotStyle}>•</span><span>Feb 25</span><span style={dotStyle}>•</span><span>11:24 am</span></Typography >
+                            <Typography style={{ color: "#777777", marginRight:"0.5rem"}}>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Share</Typography>}>
+                                <span style={iconStyle}><i className="fas fa-share" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                              </Tooltip>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer" }}>Comment</Typography>}>
+                                <span style={iconStyle}><i className="fas fa-comment" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                              </Tooltip>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer"}}>Reply this</Typography>}>
+                                <span style={iconStyle}><i className="fas fa-reply" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                              </Tooltip>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer", }}>I Like this</Typography>}>
+                                <span style={{color: "#777777", fontSize:"1.5rem", cursor:"pointer", }}><i className="fas fa-thumbs-up" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>8</span></span>
+                              </Tooltip>
+                            </Typography>
+                          </div>
+                          {/* <Card variant="outlined" sx={{mb:3, border:"none", }}> */}
+                            {/* <Paper > */}
+                              <CardContent sx={{ padding:0, px:"0.5rem", paddingBottom: "0 !important" }}>
+                                <Typography sx={{color:"#555555", fontFamily:"Arial, Sans-serif", width:"100%", textAlign:"center", padding:"0.2rem", fontSize:"1.3rem", }}>
+                                ccruing to ce the 15s, but also the leap intoed in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.ia from the Crude oil value chain have been suboptimal despite being the largest Crude oil producer in Africa and sixth-largest in the world. The “black gold” was discovered in commercial quantity at Oloibiri in 1956. At discovery, the lack of indigenous expertise, technology, and capital made foreign participation in the Oil and gas industry inevitable. Following the find, Oil became the largest contributor to revenue. For instance, from 2016 to 2017, it accounted for over 50 percent of revenue but the value addition to Gross Domestic Product (GDP) was less than 10 percent (Directorate of Planning, Research and Statistics, 2019). The implication is that services around the Oil and gas industry are not harnessed (Kingsley, 2020). In addit
+                                </Typography>
+                                <Button smallContainedButton>Next post</Button>
+                              </CardContent>                      
+                        </Box>
+                        
+                      </CardContent>
+                    </Card>
+                    <Card sx={{mb:3}}>
+                      <CardContent sx={{padding: 0 }}>
+                        <Box sx={{width:{md: "90%"}, mx:"auto"}}>
+                        <CardMedia
+                            component="img"
+                            // height="300"
+                            image="/assets/images/img3.jpg"
+                            alt="passport"
+                            sx={{borderRadius:'0.5rem', maxHeight:"400px"}}
+                          />
+                          <div id="actions" style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+                            <Typography sx={{fontSize:"1.5rem", margin:"0.2rem", marginLeft:"0.5rem"}}>
+                              <span style={{color:"#ffd700", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
+                              <span style={{color:"#c0c0c0", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
+                              <span style={{color:"#cd7f32"}}><i className="fas fa-medal"></i></span>
+                            </Typography>
+                            <Typography component="span" sx={{ color: "#777777", display:"flex", alignItems:"center", letterSpacing:0, }}><Link to="/communities/politics/posts/nikki" style={{color:"#3b5998"}}>@Nikki</Link><span style={dotStyle}>•</span><span>Feb 25</span><span style={dotStyle}>•</span><span>11:24 am</span></Typography >
+                            <Typography style={{ color: "#777777", marginRight:"0.5rem"}}>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Share</Typography>}>
+                                <span style={iconStyle}><i className="fas fa-share" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                              </Tooltip>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer" }}>Comment</Typography>}>
+                                <span style={iconStyle}><i className="fas fa-comment" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                              </Tooltip>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer"}}>Reply this</Typography>}>
+                                <span style={iconStyle}><i className="fas fa-reply" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                              </Tooltip>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer", }}>I Like this</Typography>}>
+                                <span style={{color: "#777777", fontSize:"1.5rem", cursor:"pointer", }}><i className="fas fa-thumbs-up" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>8</span></span>
+                              </Tooltip>
+                            </Typography>
+                          </div>
+                          {/* <Card variant="outlined" sx={{mb:3, border:"none", }}> */}
+                            {/* <Paper > */}
+                              <CardContent sx={{ padding:0, px:"0.5rem", paddingBottom: "0 !important" }}>
+                                <Typography sx={{color:"#555555", fontFamily:"Arial, Sans-serif", width:"100%", textAlign:"center", padding:"0.2rem", fontSize:"1.3rem", }}>
+                                ccruing to ce the 15s, but also the leap intoed in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.ia from the Crude oil value chain have been suboptimal despite being the largest Crude oil producer in Africa and sixth-largest in the world. The “black gold” was discovered in commercial quantity at Oloibiri in 1956. At discovery, the lack of indigenous expertise, technology, and capital made foreign participation in the Oil and gas industry inevitable. Following the find, Oil became the largest contributor to revenue. For instance, from 2016 to 2017, it accounted for over 50 percent of revenue but the value addition to Gross Domestic Product (GDP) was less than 10 percent (Directorate of Planning, Research and Statistics, 2019). The implication is that services around the Oil and gas industry are not harnessed (Kingsley, 2020). In addit
+                                </Typography>
+                                <Button smallContainedButton>Next post</Button>
+                              </CardContent>                      
+                        </Box>
+                        
+                      </CardContent>
+                    </Card>
+                    <Card sx={{mb:3}}>
+                      <CardContent sx={{padding: 0 }}>
+                        <Box sx={{width:{md: "90%"}, mx:"auto"}}>
+                        <CardMedia
+                            component="img"
+                            // height="300"
+                            image="/assets/images/gaming2.jpg"
+                            alt="passport"
+                            sx={{borderRadius:'0.5rem', maxHeight:"400px"}}
+                          />
+                          <div id="actions" style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+                            <Typography sx={{fontSize:"1.5rem", margin:"0.2rem", marginLeft:"0.5rem"}}>
+                              <span style={{color:"#ffd700", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
+                              <span style={{color:"#c0c0c0", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
+                              <span style={{color:"#cd7f32"}}><i className="fas fa-medal"></i></span>
+                            </Typography>
+                            <Typography component="span" sx={{ color: "#777777", display:"flex", alignItems:"center", letterSpacing:0, }}><Link to="/communities/politics/posts/nikki" style={{color:"#3b5998"}}>@Nikki</Link><span style={dotStyle}>•</span><span>Feb 25</span><span style={dotStyle}>•</span><span>11:24 am</span></Typography >
+                            <Typography style={{ color: "#777777", marginRight:"0.5rem"}}>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Share</Typography>}>
+                                <span style={iconStyle}><i className="fas fa-share" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                              </Tooltip>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer" }}>Comment</Typography>}>
+                                <span style={iconStyle}><i className="fas fa-comment" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                              </Tooltip>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer"}}>Reply this</Typography>}>
+                                <span style={iconStyle}><i className="fas fa-reply" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                              </Tooltip>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer", }}>I Like this</Typography>}>
+                                <span style={{color: "#777777", fontSize:"1.5rem", cursor:"pointer", }}><i className="fas fa-thumbs-up" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>8</span></span>
+                              </Tooltip>
+                            </Typography>
+                          </div>
+                          {/* <Card variant="outlined" sx={{mb:3, border:"none", }}> */}
+                            {/* <Paper > */}
+                              <CardContent sx={{ padding:0, px:"0.5rem", paddingBottom: "0 !important" }}>
+                                <Typography sx={{color:"#555555", fontFamily:"Arial, Sans-serif", width:"100%", textAlign:"center", padding:"0.2rem", fontSize:"1.3rem", }}>
+                                ccruing to ce the 15s, but also the leap intoed in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.ia from the Crude oil value chain have been suboptimal despite being the largest Crude oil producer in Africa and sixth-largest in the world. The “black gold” was discovered in commercial quantity at Oloibiri in 1956. At discovery, the lack of indigenous expertise, technology, and capital made foreign participation in the Oil and gas industry inevitable. Following the find, Oil became the largest contributor to revenue. For instance, from 2016 to 2017, it accounted for over 50 percent of revenue but the value addition to Gross Domestic Product (GDP) was less than 10 percent (Directorate of Planning, Research and Statistics, 2019). The implication is that services around the Oil and gas industry are not harnessed (Kingsley, 2020). In addit
+                                </Typography>
+                                <Button smallContainedButton>Next post</Button>
+                              </CardContent>                      
+                        </Box>
+                        
+                      </CardContent>
+                    </Card>
+                    
+                    
                 </Box>
               )}
             </Grid>
