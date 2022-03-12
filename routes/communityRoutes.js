@@ -1,5 +1,5 @@
 const communityRouter = require("express").Router();
-const { CommunityCommentLike, CommunityCommentShare, getAllComments, postAComment, getCommunityPosts, createACommunityPost, getSingleCommunityPost, deleteACommunityPost, editACommunityPost} = require("../controllers/communityController");
+const { pinCommunityPostToDashboard, deleteAComment, likeCommunityPost, CommunityCommentLike, CommunityCommentShare, getAllComments, postAComment, getCommunityPosts, createACommunityPost, getSingleCommunityPost, deleteACommunityPost, editACommunityPost} = require("../controllers/communityController");
 const { isAdmin, isAuth } = require("../utils.js");
 const expressAsyncHandler = require("express-async-handler");
 
@@ -8,19 +8,24 @@ communityRouter.get("/", expressAsyncHandler(getCommunityPosts)); //i.e get the 
 
 communityRouter.get("/:id", expressAsyncHandler(getSingleCommunityPost));
 
+communityRouter.put("/:id", expressAsyncHandler(likeCommunityPost));
+
+communityRouter.delete("/:id/delete-post",  expressAsyncHandler(deleteACommunityPost));
+
 communityRouter.post("/create-post", expressAsyncHandler(createACommunityPost));
 
-communityRouter.delete("/delete-post", isAuth, isAdmin, expressAsyncHandler(deleteACommunityPost));
+communityRouter.put("/:id/edit-post", isAuth, isAdmin, expressAsyncHandler(editACommunityPost));
 
-communityRouter.put("/edit-post", isAuth, isAdmin, expressAsyncHandler(editACommunityPost));
+communityRouter.put("/:postId/pin", expressAsyncHandler(pinCommunityPostToDashboard));
+
+communityRouter.delete("/:id/comments/delete", expressAsyncHandler(deleteAComment));
 
 communityRouter.post("/:id/comments/:commentId", expressAsyncHandler(postAComment));
 
 communityRouter.get("/:id/comments", expressAsyncHandler(getAllComments));
 
-communityRouter.post("/:id/comments/shares", expressAsyncHandler(CommunityCommentShare));
+communityRouter.put("/:id/comments/shares", expressAsyncHandler(CommunityCommentShare));
 
-communityRouter.post("/:id/comments/likes", expressAsyncHandler(CommunityCommentLike));
-
+communityRouter.put("/:id/comments/likes", expressAsyncHandler(CommunityCommentLike));
 
 module.exports = communityRouter;

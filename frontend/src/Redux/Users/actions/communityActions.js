@@ -3,7 +3,7 @@ import { CREATE_COMMUNITY_POST_FAIL,
     CREATE_COMMUNITY_POST_SUCCESS, 
     DELETE_COMMUNITY_POST_FAIL,
      DELETE_COMMUNITY_POST_REQUEST, 
-     DELETE_COMMUNITY_POST_SUCCESS, 
+     DELETE_COMMUNITY_POST, 
      EDIT_COMMUNITY_POST_FAIL, 
      EDIT_COMMUNITY_POST_REQUEST, 
      EDIT_COMMUNITY_POST_SUCCESS, 
@@ -22,17 +22,50 @@ import { CREATE_COMMUNITY_POST_FAIL,
     GET_COMMUNITY_POST_COMMENTS_REQUEST,
     GET_COMMUNITY_POST_COMMENTS_SUCCESS,
     GET_COMMUNITY_POST_COMMENTS_FAIL,
-    NEW_POST,
+    ADD_NEW_COMMUNITY_POST,
     LIKE_COMMUNITY_COMMENT_REQUEST,
     LIKE_COMMUNITY_COMMENT_SUCCESS,
     LIKE_COMMUNITY_COMMENT_FAIL,
     SHARE_COMMUNITY_COMMENT_REQUEST,
     SHARE_COMMUNITY_COMMENT_SUCCESS,
     SHARE_COMMUNITY_COMMENT_FAIL,
+    LIKE_COMMUNITY_POST_REQUEST,
+    LIKE_COMMUNITY_POST_SUCCESS,
+    LIKE_COMMUNITY_POST_FAIL,
+    ADD_COMMUNITY_POST_COMMENT,
+    DELETE_COMMUNITY_POST_COMMENT_REQUEST,
+    DELETE_COMMUNITY_POST_COMMENT_SUCCESS,
+    DELETE_COMMUNITY_POST_COMMENT_FAIL,
+    DELETE_COMMUNITY_POST_COMMENT,
+    LIKE_COMMUNITY_POST_COMMENT,
+    UNLIKE_COMMUNITY_POST_COMMENT,
+    PIN_COMMUNITY_POST_REQUEST,
+    PIN_COMMUNITY_POST_SUCCESS,
+    UNPIN_COMMUNITY_POST_SUCCESS,
+    PIN_COMMUNITY_POST_FAIL,
     SEEN__POST} from "../constants/communityConstants";
     
     import axios from "axios";
 
+
+export const pinToDashboard = (thePostId, community, username) => async (dispatch) => {
+    dispatch({ type: PIN_COMMUNITY_POST_REQUEST });
+    try {
+        const { data } = await axios.put(`/${community}/posts/${thePostId}/pin`, {username});
+        console.log("Pinned post data is back from the backend", data);
+        if(data.pinned === true){
+            dispatch({ type: PIN_COMMUNITY_POST_SUCCESS, payload: data });
+            
+        }else{
+            dispatch({ type: UNPIN_COMMUNITY_POST_SUCCESS, payload: data });
+        }
+    } catch (error) {
+        dispatch({
+            type: PIN_COMMUNITY_POST_FAIL,
+            payload: error.response && error.response.data.message ? error.response.data.message : error.message,
+        });
+    }
+};
 
 export const CommunityImageUpload = (file) => async (dispatch) => {
     dispatch({ type: COMMUNITY_IMAGE_UPLOAD_REQUEST });
@@ -49,10 +82,11 @@ export const CommunityImageUpload = (file) => async (dispatch) => {
     }
 };
 
-export const viewACommunityPost = ( id, community) => async (dispatch) => {
+export const viewACommunityPost = ( id, community, username) => async (dispatch) => {
     dispatch({ type: GET_A_COMMUNITY_POST_REQUEST });
     try {
-        const { data } = await axios.get(`/${community}/posts/${id}`);
+        console.log("got to single post actions")
+        const { data } = await axios.get(`/${community}/posts/${id}?username=${username}`);
         dispatch({ type: GET_A_COMMUNITY_POST_SUCCESS, payload: data });
         // localStorage.setItem("postDetails", JSON.stringify(data));
     } catch (error) {
@@ -69,7 +103,7 @@ export const createCommunityPost = (title, description, picture, author, communi
     try {
         const { data } = await axios.post(`/${community}/posts/create-post`, { title, description, picture, author, community });
         // localStorage.setItem("postDetails", JSON.stringify(data));
-        dispatch({ type: NEW_POST, payload: data });
+        dispatch({ type: ADD_NEW_COMMUNITY_POST, payload: data });
         window.location.replace(`/communities/${community}/${data.post_id}`);
     } catch (error) {
         dispatch({
@@ -79,12 +113,14 @@ export const createCommunityPost = (title, description, picture, author, communi
     }
 };
 
-export const deletePost = (id, username, community) => async (dispatch) => {
+export const deletePost = (deleteDetails) => async (dispatch) => {
+    const { id, community, username } = deleteDetails;
+    console.log(deleteDetails)
     dispatch({ type: DELETE_COMMUNITY_POST_REQUEST });
     try {
-         await axios.delete(`/${community}/posts/delete-post`, { data: { username, id } });  //NOTE: the axios delete method needs to have a "data" key in the body to work
-        dispatch({ type: DELETE_COMMUNITY_POST_SUCCESS, payload: {} });
-        // localStorage.removeItem("postDetails");
+         const { data } = await axios.delete(`/${community}/posts/${id}/delete-post`, { data: { username } });  //NOTE: the axios delete method needs to have a "data" key in the body to work
+        dispatch({ type: DELETE_COMMUNITY_POST, payload: data });
+        window.location.replace(`/communities/${community}`);
     } catch (error) {
         dispatch({
             type: DELETE_COMMUNITY_POST_FAIL,
@@ -96,7 +132,7 @@ export const deletePost = (id, username, community) => async (dispatch) => {
 export const editPost = (title, id, description, username, community) => async (dispatch) => {
     dispatch({ type: EDIT_COMMUNITY_POST_REQUEST, payload: { title, description, username } });
     try {
-        const { data } = await axios.put(`/${community}/posts/edit-post`, { username, title, description, id, community });
+        const { data } = await axios.put(`/${community}/posts/${id}/edit-post`, { username, title, description, id, community });
         dispatch({ type: EDIT_COMMUNITY_POST_SUCCESS, payload: data });
         // localStorage.setItem("postDetails", JSON.stringify(data));
         // localStorage.getItem("postDetails") && JSON.parse(localStorage.getItem("postDetails"));
@@ -115,6 +151,7 @@ export const getCommunityPosts = (search, community) => async (dispatch) => {
         console.log(community, "got")
         console.log("community get posts")
         const { data } = await axios.get(`/${community}/posts` + search);
+        console.log(data)
         dispatch({ type: GET_COMMUNITY_POSTS_SUCCESS, payload: data });
     } catch (error) {
         dispatch({
@@ -135,7 +172,7 @@ export const postComment = (comment) => async (dispatch) => {
 
     try {
         const { data } = await axios.post(`/${community_name}/posts/${post_id}/comments/${comment_id}`, rest );
-        dispatch({ type: POST_COMMUNITY_COMMENT_SUCCESS, payload: data });
+        dispatch({ type: ADD_COMMUNITY_POST_COMMENT, payload: data });
         // localStorage.setItem("postDetails", JSON.stringify(data));
     } catch (error) {
         dispatch({
@@ -161,33 +198,92 @@ export const getPostComments = (id, community) => async (dispatch) => {
     }
 };
 
-// export const likeComment = (likeDetails) => async (dispatch) => {
-//     const { post_id: id, community, ...rest} = likeDetails;
-//     dispatch({ type: LIKE_COMMUNITY_COMMENT_REQUEST });
+export const deleteComment = (deleteObject) => async (dispatch) => {
+    console.log("got to community comment delete actions")
+    const { id, community, username, stateCommentId} = deleteObject;
+    dispatch({ type: DELETE_COMMUNITY_POST_COMMENT_REQUEST });
+
+    try {
+        const { data } = await axios.delete(`/${community}/posts/${id}/comments/delete`, { data: { username, stateCommentId } });
+        dispatch({ type: DELETE_COMMUNITY_POST_COMMENT, payload: data });
+        // localStorage.setItem("postDetails", JSON.stringify(data));
+    } catch (error) {
+        dispatch({
+            type: DELETE_COMMUNITY_POST_COMMENT_FAIL,
+            payload: error.response && error.response.data.message ? error.response.data.message : error.message,
+        });
+    }
+};
+
+export const likeComment = (likeDetails) => async (dispatch) => {
+    const {id, community, ...rest} = likeDetails;
+
+    dispatch({ type: LIKE_COMMUNITY_COMMENT_REQUEST });
+
+    try {
+        const { data } = await axios.put(`/${community}/posts/${id}/comments/likes`, rest);
+        console.log(data)
+        console.log("returned liked data")
+        if(data.likeAction === true ){
+            dispatch({ type: LIKE_COMMUNITY_POST_COMMENT, payload: data });
+
+        }else{
+            dispatch({ type: UNLIKE_COMMUNITY_POST_COMMENT, payload: data });
+        }
+    } catch (error) {
+        dispatch({
+            type: LIKE_COMMUNITY_COMMENT_FAIL,
+            payload: error.response && error.response.data.message ? error.response.data.message : error.message,
+        });
+    }
+};
+
+export const likePost = (likeDetails) => async (dispatch) => {
+    const {id, community, ...rest} = likeDetails;
+
+    dispatch({ type: LIKE_COMMUNITY_POST_REQUEST });
+
+    try {
+        const { data } = await axios.put(`/${community}/posts/${id}`, rest);
+        console.log(data)
+        dispatch({ type: LIKE_COMMUNITY_POST_SUCCESS, payload: data });
+    } catch (error) {
+        dispatch({
+            type: LIKE_COMMUNITY_POST_FAIL,
+            payload: error.response && error.response.data.message ? error.response.data.message : error.message,
+        });
+    }
+};
+
+// export const viewPost = (likeDetails) => async (dispatch) => {
+//     const {id, community, ...rest} = likeDetails;
+
+//     dispatch({ type: LIKE_COMMUNITY_POST_REQUEST });
 
 //     try {
-//         const { data } = await axios.post(`/${community}/posts/${post_id}/comments/likes`, rest);
-//         dispatch({ type: LIKE_COMMUNITY_COMMENT_SUCCESS, payload: data });
+//         const { data } = await axios.put(`/${community}/posts/${id}`, rest);
+//         console.log(data)
+//         dispatch({ type: LIKE_COMMUNITY_POST_SUCCESS, payload: data });
 //     } catch (error) {
 //         dispatch({
-//             type: LIKE_COMMUNITY_COMMENT_FAIL,
+//             type: LIKE_COMMUNITY_POST_FAIL,
 //             payload: error.response && error.response.data.message ? error.response.data.message : error.message,
 //         });
 //     }
 // };
 
 
-// export const shareComment = (shareDetails) => async (dispatch) => {
-//     const { post_id: id, community } = shareDetails;
-//     dispatch({ type: SHARE_COMMUNITY_COMMENT_REQUEST });
+export const shareComment = (shareDetails) => async (dispatch) => {
+    const { id, community, ...rest } = shareDetails;
+    dispatch({ type: SHARE_COMMUNITY_COMMENT_REQUEST });
 
-//     try {
-//         const { data } = await axios.post(`/${community}/posts/${post_id}/comments/shares`);
-//         dispatch({ type: SHARE_COMMUNITY_COMMENT_SUCCESS, payload: data });
-//     } catch (error) {
-//         dispatch({
-//             type: SHARE_COMMUNITY_COMMENT_FAIL,
-//             payload: error.response && error.response.data.message ? error.response.data.message : error.message,
-//         });
-//     }
-// };
+    try {
+        const { data } = await axios.put(`/${community}/posts/${id}/comments/shares`, rest);
+        dispatch({ type: SHARE_COMMUNITY_COMMENT_SUCCESS, payload: data });
+    } catch (error) {
+        dispatch({
+            type: SHARE_COMMUNITY_COMMENT_FAIL,
+            payload: error.response && error.response.data.message ? error.response.data.message : error.message,
+        });
+    }
+};

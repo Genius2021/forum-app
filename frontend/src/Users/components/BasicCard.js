@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
@@ -6,14 +6,13 @@ import CardHeader from '@mui/material/CardHeader';
 import { IconButton, Typography } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import ShareIcon from '@mui/icons-material/Share';
 import PushPin from '@mui/icons-material/PushPin';
 import Tooltip from '@mui/material/Tooltip';
 import Visibility from '@mui/icons-material/Visibility';
 import { useDispatch, useSelector } from 'react-redux';
-import { viewACommunityPost, viewed } from '../../Redux/Users/actions/communityActions';
+import { pinToDashboard, viewed } from '../../Redux/Users/actions/communityActions';
 import { Link, useLocation, useHistory } from 'react-router-dom';
-
+import { AmOrPm, hrsAndMins, monthAndDay } from '../../commonFunctions';
 
 const bull = (
   <Box
@@ -25,14 +24,16 @@ const bull = (
 );
 
 
-export default function BasicCard({ post, is_viewed, viewCount }) {
+export default function BasicCard({ post, is_viewed, is_pinned, viewCount, hrsAndMin }) {
   const dispatch = useDispatch();
   const location = useLocation();
   const history = useHistory();
   const community = location.pathname.split("/")[2];
    
+  const { userInfo } = useSelector(state => state.userSignin);
+  const username = userInfo.username;
+
   const [favouriteIcon, setFavouriteIcon] = useState(false);
-  const [pushPinIcon, setPushPinIcon] = useState(false);
   const [shareIcon, setShareIcon] = useState(false);
 
   const handleFavouriteIcon = ()=>{
@@ -43,8 +44,8 @@ export default function BasicCard({ post, is_viewed, viewCount }) {
     setShareIcon(!shareIcon);
   }
 
-  const handlePushPinIcon = ()=>{
-    setPushPinIcon(!pushPinIcon);
+  const handlePushPinIcon = (e, thePostId)=>{
+    dispatch(pinToDashboard(thePostId, community, username))
   }
 
     const viewPostHandler = (e, thePostId)=>{
@@ -54,7 +55,11 @@ export default function BasicCard({ post, is_viewed, viewCount }) {
     }
 
 
-  const dotStyle = { mx:0.3, fontSize: "1.1rem", color:"#555555" }
+  const dotStyle = { mx: 0.3, fontSize: "1.1rem", color: "#555555" }
+  
+  
+
+    
 
   return (
     <Card sx={{ minWidth: 275, maxHeight:100, pb:1,'&:hover': {transform: "scale(1.02)"}}}>
@@ -68,14 +73,20 @@ export default function BasicCard({ post, is_viewed, viewCount }) {
           </Tooltip>
         }
         title={<Typography onClick={(e)=>viewPostHandler(e, post.post_id)} sx={{ color:"#444444", fontSize:"1.3rem",cursor:"pointer", "&:hover": {color:"#3b5998"}}}>{post ? post.title.substring(0, 65) : "Shrimp and Chorizo Paella" }</Typography>}
-        subheader={<Typography sx={{ display:"flex", alignItems:"center", fontSize: "0.9rem", color:"#777777", marginRight:0.3 }}>By<Link to={`/communities/${community}/posts/${ post ? post.author : "Goat Messi" }`}><Typography sx={{color:"#3b5998", cursor:"pointer",fontSize: "0.9rem",ml: 0.3 }}>{ post ? post.author : "Goat Messi" }</Typography></Link> <Typography component="span" sx={dotStyle}>•</Typography > { post ? new Date(post?.created_on).toDateString().substring(4) : "September 14, 2016" } <Typography component="span" sx={dotStyle}>•</Typography > { post ? new Date(post?.created_on).toTimeString().substring(0,5) : "11:20pm" }</Typography>}
+        subheader={<Typography sx={{ display:"flex", alignItems:"center", fontSize: "0.9rem", color:"#777777", marginRight:0.3 }}>By<Link to={`/communities/${community}/posts/${ post ? post.author : "Goat Messi" }`}><Typography sx={{color:"#3b5998", cursor:"pointer",fontSize: "0.9rem",ml: 0.3 }}>{ post ? post.author : "Goat Messi" }</Typography></Link> <Typography component="span" sx={dotStyle}>•</Typography >
+         { monthAndDay(post?.created_on) } 
+         
+         <Typography component="span" sx={dotStyle}>•</Typography > { `${hrsAndMin}${AmOrPm(post?.created_on)}`}</Typography>}
       />
       <CardActions disableSpacing sx={{ display:"flex", justifyContent:"space-between" }}>
-      <Tooltip title={<Typography sx={{ fontSize: "1rem" }}>{ favouriteIcon ? "Unlike" : "Like" }</Typography>}>
-        <IconButton aria-label="add to favorites" size="small" onClick={handleFavouriteIcon} sx={{ display:"flex", justifyContent: "center", alignItems:"center", color:`${ favouriteIcon && "red"}`, backgroundColor:`${ favouriteIcon && "rgba(0, 0, 0, 0.04)"}` }}>
-          <FavoriteIcon />
-        </IconButton>
-        </Tooltip>
+        <Box sx={{ display:"flex", alignItems:"center" }}>
+          <Tooltip title={<Typography sx={{ fontSize: "1rem" }}>{ favouriteIcon ? "Unlike" : "Like" }</Typography>}>
+            <IconButton aria-label="add to favorites" size="small" onClick={handleFavouriteIcon} sx={{ display:"flex", justifyContent: "center", alignItems:"center", color:`${ favouriteIcon && "red"}`, backgroundColor:`${ favouriteIcon && "rgba(0, 0, 0, 0.04)"}` }}>
+              <FavoriteIcon />
+            </IconButton>
+          </Tooltip>
+          {/* <Typography sx={{ fontSize: "1rem", color:"#555555" }}>{ postLikeCount || (post.liked_by?.length > 0 ? post.liked_by?.length : 0) }</Typography> */}
+        </Box>
         <Tooltip title={<Typography sx={{ fontSize: "1rem" }}>Share</Typography>}>
           <span onClick={handleShareIcon}><i className="fas fa-share" style={{ color: "#777777", fontSize:"1.3rem", cursor:"pointer",}}></i><span style={{fontSize:"1.1rem", color: "#777777"}}>4</span></span>
         </Tooltip>
@@ -88,8 +99,8 @@ export default function BasicCard({ post, is_viewed, viewCount }) {
           <Typography sx={{ fontSize: "1rem", color:"#555555" }}>{ viewCount }</Typography>
         </Box>
         
-        <Tooltip title={<Typography sx={{ fontSize: "1rem" }}>{ pushPinIcon ? "Unpin from dashboard" : "Pin to dashboard" }</Typography>}>
-          <IconButton aria-label="push pin" size="small" onClick={handlePushPinIcon} sx={{ color:`${ pushPinIcon && "white"}`, backgroundColor:`${ pushPinIcon && "#3b5998"}`, "&:hover": {backgroundColor:`${ pushPinIcon && "#3b5998"}`,}}}>
+        <Tooltip title={<Typography sx={{ fontSize: "1rem" }}>{ is_pinned ? "Unpin from dashboard" : "Pin to dashboard" }</Typography>}>
+          <IconButton aria-label="push pin" size="small" onClick={(e)=>handlePushPinIcon(e, post.post_id)} sx={{ color:`${ is_pinned && "white"}`, backgroundColor:`${ is_pinned && "#3b5998"}`, "&:hover": {backgroundColor:`${ is_pinned && "#3b5998"}`,}}}>
             <PushPin />
           </IconButton>
         </Tooltip>

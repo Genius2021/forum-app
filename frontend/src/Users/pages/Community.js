@@ -11,24 +11,24 @@ import BasicCard from "../components/BasicCard";
 import { getCommunityPosts } from "../../Redux/Users/actions/communityActions";
 import { useEffect, useState } from "react";
 import CircularProgress from '@mui/material/CircularProgress';
+import { hrsAndMins } from "../../commonFunctions";
 
 
 export default function Community(props) {
 
   const { posts, loading, error, numOfPages } = useSelector(state => state.getCommunityPosts)
   const { value } = useSelector(state => state.communityPagination);
-  const { seenPostsArray, postViewsCounter } = useSelector(state => state.seenPost)
   const { newPost } = useSelector(state => state.createCommunityPost)
+  const { userInfo } = useSelector(state => state.userSignin);
+  const username = userInfo?.username;
 
-  // const [allPosts, setAllPosts] = useState(posts)
-  
   const dispatch = useDispatch();
   let { search } = useLocation();
   const community = props.location.pathname.split("/")[2]
 
   useEffect(() => {
     dispatch(getCommunityPosts(search || `?page=${value}`, community));
-}, [dispatch, search, value, community]);
+}, [search, value, community]);
   
 
   const style = {
@@ -36,8 +36,6 @@ export default function Community(props) {
     top: "62.5px",
     zIndex: 20,
   }
-
-
 
   return <>
         <Grid container spacing={1} sx={{ justifyContent: "center" }}>
@@ -70,18 +68,30 @@ export default function Community(props) {
                         <>
                           { posts?.map( post =>{
                             
-                            const postInArray = seenPostsArray.includes(post.post_id)
-                              let count = 0;
-                              postViewsCounter.forEach(x =>{
-                                if(x.postId === post.post_id){
-                                  count = x.count;
-                                }
+                            // const postInArray = seenPostsArray.includes(post.post_id)
+                            //   let count = 0;
+                            //   postViewsCounter.forEach(x =>{
+                            //     if(x.postId === post.post_id){
+                            //       count = x.count;
+                            //     }
                                
-                              })                     
-                              
-                              return <Paper key={post.post_id} sx={{mb:2}}>
-                                <BasicCard post={post} is_viewed={postInArray}  viewCount={count} />
+                            //   }) 
+                            // if(post){
+                            const hrsAndMin = hrsAndMins(post?.created_on)
+                            let is_viewed;
+                            let is_pinned;
+                            let count = (post.viewed_by_registered_users?.length || 0) + (post.viewed_by_unregistered_users?.length || 0)
+                            if(username){
+                              is_viewed = post.viewed_by_registered_users?.includes(username)  
+                              is_pinned = post.is_pinned_to_dashboard_array?.includes(username)  
+                            }
+
+    
+                            return <Paper key={post.post_id} sx={{mb:2}}>
+                                <BasicCard hrsAndMin={hrsAndMin} post={post} is_viewed={is_viewed} is_pinned={is_pinned} viewCount={count} />
                               </Paper> 
+                            // }
+                           
                             })
                           }
                         </>)

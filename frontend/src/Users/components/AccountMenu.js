@@ -16,7 +16,7 @@ import MailIcon from '@mui/icons-material/Mail';
 import Badge from '@mui/material/Badge';
 import { useDispatch, useSelector } from 'react-redux';
 import { openModal } from '../../Redux/Users/actions/generalActions';
-import MyModal from './MyModal';
+import { Link } from 'react-router-dom';
 
 
 export default function AccountMenu() {
@@ -120,9 +120,12 @@ export default function AccountMenu() {
         <MenuItem>
           <Avatar /> My Account
         </MenuItem>
-        <MenuItem>
-          <Avatar />Dashboard
-        </MenuItem>
+        <Link to="/dashboard">
+          <MenuItem>
+            <Avatar />Dashboard
+          </MenuItem>
+        </Link>
+        
         <Divider />
         <MenuItem>
           <ListItemIcon>

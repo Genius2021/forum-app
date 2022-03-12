@@ -45,3 +45,32 @@ export function capitalizeLowercaseStringWithSpace(string){
     }
 
 }
+
+
+export const  monthAndDay = (date)=>{
+    let commentDate = new Date(date).toString().split(" ");
+    let commentMonth = commentDate[1];
+    let commentDay = commentDate[2];
+    return `${commentMonth} ${commentDay}`
+}
+
+
+export const hrsAndMins = (timeValue)=>{
+    let commentDate = new Date(timeValue).toString().split(" ")[4];
+    let furtherBreaking = commentDate?.split(":")
+    let hours = furtherBreaking[0];
+    let minutes = furtherBreaking[1];
+    return `${hours}:${minutes}`
+  }
+
+  export  const AmOrPm = (time)=>{
+    let commentDate = new Date(time).toString().split(" ")[4];
+      const number = parseInt(commentDate?.split(":")[0])
+      if(number === 12){
+        return "pm";
+      }else if(number > 12){
+        return "pm";
+      }else{
+        return "am";
+      }
+  }

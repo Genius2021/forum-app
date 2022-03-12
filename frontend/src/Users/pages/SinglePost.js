@@ -1,10 +1,10 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { likeComment, shareComment, getPostComments, postComment, viewACommunityPost } from '../../Redux/Users/actions/communityActions';
-import { Avatar, Box, Card, CardContent, CardHeader, CircularProgress, Divider, Grid, Paper, Typography } from "@mui/material";
+import { deletePost, deleteComment, likePost, likeComment, shareComment, getPostComments, postComment, viewACommunityPost } from '../../Redux/Users/actions/communityActions';
+import { Avatar, Box, Card, CardContent, CircularProgress, Divider, Grid, Paper, Typography } from "@mui/material";
 import Advertisement from "../components/Advertisement";
 import Communities from "../components/LeftbarComponent";
 import PageTitle from "../components/PageTitle";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import AlertComponent from '../components/AlertComponent';
 import TextSelectionActions from '../components/TextSelectionActions';
 import { capitalize } from '../../commonFunctions';
@@ -22,15 +22,16 @@ function SinglePost({location, match, history }) {
     const community = location.pathname.split("/")[2]
     const id = match.params.id;
     const dispatch = useDispatch();
-    const { loading, post, error } = useSelector(state => state.getACommunityPost);
-    const { comment } = useSelector(state => state.postCommunityComment);
-    let { comments } = useSelector(state => state.getAllComments);
+    const { loading, post, seenPost, error } = useSelector(state => state.getACommunityPost);
+    let { comments, commentLiked, commentLikeCount } = useSelector(state => state.getAllComments);
     const { userInfo } = useSelector(state => state.userSignin);
-    const { seenPostsArray, postViewsCounter } = useSelector(state => state.seenPost);
-    const [actions, setActions]=([])
+    const username = userInfo?.username;
 
-    // console.log(comments)
-    let liked;
+    const { postLiked, postLikeCount } = useSelector(state => state.likeCommunityPost);
+    const { shared, shareCount } = useSelector(state => state.shareCommunityComment);
+    const [sendMessage, setSendMessage] = useState(false);
+    const [stateCommentId, setStateCommentId] = useState("");
+    console.log(comments)
     
   const style = {
     position:"sticky", 
@@ -70,7 +71,6 @@ function SinglePost({location, match, history }) {
 
   useEffect(()=>{
       const loadiframe = ()=>{
-        const iframe = document.getElementById("iframeTextField").contentDocument;
         document.getElementById("iframeTextField").contentEditable = true;
         let editor = document.getElementById("iframeTextField")
         let editorDoc = editor.contentWindow.document;
@@ -99,19 +99,19 @@ function SinglePost({location, match, history }) {
               //the "post as a dependency in the array, then the iframe will not load/be in design and edit mode".
 
   useEffect(() => {
-      dispatch(viewACommunityPost(id, community));
+      dispatch(viewACommunityPost(id, community, username));
       dispatch(getPostComments(id, community));      
-  }, [dispatch, id, community, location]);
+    }, [id, community, location]);
 
   
-    const postInArray = seenPostsArray.includes(id)  //this id is coming from match.params.id
-      let count = 0;
-      postViewsCounter.forEach(x =>{
-        if(x.postId === id){
-          count = x.count;
-        }
+    // const postInArray = seenPostsArray.includes(id)  //this id is coming from match.params.id
+    //   let count = 0;
+    //   postViewsCounter.forEach(x =>{
+    //     if(x.postId === id){
+    //       count = x.count;
+    //     }
        
-      })                   
+    //   })                   
 
       const addCommentHandler = (e)=>{
         e.preventDefault();
@@ -128,19 +128,36 @@ function SinglePost({location, match, history }) {
               comment_id: uuidv4(),
               post_id: id,
               community_name: community,
-              author_id: userInfo.user_id,
+              author_username: userInfo.username,
               is_admin: userInfo.is_admin,
               comment_text: textAreaValue,              
             }
-            console.log(thisComment)
+            window.frames["iframeTextField"].document.body.innerHTML = "";
+            setSendMessage(true)
             dispatch(postComment(thisComment))
-            // setComments([thisComment, ...comments])
+            setTimeout(()=>(setSendMessage(false)), 30000);
+
           }
         } 
       }
 
-      const handleDelete = ()=>{
-        dispatch(openModal("deleteCommentModal"));
+      const commentDeleteHandler = (e, commentId)=>{
+        console.log(commentId)
+        if(!username){
+          history.push("/login");
+        }else{
+          setStateCommentId(commentId)
+          dispatch(openModal("deleteCommentModal"))
+        }
+
+      }
+
+      const postDeleteHandler = ()=>{
+        if(!username){
+          history.push("/login")
+        }else{
+          dispatch(openModal("deletePostModal"));
+        }
       }
       
 
@@ -148,14 +165,37 @@ function SinglePost({location, match, history }) {
       const month = postDate[1];
       const day = postDate[2];
 
-      const ActionHandler =(e)=>{
-        if(e.target.name === "like"){
-        // dispatch(likeComment({ post_id: id, likeCount: likeCount++, community, liked_by: userInfo.username}))
-      }
-        if(e.target.name === "share"){
-          // dispatch(shareComment({ post_id: id, shareCount: shareCount++, community, shared_by: userInfo.username}))
+      const commentActionHandler =(e, commentId, user_name)=>{
+        if(!username){
+          history.push("/login")
+        }else{
+          if(e.target.id === "like"){
+            console.log(commentId, user_name)
+              dispatch(likeComment({id, community, commentId, user_name}))
+          }
+
+          if(e.target.id === "share"){
+            dispatch(shareComment({id, community, username}))
+          }
+          
         }
 
+      }
+
+
+      const postActionHandler = (e)=>{
+        if(!username){
+          history.push("/login")
+        }else{
+          if(e.target.id === "postLike"){
+            dispatch(likePost({id, community, username}));
+  
+          }
+
+          // if(e.target.id === "deletePost"){
+          //   dispatch(deletePost({id, community, username}));
+          // }
+        }
       }
 
 
@@ -191,14 +231,29 @@ function SinglePost({location, match, history }) {
                       </Box>
                       <span style={{fontSize:"1rem", color:"#555555" }}>{`${month} ${day}`}</span>
                       <Box sx={{display:"flex", alignItems:"center", color:"#777777", marginRight:"0.5rem"}}>
-                        <span  style={{marginRight:"2rem"}}><i className="fas fa-eye" style={{my: "auto", marginRight:"0.3rem", fontSize:"1rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
-                        <span><i className="fas fa-thumbs-up" style={{my: "auto", marginRight:"0.3rem", fontSize:"1rem", cursor:"pointer" }}></i><span style={{fontSize:"1.1rem"}}>8</span></span>
+                        <span  style={{marginRight:"2rem"}}><i className="fas fa-eye" style={{my: "auto", marginRight:"0.3rem", fontSize:"1rem", color:`${seenPost ? "#3b5998" : ""}`}}></i><span style={{fontSize:"1.1rem"}}>{(post.viewed_by_registered_users?.length || 0) + (post.viewed_by_unregistered_users?.length || 0)}</span></span>
+                        <span><i className="fas fa-thumbs-up" id="postLike" onClick={postActionHandler} style={{my: "auto", marginRight:"0.3rem", fontSize:"1rem", cursor:"pointer", color:`${(postLiked === true ? "green" : "") || (post.liked_by?.includes(username) ? "green" : "") }` }}></i><span style={{fontSize:"1.1rem"}}>{ postLikeCount || (post.liked_by?.length > 0 && post.liked_by?.length)}</span></span>
                       </Box>
                     </Paper>
                     <Card variant="outlined" sx={{mb:3}}>
                       <Paper sx={{padding:"0.3rem"}} >
-                        <CardContent sx={{display:"flex", justifyContent:"space-between", alignItems:"center", inset: {bottom: 4} }}>
-                          <Typography sx={{color:"#555555", fontFamily:"Roboto", width:"100%", textAlign:"center", fontSize:"1.5rem" }} dangerouslySetInnerHTML={{__html: post?.description }} />
+                        <CardContent>
+                          <Typography dangerouslySetInnerHTML={{__html: post?.description }} sx={{color:"#555555", fontFamily:"Roboto", width:"100%", textAlign:"center", fontSize:"1.5rem" }} />
+                          <MyModal  question="Are you sure about deleting this comment?" dispatchAction={deleteComment({id, community, username, stateCommentId})} modalName="deleteCommentModal" />
+                          <MyModal  question="Do you really want to delete this post?" dispatchAction={deletePost({id, community, username})} modalName="deletePostModal" />
+                          <span style={{display:"flex", justifyContent:"space-between"}}>
+                            <Typography style={{ color: "#777777", }}>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Delete post</Typography>}>
+                                <span onClick={postDeleteHandler} style={iconStyle}>
+                                  <i className="far fa-trash-alt" id="deletePost" style={{marginRight:"0.2rem"}}></i>
+                                </span>
+                              </Tooltip>
+                              <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Edit post</Typography>}>
+                                <span style={{fontSize:"1.3rem", cursor:"pointer",}}><i className="far fa-edit" id="editPost" style={{marginRight:"0.2rem"}}></i></span>
+                              </Tooltip>
+                            </Typography>
+                            <Button smallContainedButton>Next post</Button>
+                          </span>
                         </CardContent>
                       </Paper>
                     </Card>
@@ -223,14 +278,16 @@ function SinglePost({location, match, history }) {
                           <iframe name="iframeTextField" id="iframeTextField" title="iframeTextField" style={iframeTextArea}></iframe>
                             <Button smallContainedButton type="submit" border="none" justifySelf="end" onClick={addCommentHandler}>Add comment</Button>
                         </form>
+                        {sendMessage && <Typography sx={{textAlign:"center", color:"green",backgroundColor:"none"}}>You have successfully added your comment boss!</Typography>}
                       </CardContent>
                     </Card>
                     <Card sx={{paddingBottom:0}}>
-                      <CardContent sx={{paddingBottom:0}}>
+                      <CardContent sx={{paddingBottom:"1rem !important"}}>
                           <TextEditor flexWrap="wrap" width="100%" border="none" TextSelectionActions={TextSelectionActions} iframeName="iframeTextField" />
                       </CardContent>
                     </Card>
                       <Divider variant="middle" sx={{my:"2rem"}}> <Typography sx={{fontSize:"1rem", margin:"0.2rem", color:"#666666"}}>Comments below</Typography></Divider>
+                      
                       {
                         comments.map((comment, index)=>{
                           const commentDate = new Date(comment?.created_on).toString().split(" ");
@@ -252,6 +309,8 @@ function SinglePost({location, match, history }) {
                               }
                           }
 
+                          const commentId = comment.comment_id;
+
                           const htmlDecode = (input)=>{
                             let parsed_doc = new DOMParser().parseFromString(input, "text/html");
                             // let resulting_nodes = [...parsed_doc.body.childNodes]
@@ -263,6 +322,12 @@ function SinglePost({location, match, history }) {
                           }
                           
                           // htmlDecode(comment?.comment_text)
+                          let liked_by;
+
+                          if(username){
+                            liked_by = comment.liked_by?.includes(username)  
+                            // is_pinned = post.is_pinned_to_dashboard_array?.includes(username)  
+                          }
 
 
                           return <Card key={index} sx={{mb:3}}>
@@ -281,10 +346,10 @@ function SinglePost({location, match, history }) {
                                   <span style={{color:"#c0c0c0", marginRight:"0.5rem"}}><i className="fas fa-medal"></i></span>
                                   <span style={{color:"#cd7f32"}}><i className="fas fa-medal"></i></span>
                                 </Typography>
-                                <Typography component="span" sx={{ color: "#777777", display:"flex", alignItems:"center", letterSpacing:0, }}><Link to={`/users/${comment?.username}`} style={{color:"#3b5998"}}>@{comment?.username}</Link><span style={dotStyle}>•</span><span>{`${commentMonth} ${commentDay}`}</span><span style={dotStyle}>•</span><span>{`${hours}:${minutes}  ${AmOrPm(time)}`}</span></Typography >
+                                <Typography component="span" sx={{ color: "#777777", display:"flex", alignItems:"center", letterSpacing:0, }}><Link to={`/users/${comment?.author_username}`} style={{color:"#3b5998"}}>@{comment?.author_username}</Link><span style={dotStyle}>•</span><span>{`${commentMonth} ${commentDay}`}</span><span style={dotStyle}>•</span><span>{`${hours}:${minutes}${AmOrPm(time)}`}</span></Typography >
                                 <Typography style={{ color: "#777777", marginRight:"0.5rem"}}>
                                   <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Share</Typography>}>
-                                    <span style={iconStyle}><i className="fas fa-share" name="share" onClick={ActionHandler} style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>{comment?.shares}</span></span>
+                                    <span style={iconStyle}><i className="fas fa-share" id="share" onClick={commentActionHandler} style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>{shareCount || (comment.shared_by?.length > 0 && comment.shared_by?.length)}</span></span>
                                   </Tooltip>
                                   <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer" }}>Comment</Typography>}>
                                     <span style={iconStyle}><i className="far fa-comment" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
@@ -293,23 +358,22 @@ function SinglePost({location, match, history }) {
                                     <span style={iconStyle}><i className="fas fa-reply" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
                                   </Tooltip>
                                   <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer", }}>I Like this</Typography>}>
-                                    <span style={{color: "#777777", fontSize:"1.5rem", cursor:"pointer", }}><i className="fas fa-thumbs-up" name="like" onClick={ActionHandler} style={{ marginRight:"0.2rem", color: `${liked && "green"}` }}></i><span style={{fontSize:"1.1rem"}}>{comment?.likes}</span></span>
+                                    <span style={{color: "#777777", fontSize:"1.5rem", cursor:"pointer", }}><i className="far fa-thumbs-up" id="like" onClick={(e)=>commentActionHandler(e, commentId, username )} style={{ marginRight:"0.2rem",  color:`${ liked_by && "green"}`}}></i><span style={{fontSize:"1.1rem"}}>{ commentLikeCount || ((comment?.liked_by?.length || 0) > 0 && (comment?.liked_by?.length || 0))}</span></span>
                                   </Tooltip>
                                 </Typography>
                               </div>
                               {/* <Card variant="outlined" sx={{mb:3, border:"none", }}> */}
                                 {/* <Paper > */}
                                   <CardContent sx={{ padding:0, px:"0.5rem", paddingBottom: "0 !important" }}>
-                                    <div dangerouslySetInnerHTML={{__html: comment?.comment_text }} sx={{color:"#555555", fontFamily:"Arial, Sans-serif", width:"100%", textAlign:"center", padding:"0.2rem", fontSize:"1rem", }} />
+                                    <div dangerouslySetInnerHTML={{__html: comment?.comment_text }} style={{color:"#555555", fontFamily:"Arial, Sans-serif", width:"100%", textAlign:"center", padding:"0.2rem", fontSize:"1.2rem", }} />
                                     <span style={{display:"flex", justifyContent:"space-between"}}>
                                     <Button smallContainedButton>Next post</Button>
                                     <Typography style={{ color: "#777777", }}>
-                                      <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Delete comment</Typography>}>
-                                        <span onClick={handleDelete} style={iconStyle}>
+                                      <Tooltip title={<Typography sx={{ fontSize: "0.85rem" }}>Delete comment</Typography>}>
+                                        <span onClick={(e)=>commentDeleteHandler(e, commentId)} style={iconStyle}>
                                           <i className="far fa-trash-alt" style={{marginRight:"0.2rem"}}></i>
                                         </span>
                                       </Tooltip>
-                                      <MyModal  question="Are you sure you want to delete this comment?" modalName="deleteCommentModal" />
                                       <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Edit comment</Typography>}>
                                         <span style={{fontSize:"1.3rem", cursor:"pointer",}}><i className="far fa-edit" style={{marginRight:"0.2rem"}}></i></span>
                                       </Tooltip>
@@ -343,7 +407,7 @@ function SinglePost({location, match, history }) {
                             <Typography component="span" sx={{ color: "#777777", display:"flex", alignItems:"center", letterSpacing:0, }}><Link to="/communities/politics/posts/nikki" style={{color:"#3b5998"}}>@Nikki</Link><span style={dotStyle}>•</span><span>Feb 25</span><span style={dotStyle}>•</span><span>11:24 am</span></Typography >
                             <Typography style={{ color: "#777777", marginRight:"0.5rem"}}>
                               <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Share</Typography>}>
-                                <span style={iconStyle}><i className="fas fa-share" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
+                                <span style={iconStyle}><i className="fas fa-share" style={{marginRight:"0.2rem"}} id="share" onClick={commentActionHandler}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
                               </Tooltip>
                               <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer" }}>Comment</Typography>}>
                                 <span style={iconStyle}><i className="far fa-comment" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
@@ -352,7 +416,7 @@ function SinglePost({location, match, history }) {
                                 <span style={iconStyle}><i className="fas fa-reply" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>4</span></span>
                               </Tooltip>
                               <Tooltip title={<Typography sx={{ fontSize: "0.85rem", cursor:"pointer", }}>I Like this</Typography>}>
-                                <span style={{color: "#777777", fontSize:"1.5rem", cursor:"pointer", }}><i className="fas fa-thumbs-up" style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>8</span></span>
+                                <span style={{color: "#777777", fontSize:"1.5rem", cursor:"pointer", }}><i className="fas fa-thumbs-up" id="like" onClick={commentActionHandler} style={{marginRight:"0.2rem"}}></i><span style={{fontSize:"1.1rem"}}>8</span></span>
                               </Tooltip>
                             </Typography>
                           </div>
@@ -360,16 +424,17 @@ function SinglePost({location, match, history }) {
                             {/* <Paper > */}
                               <CardContent sx={{ padding:0, px:"0.5rem", paddingBottom: "0 !important" }}>
                                 <Typography sx={{color:"#555555", fontFamily:"Arial, Sans-serif", width:"100%", textAlign:"center", padding:"0.2rem", fontSize:"1.3rem", }}>
-                                ccruing to ce the 15s, but also the leap intoed in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.ia from the Crude oil value chain have been suboptimal despite being the largest Crude oil producer in Africa and sixth-largest in the world. The “black gold” was discovered in commercial quantity at Oloibiri in 1956. At discovery, the lack of indigenous expertise, technology, and capital made foreign participation in the Oil and gas industry inevitable. Following the find, Oil became the largest contributor to revenue. For instance, from 2016 to 2017, it accounted for over 50 percent of revenue but the value addition to Gross Domestic Product (GDP) was less than 10 percent (Directorate of Planning, Research and Statistics, 2019). The implication is that services around the Oil and gas industry are not harnessed (Kingsley, 2020). In addit
+                                example ccruing to ce the 15s, but also the leap intoed in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.ia from the Crude oil value chain have been suboptimal despite being the largest Crude oil producer in Africa and sixth-largest in the world. The “black gold” was discovered in commercial quantity at Oloibiri in 1956. At discovery, the lack of indigenous expertise, technology, and capital made foreign participation in the Oil and gas industry inevitable. Following the find, Oil became the largest contributor to revenue. For instance, from 2016 to 2017, it accounted for over 50 percent of revenue but the value addition to Gross Domestic Product (GDP) was less than 10 percent (Directorate of Planning, Research and Statistics, 2019). The implication is that services around the Oil and gas industry are not harnessed (Kingsley, 2020). In addit
                                 </Typography>
                                 <span style={{display:"flex", justifyContent:"space-between"}}>
                                   <Button smallContainedButton>Next post</Button>
                                   <Typography style={{ color: "#777777", }}>
                                     <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Delete comment</Typography>}>
-                                      <span onClick={handleDelete} style={iconStyle}>
+                                      <span onClick={commentDeleteHandler} style={iconStyle}>
                                         <i className="far fa-trash-alt" style={{marginRight:"0.2rem"}}></i>
                                       </span>
                                     </Tooltip>
+                                    {/* <MyModal  question="Are you sure you want to delete this comment?" modalName="deleteCommentModal" /> */}
                                     <Tooltip title={<Typography sx={{ fontSize: "0.85rem", }}>Edit comment</Typography>}>
                                       <span style={{fontSize:"1.3rem", cursor:"pointer",}}><i className="far fa-edit" style={{marginRight:"0.2rem"}}></i></span>
                                     </Tooltip>

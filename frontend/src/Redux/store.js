@@ -4,7 +4,7 @@ import { userRegisterReducer, userSigninReducer } from "./Users/reducers/userRed
 import { getPostsReducer } from "./Users/reducers/postReducer";
 import { sidebarStateReducer } from "./Users/reducers/sidebarReducers";
 import { communityPaginationReducer, homePaginationReducer, messageReducer, modalReducer } from "./Users/reducers/generalReducers";
-import {getAllCommentsReducer, postCommentReducer, createCommunityPostReducer, deleteCommunityPostReducer, editCommunityPostReducer, getACommunityPostReducer, getCommunityPostsReducer, seenPostReducer } from "./Users/reducers/communityReducers";
+import { viewCommunityPostReducer, likeCommunityPostReducer, shareCommunityCommentReducer, likeCommunityCommentReducer, getAllCommentsReducer, postCommentReducer, createCommunityPostReducer, deleteCommunityPostReducer, editCommunityPostReducer, getACommunityPostReducer, getCommunityPostsReducer, seenPostReducer } from "./Users/reducers/communityReducers";
 
 
 
@@ -24,15 +24,19 @@ const reducer = combineReducers({
     message : messageReducer,
     modal: modalReducer,
     createCommunityPost: createCommunityPostReducer,
-    deleteCommunityPost: deleteCommunityPostReducer,
+    // deleteCommunityPost: deleteCommunityPostReducer,
     editCommunityPost: editCommunityPostReducer,
     getCommunityPosts: getCommunityPostsReducer,
     getACommunityPost: getACommunityPostReducer,
     communityPagination: communityPaginationReducer,
     homePagination: homePaginationReducer,
-    seenPost: seenPostReducer,
-    postCommunityComment: postCommentReducer,
+    // seenPost: seenPostReducer,
+    // postCommunityComment: postCommentReducer,
     getAllComments: getAllCommentsReducer,
+    likeCommunityComment: likeCommunityCommentReducer,
+    shareCommunityComment:shareCommunityCommentReducer,
+    likeCommunityPost: likeCommunityPostReducer,
+    // viewCommunityPost: viewCommunityPostReducer,
 });
 
 

@@ -23,20 +23,20 @@ const style = {
   pb:1.5,
 };
 
-export default function MyModal({ question, signOutAction, modalName, specificAction }) {
+export default function MyModal({ question, signOutAction, modalName, dispatchAction }) {
 
   const { isOpen, typeOfModal} = useSelector(state => state.modal);
   const dispatch = useDispatch();
 
   const HandleProceed = () =>{
+
     if(signOutAction){
       dispatch(signout());
       dispatch(closeModal(modalName));
 
     }else{
-      // dispatch(specificAction) for instance, implement a delete action
+      dispatch(dispatchAction);
       dispatch(closeModal(modalName));
-      console.log("got to proceed")
     }
   }
 
