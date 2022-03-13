@@ -16,9 +16,7 @@ import { closeSidebar, openSidebar } from '../../Redux/Users/actions/sidebarActi
 import { useDispatch, useSelector } from 'react-redux';
 import AccountMenu from "./AccountMenu";
 import MyModal from './MyModal';
-import { Card } from '@mui/material';
-import { signout } from '../../Redux/Users/actions/userActions';
-import { closeModal } from '../../Redux/Users/actions/generalActions';
+
 
 
 const Search = styled('div')(({ theme }) => ({

@@ -1,11 +1,13 @@
 const postRouter = require("express").Router();
 const { isAuth } = require("../utils.js");
 const expressAsyncHandler = require("express-async-handler");
-const { createPost, getAPost, getAllPosts, editPost , deletePost } = require("../controllers/postController.js");
+const { getPinnedPosts, createPost, getAPost, getAllPosts, editPost , deletePost } = require("../controllers/postController.js");
 
 
 
 postRouter.get("/", expressAsyncHandler(getAllPosts));
+
+postRouter.get("/pinned-posts/:username", expressAsyncHandler(getPinnedPosts));
 
 // postRouter.get("/:id", isAuth, expressAsyncHandler(getAPost));
 

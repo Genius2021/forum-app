@@ -10,10 +10,9 @@
     flex: 1;
     margin: 0 2rem;
     margin-top: 1rem;
-    padding: 2.5rem;
+    padding: 2rem;
     border-top: 0.5px solid rgb(201, 197, 197);
     border-radius: 1rem;
-    cursor: pointer;
     box-shadow: 3px 4px 5px 0px rgba(0,0,0,0.75);
     -webkit-box-shadow: 3px 4px 5px 0px rgba(0,0,0,0.75);
     -moz-box-shadow: 3px 4px 5px 0px rgba(0,0,0,0.75);

@@ -93,7 +93,7 @@ const getAllPosts = async (req, res) => {
     const community = req.query.community;
     const pageNumber = req.query.page;
     console.log(req.query)
-    const pageLimit = 3;
+    const pageLimit = 10;
     // const skipNumber = 2;
     const skipNumber = (pageNumber * pageLimit) - pageLimit;
     let documentsCount;
@@ -170,9 +170,35 @@ const getAllPosts = async (req, res) => {
     }
 }
 
+const getPinnedPosts = async (req, res) => {
+    const username = req.params.username
+
+    const pageLimit = 5;
+    // const skipNumber = (pageNumber * pageLimit) - pageLimit;
+    let documentsCount;
+    let numOfPages;
+
+    try {
+           const result = await db.query(`SELECT title, community_name, post_id, created_on FROM posts WHERE $1 = ANY(is_pinned_to_dashboard_array) ORDER BY created_on DESC LIMIT ${pageLimit};`, [username])
+           if(result.rowCount > 0){
+                documentsCount = result.rows.length;
+                numOfPages = Math.ceil(documentsCount / pageLimit);
+                let pinnedPosts = result.rows
+                res.status(200).send({documentsCount, numOfPages , pinnedPosts})
+           }else{
+            res.status(404).json("Oops! Pinned posts were not found");
+
+           }           
+        
+    } catch (error) {
+        res.status(404).json("Posts not found");
+    }
+}
+
 
 
 module.exports ={
+    getPinnedPosts,
     createPost,
     editPost,
     deletePost,
