@@ -80,7 +80,7 @@ function UserDashboard() {
                 }}
               >
                 <ListComponent
-                  title="Viewed posts"
+                  title="Followed topics"
                   icon={<i className="fas fa-eye"></i>}
                 />
               </CardContent>

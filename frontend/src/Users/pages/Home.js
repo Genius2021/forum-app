@@ -1,5 +1,4 @@
 import Grid from "@mui/material/Grid";
-import CardComponent from "../components/CardComponent";
 import LeftbarComponent from "../components/LeftbarComponent";
 import SlideShow from "../components/SlideShow";
 import Advertisement from "../components/Advertisement";
@@ -134,7 +133,7 @@ export default function Home() {
                               marginRight: "0.5rem",
                             }}
                           >
-                            {index + 1}
+                            { index + 1 }
                           </span>
                           <Link
                             to={`/communities/${post.community_name}/${post.post_id}`}
@@ -145,7 +144,7 @@ export default function Home() {
                                   sx={{
                                     color: "#3b5998",
                                     fontSize: "1.2rem",
-                                    fontWeight: 500,
+                                    fontWeight: 400,
                                   }}
                                 >
                                   {`${post.title.substr(0, 35)}...`}

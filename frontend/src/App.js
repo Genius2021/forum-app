@@ -10,6 +10,7 @@ import Post from "./Users/components/CardComponent";
 import CreatePost from "./Users/pages/CreatePost";
 import SinglePost from "./Users/pages/SinglePost";
 import UserDashboard from "./Users/pages/UserDashboard";
+import UserProfile from "./Users/pages/UserProfile";
 
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
             <Route path="/login" component={Login} />
             <Route path="/register" component={Register} />
             <Route path="/dashboard" component={UserDashboard} />
+            <Route path="/users/:username" component={UserProfile} />
             <Route exact path="/communities/:community" component={Community} />
             <Route exact path="/communities/:community/create-post" component={CreatePost} />
             <Route path="/communities/:community/:id" component={SinglePost} />

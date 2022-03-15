@@ -148,7 +148,7 @@ const getAllComments = async (req, res) => {
     const capitalizeCommunity = capitalizeStringWithDash(req.baseUrl.split("/")[2])
     try {
         //NOTE: When doing an inner join, after the SELECT, you specify the columns in both table A and table B which you want. NOTE again, they come immediately after the SELECT syntax.
-        const allComments = await db.query("SELECT comment_id, post_id,community_name, author_username, comments.is_admin, comment_text, liked_by, shared_by, comments.created_on, edited_on, users.firstname, users.username  FROM comments INNER JOIN users ON comments.author_username = users.username WHERE post_id = $1 AND community_name = $2 ORDER BY comments.created_on DESC LIMIT 15;", [ post_id, capitalizeCommunity ])
+        const allComments = await db.query("SELECT comment_id, post_id,community_name, author_username, comments.is_admin, comment_text, liked_by, shared_by, comments.created_on, edited_on, users.firstname, users.username FROM comments INNER JOIN users ON comments.author_username = users.username WHERE post_id = $1 AND community_name = $2 ORDER BY comments.created_on DESC LIMIT 15;", [ post_id, capitalizeCommunity ])
         const createdPost = allComments.rows
         res.status(200).json(createdPost);
     } catch (err) {

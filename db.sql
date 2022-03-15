@@ -65,7 +65,17 @@ CREATE TABLE IF NOT EXISTS posts (
         is_admin BOOLEAN DEFAULT FALSE NOT NULL, 
         created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
         last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL );
-
+        
+        
+        CREATE TABLE IF NOT EXISTS friends ( 
+        username VARCHAR(50) PRIMARY KEY NOT NULL, 
+        friends_list VARCHAR[],
+        followers_list VARCHAR[],
+        following_list VARCHAR[], 
+        CONSTRAINT friends_username_foreignkey_constraint
+        FOREIGN KEY (username)
+        REFERENCES users(username)
+        ON DELETE NO ACTION);
 
    CREATE TABLE IF NOT EXISTS comments ( 
         comment_id VARCHAR(150) PRIMARY KEY NOT NULL, 

@@ -1,6 +1,6 @@
 import { createStore, compose, applyMiddleware, combineReducers } from "redux";
 import thunk from "redux-thunk";
-import { userRegisterReducer, userSigninReducer } from "./Users/reducers/userReducer";
+import { userProfileReducer, userRegisterReducer, userSigninReducer } from "./Users/reducers/userReducer";
 import { getPinnedPostsReducer, getPostsReducer } from "./Users/reducers/postReducer";
 import { sidebarStateReducer } from "./Users/reducers/sidebarReducers";
 import { communityPaginationReducer, homePaginationReducer, messageReducer, modalReducer } from "./Users/reducers/generalReducers";
@@ -34,6 +34,7 @@ const reducer = combineReducers({
     shareCommunityComment:shareCommunityCommentReducer,
     likeCommunityPost: likeCommunityPostReducer,
     getPinnedPosts: getPinnedPostsReducer,
+    userProfile: userProfileReducer,
 });
 
 
