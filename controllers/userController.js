@@ -43,16 +43,14 @@ const getUserProfile = async (req, res) => {
   try {
     if (username) {
       let userPosts = await db.query(
-        `SELECT post_id, title, community_name, created_on FROM posts WHERE author = $1 ORDER BY created_on LIMIT ${dataLimit};`,
+        `SELECT post_id, title, community_name, created_on FROM posts WHERE author = $1 ORDER BY created_on DESC LIMIT ${dataLimit};`,
         [username]
       );
-      console.log(userPosts);
 
       let userComments = await db.query(
-        `SELECT community_name, comment_id, comment_text, created_on FROM comments WHERE author_username = $1 ORDER BY created_on LIMIT ${dataLimit} ;`,
+        `SELECT community_name, comment_id, comment_text, created_on FROM comments WHERE author_username = $1 ORDER BY created_on DESC LIMIT ${dataLimit} ;`,
         [username]
       );
-      console.log(userComments);
 
       //   let userFirstnameAndFollowers = await db.query(
       //     "SELECT users.firstname, friends_list, followers_list, following_list FROM users LEFT JOIN friends ON users.username = friends.username WHERE users.username = $1;",

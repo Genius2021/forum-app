@@ -5,7 +5,7 @@ import Checkbox from '@mui/material/Checkbox';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import {Link } from "react-router-dom";
+import Grid from "@mui/material/Grid";
 import { useDispatch, useSelector } from 'react-redux';
 import { signin } from "../../Redux/Users/actions/userActions";
 import AlertComponent  from "../components/AlertComponent";
@@ -69,33 +69,37 @@ export default function Login(props) {
 
   return (
       <>
-        <Box
-        component="form"
-        sx={{
-            display:"flex",
-            flexDirection:"column",
-            justifyContent:"center",
-            alignItems:"center",
-            height: 'calc(100vh - 62.5px)',
-            '& > :not(style)': { width: '60vw'},
-            "& .css-1u3bzj6-MuiFormControl-root-MuiTextField-root": {marginTop: "15px"}
-        }}
-        noValidate
-        autoComplete="off"
-        >
-        <Typography variant="h2" sx={{textAlign: "center", marginBottom: "20px", fontSize:"2.5rem", color:"#555555"}}>Welcome back Boss! Log In.</Typography>
-        { (errorMessage || error) && <AlertComponent typeOfAlert="error">{errorMessage || error }</AlertComponent> }
-        { registerInfo && successMessage && <AlertComponent typeOfAlert="success">{ successMessage }</AlertComponent> }
-        <TextField required id="outlined-basic" label="Email" InputProps={{style:{fontSize: "1.2rem", color: "#777777"}}} InputLabelProps={{style:{fontSize: "1.5rem" }}} variant="outlined" autoFocus onChange={e => setEmail(e.target.value)} />
-        <TextField required id="outlined-basic" label="Password" variant="outlined" type={ showPassword ? "text": "password" } InputProps={{style:{fontSize: "1.2rem", color: "#777777" },  endAdornment: <InputAdornment position="end" sx={{ "&:hover": {cursor: "pointer"} }} onClick={handleShowPassword}>{ showPassword ? <VisibilityOff sx={visibility} /> : <Visibility sx={visibility} /> }</InputAdornment> }} InputLabelProps={{style:{fontSize:"1.5rem"}}} onChange={e => setPassword(e.target.value)}/>
-        <FormControlLabel
-          value="top"
-          control={<Checkbox color="success" 
-          sx={{ '& .MuiSvgIcon-root': { fontSize: 15 }, display:"flex", alignSelf: "center"}}/>}
-          label={<Typography variant="subtitle2" sx={{color:"#444444"}} >Remember me</Typography>}
-        />
-        <Button variant="contained" endIcon={loading && <CircularProgress size="2rem" sx={{ color:"white" }} />} onClick={submitHandler} size="large" sx={{marginTop: "1.3rem", fontSize: "1.2rem", backgroundColor:"#3b5998", "&:hover": {cursor:`${loading && "not-allowed"}`}}}>Login</Button>
-        </Box>
+        <Grid container sx={{ justifyContent: "center" }}>
+          <Grid item xs={10} sm={8} md={6} lg={6} sx={{ mb: 3 }}>
+            <Box
+            component="form"
+            sx={{
+                display:"flex",
+                flexDirection:"column",
+                justifyContent:"center",
+                alignItems:"center",
+                height: 'calc(100vh - 62.5px)',
+                '& > :not(style)': { width: '100%'},
+                "& .css-1u3bzj6-MuiFormControl-root-MuiTextField-root": {marginTop: "15px"}
+            }}
+            noValidate
+            autoComplete="off"
+            >
+            <Typography variant="h2" sx={{textAlign: "center", marginBottom: "20px", fontSize:"2.5rem", color:"#555555"}}>Welcome back Boss! Log In.</Typography>
+            { (errorMessage || error) && <AlertComponent typeOfAlert="error">{errorMessage || error }</AlertComponent> }
+            { registerInfo && successMessage && <AlertComponent typeOfAlert="success">{ successMessage }</AlertComponent> }
+            <TextField required id="outlined-basic" label="Email" InputProps={{style:{fontSize: "1.2rem", color: "#777777"}}} InputLabelProps={{style:{fontSize: "1.5rem" }}} variant="outlined" autoFocus onChange={e => setEmail(e.target.value)} />
+            <TextField required id="outlined-basic" label="Password" variant="outlined" type={ showPassword ? "text": "password" } InputProps={{style:{fontSize: "1.2rem", color: "#777777" },  endAdornment: <InputAdornment position="end" sx={{ "&:hover": {cursor: "pointer"} }} onClick={handleShowPassword}>{ showPassword ? <VisibilityOff sx={visibility} /> : <Visibility sx={visibility} /> }</InputAdornment> }} InputLabelProps={{style:{fontSize:"1.5rem"}}} onChange={e => setPassword(e.target.value)}/>
+            <FormControlLabel
+              value="top"
+              control={<Checkbox color="success" 
+              sx={{ '& .MuiSvgIcon-root': { fontSize: 15 }, display:"flex", alignSelf: "center"}}/>}
+              label={<Typography variant="subtitle2" sx={{color:"#444444"}} >Remember me</Typography>}
+            />
+            <Button variant="contained" endIcon={loading && <CircularProgress size="2rem" sx={{ color:"white" }} />} onClick={submitHandler} size="large" sx={{marginTop: "1.3rem", fontSize: "1.2rem", backgroundColor:"#3b5998", "&:hover": {cursor:`${loading && "not-allowed"}`}}}>Login</Button>
+            </Box>
+          </Grid>
+        </Grid>
     </>
   );
 }

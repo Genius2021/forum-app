@@ -13,11 +13,11 @@ const likeCommunityPost = async (req, res) => {
         if(find.rows.length > 0){
             const removed = await db.query("UPDATE posts SET liked_by = array_remove(liked_by, $1) WHERE post_id = $2 RETURNING liked_by;", [username, post_id ] )
             likeCount = removed.rows[0].liked_by.length
-            res.status(200).json({ liked: false, likeCount });
+            res.status(200).json({ liked: false, likeCount, username });
         }else{
             const addedLike = await db.query("UPDATE posts SET liked_by = array_append(liked_by, $1) WHERE post_id = $2 RETURNING liked_by;", [username, post_id ] )
             likeCount = addedLike.rows[0].liked_by.length
-            res.status(200).json({ liked: true, likeCount });
+            res.status(200).json({ liked: true, likeCount, username });
         }
         
     } catch (err) {
@@ -84,24 +84,26 @@ const deleteAComment = async (req, res) => {
 const CommunityCommentLike = async (req, res) => {
     const { user_name, commentId} = req.body;
     const post_id = req.params.id
+    console.log(user_name, commentId)
     try {
         let liked_by;
         let length;
         let comment_id;
+        let username;
         const find = await db.query("SELECT liked_by FROM comments WHERE comment_id = $1 AND $2 = ANY(liked_by);", [commentId, user_name] )
         if(find.rows.length > 0){
-            const removed = await db.query("UPDATE comments SET liked_by = array_remove(liked_by, $1) WHERE comment_id = $2 RETURNING liked_by, comment_id;", [user_name, commentId ] )
-            liked_by = removed.rows[0].liked_by
-            comment_id = removed.rows[0].comment_id
-            length = removed.rows[0].liked_by.length
-            const username = removed.rows[0].author_username
+            const removed = await db.query("UPDATE comments SET liked_by = array_remove(liked_by, $1) WHERE comment_id = $2 RETURNING liked_by, comment_id, author_username;", [user_name, commentId ] )
+            liked_by = removed.rows[0].liked_by;
+            comment_id = removed.rows[0].comment_id;
+            length = removed.rows[0].liked_by.length;
+            username = user_name;
             res.status(200).json({liked_by, username, length, likeAction: false, comment_id});
         }else{
-            const addedLike = await db.query("UPDATE comments SET liked_by = array_append(liked_by, $1) WHERE comment_id = $2 RETURNING liked_by, comment_id;", [user_name, commentId ] )
-            liked_by = addedLike.rows[0].liked_by
-            comment_id = addedLike.rows[0].comment_id
-            length = addedLike.rows[0].liked_by.length
-            const username = addedLike.rows[0].author_username
+            const addedLike = await db.query("UPDATE comments SET liked_by = array_append(liked_by, $1) WHERE comment_id = $2 RETURNING liked_by, comment_id, author_username;", [user_name, commentId ] )
+            liked_by = addedLike.rows[0].liked_by;
+            comment_id = addedLike.rows[0].comment_id;
+            length = addedLike.rows[0].liked_by.length;
+            username = user_name;
             res.status(200).json({liked_by, username, length, likeAction: true, comment_id});
         }
         

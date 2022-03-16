@@ -32,6 +32,7 @@ import { CREATE_COMMUNITY_POST_FAIL,
     LIKE_COMMUNITY_POST_REQUEST,
     LIKE_COMMUNITY_POST_SUCCESS,
     LIKE_COMMUNITY_POST_FAIL,
+    UNLIKE_COMMUNITY_POST_SUCCESS,
     ADD_COMMUNITY_POST_COMMENT,
     DELETE_COMMUNITY_POST_COMMENT_REQUEST,
     DELETE_COMMUNITY_POST_COMMENT_SUCCESS,
@@ -172,6 +173,7 @@ export const postComment = (comment) => async (dispatch) => {
 
     try {
         const { data } = await axios.post(`/${community_name}/posts/${post_id}/comments/${comment_id}`, rest );
+        console.log(data)
         dispatch({ type: ADD_COMMUNITY_POST_COMMENT, payload: data });
         // localStorage.setItem("postDetails", JSON.stringify(data));
     } catch (error) {
@@ -246,7 +248,12 @@ export const likePost = (likeDetails) => async (dispatch) => {
     try {
         const { data } = await axios.put(`/${community}/posts/${id}`, rest);
         console.log(data)
-        dispatch({ type: LIKE_COMMUNITY_POST_SUCCESS, payload: data });
+        if(data.liked === true){
+            dispatch({ type: LIKE_COMMUNITY_POST_SUCCESS, payload: data });
+
+        }else{
+            dispatch({ type: UNLIKE_COMMUNITY_POST_SUCCESS, payload: data });
+        }
     } catch (error) {
         dispatch({
             type: LIKE_COMMUNITY_POST_FAIL,

@@ -30,9 +30,9 @@ const reducer = combineReducers({
     communityPagination: communityPaginationReducer,
     homePagination: homePaginationReducer,
     getAllComments: getAllCommentsReducer,
-    likeCommunityComment: likeCommunityCommentReducer,
+    // likeCommunityComment: likeCommunityCommentReducer,
     shareCommunityComment:shareCommunityCommentReducer,
-    likeCommunityPost: likeCommunityPostReducer,
+    // likeCommunityPost: likeCommunityPostReducer,
     getPinnedPosts: getPinnedPostsReducer,
     userProfile: userProfileReducer,
 });

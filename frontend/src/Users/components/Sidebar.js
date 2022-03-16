@@ -19,6 +19,7 @@ import { Badge } from '@mui/material';
 // }))
 
 export default function Sidebar() {
+  const { userInfo } = useSelector(state => state.userSignin);
   const { sidebarState } = useSelector(state => state.sidebarState);
 
   const dispatch = useDispatch();
@@ -43,7 +44,7 @@ export default function Sidebar() {
     let sidebarBottomElements = [
       {text: 'Messages', link: '/messages', font: <i className="fas fa-envelope"></i>},
       {text: 'My Dashboard', link: '/dashboard', font: <i className="fas fa-clipboard"></i>},
-      {text: 'Account', link: '/account', font: <i className="fas fa-user"></i>},
+      {text: 'Account', link: `/users/${userInfo?.username}`, font: <i className="fas fa-user"></i>},
     
    ];
 

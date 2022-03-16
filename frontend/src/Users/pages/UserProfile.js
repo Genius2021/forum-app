@@ -21,7 +21,7 @@ import { Link } from "react-router-dom";
 function UserProfile(props) {
   const [textareaState, setTextareaState] = useState("");
 
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   const handleClick = () => {
     setOpen(!open);
@@ -105,7 +105,7 @@ function UserProfile(props) {
         component="h3"
         style={{ textAlign: "center", fontWeight: "bold", fontSize: "2rem" }}
       >
-        Your profile
+        Your profile {paramsUsername}!
       </Typography>
       <div style={{ display: "flex", alignItems: "center", my: "1rem" }}>
         <Avatar sx={{ width: 100, height: 100 }}>
@@ -174,8 +174,10 @@ function UserProfile(props) {
             style={{
               color: "#555555",
               marginLeft: "1rem",
+              marginBottom: "1rem",
               padding: "0.3rem",
               border: "1px solid rgba(0,0,0,0.12)",
+              cursor:"pointer",
             }}
           >
             {genders.map((gender, index) => {
@@ -198,6 +200,7 @@ function UserProfile(props) {
               marginLeft: "1rem",
               padding: "0.3rem",
               border: "1px solid rgba(0,0,0,0.12)",
+              cursor:"pointer",
             }}
           >
             <option value="Nigerian">Nigerian</option>
@@ -215,6 +218,7 @@ function UserProfile(props) {
               marginLeft: "1rem",
               padding: "0.3rem",
               border: "1px solid rgba(0,0,0,0.12)",
+              cursor:"pointer",
             }}
           >
             {states.map((state, index) => {
@@ -227,36 +231,26 @@ function UserProfile(props) {
           </select>
         </span>
       </div>
-      <p>Active communities</p>
+      <p>Recent Activity summary</p>
+      <p style={{fontSize:"1.2rem", paddingLeft:"1.6rem"}}>Active communities</p>
       <div>
-        <p>Followed topics</p>
         { 
 
         <List
-        sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
+        sx={{ width: '100%',py:0, bgcolor: 'background.paper', border:"1px solid rgba(0,0,0,0.12)" }}
         component="nav"
         aria-labelledby="nested-list-subheader"
-        subheader={
-        <ListSubheader component="div" id="nested-list-subheader">
-            Nested List Items
-        </ListSubheader>
-        }
         >
         <ListItemButton onClick={handleClick}>
-        <ListItemIcon>
+        {/* <ListItemIcon>
             <InboxIcon />
-        </ListItemIcon>
-        <ListItemText primary="Followed topics" />
+        </ListItemIcon> */}
+        <ListItemText primary={<Typography sx={{fontSize:"1.2rem",paddingLeft:0}}>Followed topics</Typography>} />
         {open ? <ExpandLess /> : <ExpandMore />}
         </ListItemButton>
         <Collapse in={open} timeout="auto" unmountOnExit>
             {
             postsData.map((post, index)=>{
-                // <List component="div" disablePadding>
-                //     <ListItemButton sx={{ pl: 4 }}>
-                //     <ListItemText primary={<Typography>{`${post.title.substr(0, 25)}...`}</Typography>} />
-                //     </ListItemButton>
-                // </List>
 
                 return <List 
                 component="div" 
@@ -323,7 +317,7 @@ function UserProfile(props) {
         }
       </div>
       <div>
-        <p>Recent comments</p>
+        <p style={{fontSize:"1.2rem", paddingLeft:"1.6rem"}}>Recent comments</p>
         {
             commentsData.map((comment, index)=>{
 

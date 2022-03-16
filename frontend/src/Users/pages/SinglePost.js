@@ -49,15 +49,12 @@ function SinglePost({ location, match, history }) {
   const { userInfo } = useSelector((state) => state.userSignin);
   const username = userInfo?.username;
 
-  const { postLiked, postLikeCount } = useSelector(
-    (state) => state.likeCommunityPost
-  );
   const { shared, shareCount } = useSelector(
     (state) => state.shareCommunityComment
   );
   const [sendMessage, setSendMessage] = useState(false);
   const [stateCommentId, setStateCommentId] = useState("");
-  console.log(comments);
+  // console.log(comments);
 
   const style = {
     position: "sticky",
@@ -326,6 +323,7 @@ function SinglePost({ location, match, history }) {
                   </span>
                 </span>
                 <span>
+                <Tooltip title={<Typography sx={{ fontSize: "0.85rem" }}>{post.liked_by?.includes(username) ? "Unlike" : "I like this"}</Typography>}>
                   <i
                     className="fas fa-thumbs-up"
                     id="postLike"
@@ -336,13 +334,15 @@ function SinglePost({ location, match, history }) {
                       fontSize: "1rem",
                       cursor: "pointer",
                       color: `${
-                        (postLiked === true ? "green" : "") ||
+                        // (postLiked === true ? "green" : "") ||
                         (post.liked_by?.includes(username) ? "green" : "")
                       }`,
                     }}
                   ></i>
+                  </Tooltip>
                   <span style={{ fontSize: "1.1rem" }}>
-                    {postLikeCount ||
+                    {
+                    // postLikeCount ||
                       (post.liked_by?.length > 0 && post.liked_by?.length)}
                   </span>
                 </span>
@@ -708,7 +708,7 @@ function SinglePost({ location, match, history }) {
                               <Typography
                                 sx={{ fontSize: "0.85rem", cursor: "pointer" }}
                               >
-                                I Like this
+                                {liked_by ? "Unlike comment" : "Like comment"}
                               </Typography>
                             }
                           >
@@ -727,11 +727,12 @@ function SinglePost({ location, match, history }) {
                                 }
                                 style={{
                                   marginRight: "0.2rem",
-                                  color: `${liked_by && "green"}`,
+                                  color: `${liked_by ? "green" : ""}`,
                                 }}
                               ></i>
                               <span style={{ fontSize: "1.1rem" }}>
-                                {commentLikeCount ||
+                                {
+                                // commentLikeCount ||
                                   ((comment?.liked_by?.length || 0) > 0 &&
                                     (comment?.liked_by?.length || 0))}
                               </span>
