@@ -81,14 +81,14 @@ export default function Community(props) {
                             let is_viewed;
                             let is_pinned;
                             let count = (post.viewed_by_registered_users?.length || 0) + (post.viewed_by_unregistered_users?.length || 0)
+                            let likeCount = (post.liked_by?.length || 0)
                             if(username){
                               is_viewed = post.viewed_by_registered_users?.includes(username)  
                               is_pinned = post.is_pinned_to_dashboard_array?.includes(username)  
                             }
-
     
                             return <Paper key={post.post_id} sx={{mb:2}}>
-                                <BasicCard hrsAndMin={hrsAndMin} post={post} is_viewed={is_viewed} is_pinned={is_pinned} viewCount={count} />
+                                <BasicCard hrsAndMin={hrsAndMin} post={post} is_viewed={is_viewed} is_pinned={is_pinned} viewCount={count} likeCount={likeCount} />
                               </Paper> 
                             // }
                            

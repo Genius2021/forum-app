@@ -3,30 +3,54 @@ const { generateToken, capitalize } = require("../utils.js");
 const { db } = require("../db.js");
 const { v4: uuidv4 } = require("uuid");
 
-//user profile
-// const getUserProfile = async (req, res) => {
-//   const username = req.params.username;
-//   console.log(username);
+const followUser = async (req, res) => {
+        const username = req.params.username;
+        const recipient = req.body.recipient;
+        console.log(username, "inside user follow controller backend");
+        console.log(recipient, "recipient");
+    try {
+        let length;
+        let followers_list;
+        const find = await db.query("SELECT followers_list FROM friends WHERE username = $1 AND $2 = ANY(followers_list);", [recipient, username] )
+        console.log(find)
+        if(find.rows.length > 0){
+            console.log("inside unfollow logic")
+            const unfollowedUser = await db.query("UPDATE friends SET followers_list = array_remove(followers_list, $1) WHERE username = $2 RETURNING followers_list;", [username, recipient ] )
+            console.log(unfollowedUser, " after unfollowed")
+            followers_list = unfollowedUser.rows[0].followers_list;
+            length = unfollowedUser.rows[0].followers_list.length;
+            res.status(200).json({followers_list, username, length, unfollowed: true });
+        }else{
+            console.log("inside follow logic")
+            const followedUser = await db.query("UPDATE friends SET followers_list = array_append(followers_list, $1) WHERE username = $2 RETURNING followers_list;", [username, recipient ] )
+            console.log(followedUser, " after followed")
+            followers_list = followedUser.rows[0].followers_list;
+            console.log(followers_list, "followers_list")
+            length = followedUser.rows[0].followers_list.length;
+            res.status(200).json({followers_list, username, length });
+            
+        }
+
+    } catch (err) {
+        res.status(500).json(err);
+    }
+}
+
+// follow user
+// const followUser = async (req, res) => {
+//     const username = req.params.username;
+//     const recipient = req.body.recipient;
+//     console.log(username, "inside user follow controller backend");
+//     console.log(recipient, "recipient");
 //   try {
 //     if (username) {
-//       let userPostAndComments = await db.query(
-//         "SELECT posts.post_id, posts.title, posts.created_on AS postcreated_on, comments.community_name, comments.comment_id,comments.comment_text, comments.created_on AS commentcreated_on FROM posts INNER JOIN comments ON posts.author = comments.author_username WHERE posts.author = $1 LIMIT 5;",
-//         [username]
+//       let follow = await db.query(
+//         "UPDATE friends SET followers_list = array_append(followers_list, $1) WHERE friends.username = $2;",
+//         [username, recipient]
 //       );
-//       // const userProfile = await db.query("SELECT users.firstname, friendsList,followersList, followingList, posts.post_id, posts.title, comments.comment_id,comments.comment_text FROM posts INNER JOIN users ON posts.author = users.username INNER JOIN comments ON comments.post_id = posts.post_id INNER JOIN friends ON users.username = friends.username WHERE users.username = $1;",[username]);
-//       //   console.log(userPostAndComments);
-//       let userFirstnameAndFollowers = await db.query(
-//         "SELECT users.firstname, friends_list, followers_list, following_list FROM users LEFT JOIN friends ON users.username = friends.username WHERE users.username = $1;",
-//         [username]
-//       );
-//       console.log(userFirstnameAndFollowers);
-//       if(userPostAndComments.rowCount > 0 || userFirstnameAndFollowers.rowCount > 0){
-//           userPostAndComments = userPostAndComments.rows;
-//           userFirstnameAndFollowers = userFirstnameAndFollowers.rows[0];
-//         res.status(200).send({userPostAndComments, userFirstnameAndFollowers });
-//       }else{
-//           res.status(404).json("User was not found");
-//       }
+
+//         res.status(200).json({});
+
 //     } else {
 //       res.status(404).json("No ID was found");
 //     }
@@ -38,45 +62,52 @@ const { v4: uuidv4 } = require("uuid");
 //user profile
 const getUserProfile = async (req, res) => {
   const username = req.params.username;
-  console.log(username);
+  const someoneElse = req.query;
+  console.log(someoneElse, "someoneElse");
   const dataLimit = 10;
   try {
+
     if (username) {
-      let userPosts = await db.query(
-        `SELECT post_id, title, community_name, created_on FROM posts WHERE author = $1 ORDER BY created_on DESC LIMIT ${dataLimit};`,
-        [username]
-      );
-
-      let userComments = await db.query(
-        `SELECT community_name, comment_id, comment_text, created_on FROM comments WHERE author_username = $1 ORDER BY created_on DESC LIMIT ${dataLimit} ;`,
-        [username]
-      );
-
-      //   let userFirstnameAndFollowers = await db.query(
-      //     "SELECT users.firstname, friends_list, followers_list, following_list FROM users LEFT JOIN friends ON users.username = friends.username WHERE users.username = $1;",
-      //     [username]
-      //   );
-
-      let userFollowers = await db.query(
-        "SELECT friends_list, followers_list, following_list FROM friends WHERE username = $1;",
-        [username]
-      );
-      console.log(userPosts, userComments);
-      if (
-        userComments.rowCount > 0 ||
-        userFollowers.rowCount > 0 ||
-        userPosts.rowCount > 0
-      ) {
-        userComments = userComments.rows;
-        userPosts = userPosts.rows;
-        userFollowers = userFollowers.rows[0];
-        res.status(200).send({ userPosts, userComments, userFollowers });
-      } else {
-        res.status(404).json("User was not found");
-      }
-    } else {
-      res.status(404).json("No ID was found");
-    }
+        let userPosts = await db.query(
+            `SELECT post_id, title, community_name, created_on FROM posts WHERE author = $1 ORDER BY created_on DESC LIMIT ${dataLimit};`,
+            [username]
+        );
+    
+        let userComments = await db.query(
+            `SELECT community_name, comment_id, comment_text, created_on FROM comments WHERE author_username = $1 ORDER BY created_on DESC LIMIT ${dataLimit} ;`,
+            [username]
+        );
+    
+        //   let userFirstnameAndFollowers = await db.query(
+        //     "SELECT users.firstname, friends_list, followers_list, following_list FROM users LEFT JOIN friends ON users.username = friends.username WHERE users.username = $1;",
+        //     [username]
+        //   );
+    
+        let userFollowers = await db.query(
+            "SELECT friends_list, followers_list, following_list FROM friends WHERE username = $1;",
+            [username]
+        );
+        console.log(userPosts, userComments);
+        if (
+            userComments.rowCount > 0 ||
+            userFollowers.rowCount > 0 ||
+            userPosts.rowCount > 0
+        ) {
+            userComments = userComments.rows;
+            userPosts = userPosts.rows;
+            userFollowers = userFollowers.rows[0];
+            // if(someoneElse){
+            // res.status(200).send({ userPosts, userComments, userFollowers, someoneElse:true });
+            // }else{
+            res.status(200).send({ userPosts, userComments, userFollowers });
+            // }
+        } else {
+            res.status(404).json("User was not found");
+        }
+        } else {
+        res.status(404).json("No ID was found");
+        }
+    
   } catch (error) {
     res.status(404).json("User was not found");
   }
@@ -203,6 +234,7 @@ const userRegister = async (req, res) => {
           last_login,
         ]
       );
+      await db.query("INSERT INTO friends (username) VALUES($1);", [username]);
       console.log("successfully inserted a document");
       const createdUser = { ...result.rows[0] };
       res.status(201).send({
@@ -289,6 +321,7 @@ const deleteUser = async (req, res) => {
 };
 
 module.exports = {
+  followUser,
   getUserProfile,
   oneUser,
   allUsers,

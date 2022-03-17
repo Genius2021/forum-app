@@ -1,14 +1,16 @@
 const express = require("express");
 const expressAsyncHandler = require("express-async-handler");
 const { isAuth, isAdmin } = require("../utils.js");
-const { getUserProfile, userLogin, userRegister, userProfile, deleteUser, createUser, allUsers, oneUser } = require("../controllers/userController.js");
+const { followUser, getUserProfile, userLogin, userRegister, userProfile, deleteUser, createUser, allUsers, oneUser } = require("../controllers/userController.js");
 
 const userRouter = express.Router();
 
 //AuthRoutes
-userRouter.get("/profile/:username", expressAsyncHandler(getUserProfile));
+userRouter.get("/:username/profile", expressAsyncHandler(getUserProfile));
 
-userRouter.get("/:id", expressAsyncHandler(oneUser));
+userRouter.put("/:username/profile", expressAsyncHandler(followUser));
+
+// userRouter.get("/:id", expressAsyncHandler(oneUser));
 
 // userRouter.get("/", isAuth, isAdmin, expressAsyncHandler(allUsers));
 userRouter.get("/", expressAsyncHandler(allUsers));

@@ -53,6 +53,7 @@ function SinglePost({ location, match, history }) {
     (state) => state.shareCommunityComment
   );
   const [sendMessage, setSendMessage] = useState(false);
+  const [filterIndex, setFilterIndex] = useState(3);
   const [stateCommentId, setStateCommentId] = useState("");
   // console.log(comments);
 
@@ -211,6 +212,19 @@ function SinglePost({ location, match, history }) {
     }
   };
 
+  const filterHandler = (e, index, x) => {
+    setFilterIndex(index);
+    // if(x === "Most commented"){
+    //   dispatch(mostCommented)
+    // }else if(x ==="Most liked"){
+    //   dispatch(mostLiked)
+    // }else if(x === "Most shared"){
+    //   dispatch(mostShared)
+    // }else{
+
+    // }
+  };
+
   return (
     <Grid container spacing={1} sx={{ justifyContent: "center" }}>
       <Grid item xs={11.5} sm={11} md={7} lg={6}>
@@ -323,27 +337,36 @@ function SinglePost({ location, match, history }) {
                   </span>
                 </span>
                 <span>
-                <Tooltip title={<Typography sx={{ fontSize: "0.85rem" }}>{post.liked_by?.includes(username) ? "Unlike" : "I like this"}</Typography>}>
-                  <i
-                    className="fas fa-thumbs-up"
-                    id="postLike"
-                    onClick={postActionHandler}
-                    style={{
-                      my: "auto",
-                      marginRight: "0.3rem",
-                      fontSize: "1rem",
-                      cursor: "pointer",
-                      color: `${
-                        // (postLiked === true ? "green" : "") ||
-                        (post.liked_by?.includes(username) ? "green" : "")
-                      }`,
-                    }}
-                  ></i>
+                  <Tooltip
+                    title={
+                      <Typography sx={{ fontSize: "0.85rem" }}>
+                        {post.liked_by?.includes(username)
+                          ? "Unlike"
+                          : "I like this"}
+                      </Typography>
+                    }
+                  >
+                    <i
+                      className="fas fa-thumbs-up"
+                      id="postLike"
+                      onClick={postActionHandler}
+                      style={{
+                        my: "auto",
+                        marginRight: "0.3rem",
+                        fontSize: "1rem",
+                        cursor: "pointer",
+                        color: `${
+                          // (postLiked === true ? "green" : "") ||
+                          post.liked_by?.includes(username) ? "green" : ""
+                        }`,
+                      }}
+                    ></i>
                   </Tooltip>
                   <span style={{ fontSize: "1.1rem" }}>
                     {
-                    // postLikeCount ||
-                      (post.liked_by?.length > 0 && post.liked_by?.length)}
+                      // postLikeCount ||
+                      post.liked_by?.length > 0 && post.liked_by?.length
+                    }
                   </span>
                 </span>
               </Box>
@@ -443,8 +466,10 @@ function SinglePost({ location, match, history }) {
                   style={{
                     display: "flex",
                     alignItems: "center",
+                    // boxSizing:"contentBox",
                     listStyle: "none",
-                    border: "1px solid rgba(0, 0, 0, 0.12)",
+                    borderTop: "1px solid rgba(0, 0, 0, 0.12)",
+                    borderLeft: "1px solid rgba(0, 0, 0, 0.12)",
                     borderBottom: "none",
                     padding: 0,
                     marginTop: 0,
@@ -454,28 +479,31 @@ function SinglePost({ location, match, history }) {
                     color: "#555555",
                   }}
                 >
-                  <li
-                    style={{
-                      padding: "0.3rem",
-                      backgroundColor: "#dedede",
-                      cursor: "pointer",
-                      borderRight: "1px solid rgba(0, 0, 0, 0.12)",
-                    }}
-                  >
-                    Most comments
-                  </li>
-                  <li
-                    style={{
-                      padding: "0.3rem",
-                      cursor: "pointer",
-                      borderRight: "1px solid rgba(0, 0, 0, 0.12)",
-                    }}
-                  >
-                    Most likes
-                  </li>
-                  <li style={{ padding: "0.3rem", cursor: "pointer" }}>
-                    Most shares
-                  </li>
+                  {[
+                    "Most commented",
+                    "Most liked",
+                    "Most shared",
+                    "No filters",
+                  ].map((x, index) => {
+                    return (
+                      <li
+                        onClick={(e) => filterHandler(e, index, x)}
+                        key={index}
+                        style={{
+                          padding: "0.3rem",
+                          justifySelf: "flex-end",
+                          textAlign: "end",
+                          backgroundColor: `${
+                            filterIndex === index ? "#dedede" : ""
+                          }`,
+                          cursor: "pointer",
+                          borderRight: "1px solid rgba(0, 0, 0, 0.12)",
+                        }}
+                      >
+                        {x}
+                      </li>
+                    );
+                  })}
                 </ul>
               </Box>
             </div>
@@ -732,9 +760,10 @@ function SinglePost({ location, match, history }) {
                               ></i>
                               <span style={{ fontSize: "1.1rem" }}>
                                 {
-                                // commentLikeCount ||
-                                  ((comment?.liked_by?.length || 0) > 0 &&
-                                    (comment?.liked_by?.length || 0))}
+                                  // commentLikeCount ||
+                                  (comment?.liked_by?.length || 0) > 0 &&
+                                    (comment?.liked_by?.length || 0)
+                                }
                               </span>
                             </span>
                           </Tooltip>

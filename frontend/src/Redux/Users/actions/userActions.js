@@ -24,14 +24,45 @@ import {
   GET_USER_PROFILE_REQUEST,
   GET_USER_PROFILE_SUCCESS,
   GET_USER_PROFILE_FAIL,
+  GET_ANOTHER_USER_PROFILE_SUCCESS,
+  FOLLOW_USER_REQUEST,
+  FOLLOW_USER_SUCCESS,
+  UNFOLLOW_USER_SUCCESS,
+  FOLLOW_USER_FAIL,
 } from "../constants/userConstants";
 
-export const getUserProfile = (username) => async (dispatch) => {
+export const follow = (username, recipient) => async (dispatch) => {
+  dispatch({ type: FOLLOW_USER_REQUEST });
+  try {
+    const { data } = await axios.put(`/users/${username}/profile`, {recipient});
+    console.log(data)
+    if(data.unfollowed){
+        dispatch({ type: UNFOLLOW_USER_SUCCESS, payload: data });
+    }else{
+        dispatch({ type: FOLLOW_USER_SUCCESS, payload: data });
+    }
+    // localStorage.setItem("userInfo", JSON.stringify(data));
+  } catch (error) {
+    dispatch({
+      type: FOLLOW_USER_FAIL,
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const getUserProfile = (username, someoneElse) => async (dispatch) => {
   dispatch({ type: GET_USER_PROFILE_REQUEST });
   try {
-    const { data } = await axios.get(`/users/profile/${username}`);
+    const { data } = await axios.get(`/users/${username}/profile?someoneElse=${someoneElse}`);
     console.log(data)
-    dispatch({ type: GET_USER_PROFILE_SUCCESS, payload: data });
+    // if(data.someoneElse){
+    //     dispatch({ type: GET_ANOTHER_USER_PROFILE_SUCCESS, payload: data });
+    // }else{
+        dispatch({ type: GET_USER_PROFILE_SUCCESS, payload: data });
+    // }
     // localStorage.setItem("userInfo", JSON.stringify(data));
   } catch (error) {
     dispatch({
