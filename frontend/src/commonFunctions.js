@@ -27,7 +27,7 @@ export function capitalizeStringWithDash(string){
 }
 
 export function capitalizeLowercaseStringWithSpace(string){
-    if(string.includes('-')){
+    if(string.includes(" ")){
         const ans = string.split(" ").map(x =>{
             if(x === "and"){
                 return "and"

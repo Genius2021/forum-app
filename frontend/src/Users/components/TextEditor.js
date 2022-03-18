@@ -82,8 +82,8 @@ function TextEditor({ TextSelectionActions, iframeName, flexWrap, width, border}
       {command: 'unlink', tooltip: 'Unlink', type: 'button', className:  "fa fa-unlink"},
       {command: 'fontName', tooltip: 'FontName', type: 'select', name: 'fontname', options: ['Arial', 'Comic Sans MS', 'Courier', 'Sans-serif', 'Georgia', 'Times New Roman', 'Verdana', 'Courier New', 'Segoe UI Mono', 'Tahoma', 'Trebuchet MS', 'Garamond', 'Brush Script MT', 'Helvetica', ]},
       {command: 'fontSize', tooltip: 'FontSize', type: 'select', name: 'fontsize', options: [1, 2, 3, 4, 5, 6, 7]},
-      {command: 'insertImage', tooltip: 'Insert image', type: 'button', className:  "fa fa-file-image"},
-      {command: 'viewSourceCode', tooltip: 'View source code', type: 'button', className:  "fa fa-code"},
+      {command: 'insertImage', tooltip: 'Insert image url', type: 'button', className:  "fa fa-file-image"},
+      // {command: 'viewSourceCode', tooltip: 'View source code', type: 'button', className:  "fa fa-code"},
       
    ];
 

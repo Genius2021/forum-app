@@ -69,13 +69,13 @@ export default function BasicCard({
     <Card
       sx={{
         minWidth: 275,
-        maxHeight: 100,
-        pb: 1,
-        "&:hover": { transform: "scale(1.02)" },
+        maxHeight: 125,
+        // pb: 1,
+        // "&:hover": { transform: "scale(1.02)" },              
       }}
     >
       <CardHeader
-        sx={{ paddingTop: 1.5 }}
+        sx={{ padding:"0.7rem", paddingTop: 1.5 }}
         action={
           <Tooltip
             title={<Typography sx={{ fontSize: "1rem" }}>More</Typography>}
@@ -93,9 +93,10 @@ export default function BasicCard({
               fontSize: "1.3rem",
               cursor: "pointer",
               "&:hover": { color: "#3b5998" },
+              width:"fit-content"
             }}
           >
-            {post ? post.title.substring(0, 65) : "Shrimp and Chorizo Paella"}
+            {post ? `${post.title.substring(0, 55)}...` : "Shrimp and Chorizo Paella"}
           </Typography>
         }
         subheader={
@@ -110,7 +111,7 @@ export default function BasicCard({
           >
             By
             <Link
-              to={`/communities/${community}/posts/${
+              to={`/users/${
                 post ? post.author : "Goat Messi"
               }`}
             >
@@ -151,6 +152,7 @@ export default function BasicCard({
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
+                cursor:"default",
               }}
             >
               <FavoriteIcon />
@@ -169,7 +171,8 @@ export default function BasicCard({
               style={{
                 color: "#777777",
                 fontSize: "1.3rem",
-                cursor: "pointer",
+                // cursor: "pointer",
+                cursor:"default",
               }}
             ></i>
             <span style={{ fontSize: "1.1rem", color: "#777777" }}>4</span>
@@ -190,6 +193,7 @@ export default function BasicCard({
               sx={{
                 color: `${is_viewed && "green"}`,
                 backgroundColor: `${is_viewed && "rgba(0, 0, 0, 0.04)"}`,
+
               }}
             >
               <Visibility />

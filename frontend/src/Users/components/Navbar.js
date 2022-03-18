@@ -85,7 +85,7 @@ const toolbarStyles = styled(Toolbar)(({theme}) =>({
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="fixed" sx={{ backgroundColor: "white", color:"gray", boxShadow:"-1px 5px 9px -7px #000000" }}>
         <Toolbar>
-          <IconButton
+          {userInfo && <IconButton
             edge="start"
             onClick={menuToggle}
             color="inherit"
@@ -93,7 +93,7 @@ const toolbarStyles = styled(Toolbar)(({theme}) =>({
             sx={{ mr: 2 }}
           >
             <MenuIcon sx={{fontSize:"20px"}} />
-          </IconButton>
+          </IconButton>}
           <Link to="/">
             <Typography
                 variant="h6"
@@ -104,8 +104,8 @@ const toolbarStyles = styled(Toolbar)(({theme}) =>({
               PINKY-SINKY
             </Typography>
           </Link>
-          
-          <Search>
+          {
+            userInfo && <Search>
             <SearchIconWrapper>
               <SearchIcon sx={{color:"blue"}}/>
             </SearchIconWrapper>
@@ -114,7 +114,8 @@ const toolbarStyles = styled(Toolbar)(({theme}) =>({
               placeholder="Search…"
               inputProps={{ 'aria-label': 'search' }}
             />
-          </Search>
+          </Search>}
+
           {/* <Box sx={{ flexGrow: 1 }} /> */}
           { userInfo && <AccountMenu sx={{display: "flex", justifyContent:"end"}} /> }
           { userInfo ? (<Box sx={{ display: { xs: 'flex', md: 'none' } }}>

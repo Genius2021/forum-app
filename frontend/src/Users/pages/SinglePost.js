@@ -22,6 +22,7 @@ import {
 } from "@mui/material";
 import Advertisement from "../components/Advertisement";
 import Communities from "../components/LeftbarComponent";
+import RelatedPosts from "../components/RelatedPosts";
 import PageTitle from "../components/PageTitle";
 import { useState, useEffect } from "react";
 import AlertComponent from "../components/AlertComponent";
@@ -52,10 +53,14 @@ function SinglePost({ location, match, history }) {
   const { shared, shareCount } = useSelector(
     (state) => state.shareCommunityComment
   );
+
   const [sendMessage, setSendMessage] = useState(false);
+  const [filterComments, setFilterComments] = useState([]);
   const [filterIndex, setFilterIndex] = useState(3);
   const [stateCommentId, setStateCommentId] = useState("");
-  // console.log(comments);
+
+  console.log(filterComments)
+
 
   const style = {
     position: "sticky",
@@ -124,6 +129,10 @@ function SinglePost({ location, match, history }) {
     dispatch(getPostComments(id, community));
   }, [id, community, location]);
 
+  useEffect(()=>{
+    setFilterComments(comments)
+  }, [comments])
+
   // const postInArray = seenPostsArray.includes(id)  //this id is coming from match.params.id
   //   let count = 0;
   //   postViewsCounter.forEach(x =>{
@@ -162,7 +171,6 @@ function SinglePost({ location, match, history }) {
   };
 
   const commentDeleteHandler = (e, commentId) => {
-    console.log(commentId);
     if (!username) {
       history.push("/login");
     } else {
@@ -214,15 +222,20 @@ function SinglePost({ location, match, history }) {
 
   const filterHandler = (e, index, x) => {
     setFilterIndex(index);
-    // if(x === "Most commented"){
-    //   dispatch(mostCommented)
-    // }else if(x ==="Most liked"){
-    //   dispatch(mostLiked)
-    // }else if(x === "Most shared"){
-    //   dispatch(mostShared)
-    // }else{
+    if(x === "Most commented"){
+      filterComments.filter(()=>{
 
-    // }
+      })
+    }else if(x ==="Most liked"){
+      filterComments.sort((a, b)=>{
+        return b.liked_by.length - a.liked_by.length
+      })
+
+    }else if(x === "Most shared"){
+
+    }else {
+      return comments;
+    }
   };
 
   return (
@@ -438,7 +451,22 @@ function SinglePost({ location, match, history }) {
                         </span>
                       </Tooltip>
                     </Typography>
-                    <Button smallContainedButton>Next post</Button>
+                    <div>
+                      <Tooltip
+                          title={<Typography sx={{ fontSize: "1rem" }}>Share post</Typography>}
+                        >
+                          <span style={{marginRight:"1rem",}}>
+                          <i
+                            className="fas fa-share"
+                            style={{
+                              color: "#777777",
+                              fontSize: "1.3rem",
+                              cursor: "pointer",
+                            }}
+                          ></i></span>
+                        </Tooltip>
+                      <Button smallContainedButton>Next post</Button>
+                    </div>
                   </span>
                 </CardContent>
               </Paper>
@@ -507,7 +535,7 @@ function SinglePost({ location, match, history }) {
                 </ul>
               </Box>
             </div>
-            <Card variant="outlined" sx={{ mb: 3, padding: 0 }}>
+            <Card variant="outlined" sx={{ padding: 0 }}>
               <CardContent sx={{ padding: 0, paddingBottom: "0 !important" }}>
                 <form
                   id="theForm"
@@ -521,7 +549,7 @@ function SinglePost({ location, match, history }) {
                   <iframe
                     name="iframeTextField"
                     id="iframeTextField"
-                    title="iframeTextField"
+                    // title="iframeTextField"
                     style={iframeTextArea}
                   ></iframe>
                   <Button
@@ -534,7 +562,21 @@ function SinglePost({ location, match, history }) {
                     Add comment
                   </Button>
                 </form>
-                {sendMessage && (
+                {/* {sendMessage && (
+                  <Typography
+                    sx={{
+                      textAlign: "center",
+                      color: "green",
+                      backgroundColor: "none",
+                    }}
+                  >
+                    You have successfully added your comment boss!
+                  </Typography>
+                )} */}
+              </CardContent>
+            </Card>
+            <div style={{marginBottom: "2rem"}}>
+            {sendMessage && (
                   <Typography
                     sx={{
                       textAlign: "center",
@@ -545,8 +587,7 @@ function SinglePost({ location, match, history }) {
                     You have successfully added your comment boss!
                   </Typography>
                 )}
-              </CardContent>
-            </Card>
+            </div>
             <Card sx={{ paddingBottom: 0 }}>
               <CardContent sx={{ paddingBottom: "1rem !important" }}>
                 <TextEditor
@@ -567,7 +608,7 @@ function SinglePost({ location, match, history }) {
               </Typography>
             </Divider>
 
-            {comments.map((comment, index) => {
+            {filterComments.map((comment, index) => {
               const commentDate = new Date(comment?.created_on)
                 .toString()
                 .split(" ");
@@ -702,7 +743,7 @@ function SinglePost({ location, match, history }) {
                               <Typography
                                 sx={{ fontSize: "0.85rem", cursor: "pointer" }}
                               >
-                                Comment
+                                Comments
                               </Typography>
                             }
                           >
@@ -2569,9 +2610,10 @@ function SinglePost({ location, match, history }) {
       </Grid>
       <Grid item xs={11.5} sm={11} md={4} lg={3}>
         <Box sx={style}>
-          <PageTitle name="#Trending Now" />
-          <Communities />
+          <PageTitle name="Related posts" />
+          <RelatedPosts />
           <Advertisement passedIndex={2} bottomRight />
+          <Communities />
         </Box>
       </Grid>
     </Grid>

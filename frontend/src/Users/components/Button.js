@@ -1,10 +1,9 @@
-import React from 'react'
 
-function Button({type, children, border, fontSize, onClick, justifySelf, smallContainedButton, mediumContainedButton, largeContainedButton, smallOutlinedButton, mediumOutlinedButton, largeOutlinedButton }) {
+function Button({type, children, border, color, fontSize, onClick, justifySelf, smallContainedButton, mediumContainedButton, largeContainedButton, smallOutlinedButton, mediumOutlinedButton, largeOutlinedButton }) {
 
     const smallContainedButtonStyle = {
         backgroundColor:"#3b5998",
-        color:"white",
+        color: `${color || "white"}`,
         padding: "0.5rem",
         borderRadius: "0.3rem",
         border: `${border || "1px #a4a4a4 solid"} `,
@@ -16,7 +15,7 @@ function Button({type, children, border, fontSize, onClick, justifySelf, smallCo
     }
     const mediumContainedButtonStyle ={
         backgroundColor:"#3b5998",
-        color:"white",
+        color: `${color || "white"}`,
         padding: "1rem",
         borderRadius: "0.3rem",
         border: `${border || "1px #a4a4a4 solid"} `,
@@ -29,7 +28,7 @@ function Button({type, children, border, fontSize, onClick, justifySelf, smallCo
 
     const largeContainedButtonStyle = {
         backgroundColor:"#3b5998",
-        color:"white",
+        color: `${color || "white"}`,
         padding: "1.2rem",
         borderRadius: "0.3rem",
         border: `${border || "1px #a4a4a4 solid"} `,
@@ -42,7 +41,7 @@ function Button({type, children, border, fontSize, onClick, justifySelf, smallCo
 
     const smallOutlinedButtonStyle = {
         backgroundColor:"white",
-        color:"#3b5998",
+        color: `${color || "#3b5998"}`,
         padding: "0.5rem",
         borderRadius: "0.3rem",
         border: `${border || "1px #3b5998 solid"} `,
@@ -55,7 +54,7 @@ function Button({type, children, border, fontSize, onClick, justifySelf, smallCo
 
     const mediumOutlinedButtonStyle ={
         backgroundColor:"white",
-        color:"#3b5998",
+        color: `${color || "#3b5998"}`,
         padding: "1rem",
         borderRadius: "0.3rem",
         border: `${border || "1px #3b5998 solid"} `,
@@ -68,7 +67,7 @@ function Button({type, children, border, fontSize, onClick, justifySelf, smallCo
 
     const largeOutlinedButtonStyle ={
         backgroundColor:"white",
-        color:"#3b5998",
+        color: `${color || "#3b5998"}`,
         padding: "1.2rem",
         borderRadius: "0.3rem",
         border: `${border || "1px #3b5998 solid"} `,

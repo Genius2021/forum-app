@@ -7,11 +7,13 @@ import BreadCrumb from "../components/BreadCrumb";
 import PageTitle from "../components/PageTitle";
 import AlertComponent from "../components/AlertComponent";
 import PaginationComponent from "../components/PaginationComponent";
+import TrendingNow from "../components/TrendingNow";
 import BasicCard from "../components/BasicCard";
 import { getCommunityPosts } from "../../Redux/Users/actions/communityActions";
 import { useEffect, useState } from "react";
 import CircularProgress from '@mui/material/CircularProgress';
 import { hrsAndMins } from "../../commonFunctions";
+
 
 
 export default function Community(props) {
@@ -46,9 +48,8 @@ export default function Community(props) {
                 <BreadCrumb />
                 {/* <Paper sx={{ maxWidth: 350, mx:"auto", zIndex:"50"}}> */}
                 <Paper sx={{ maxWidth: 700, mx:"auto", zIndex:"50", mb:3}}>
-                  <Card variant="outlined" sx={{ maxWidth: 700 }}>
-                    <Paper elevation={2}>
-                      <CardContent sx={{display:"flex", justifyContent:"space-between", alignItems:"center", backgroundColor:"rgba(0, 0, 0, 0.04)", inset: {bottom: 4} }}>
+                  <Card elevation={0} variant="outlined" sx={{ maxWidth: 700, border:"0 !important" }}>
+                      <CardContent sx={{ border:"1px solid rgba(0,0,0,0.12)",padding:"0.5rem", display:"flex", justifyContent:"space-between", alignItems:"center", backgroundColor:"background.paper", borderRadius:"4px" }}>
                         <Typography variant="body2" color="text.secondary">
                           God
                         </Typography>
@@ -61,22 +62,11 @@ export default function Community(props) {
                           </Typography>
                         </Link>
                     </CardContent>
-                    </Paper>
-                    <Divider/>
-                    <CardContent sx={{backgroundColor: "rgba(235, 235, 235, 0.4)", height: "150vh", overflowY: "auto",  }}>
+                    <CardContent sx={{backgroundColor: "rgba(235, 235, 235, 0.4)", height: "150vh", overflowY: "auto",padding:"0 !important"  }}>
                       { loading ? (<Box textAlign="center"><CircularProgress sx={{color:"#3b5998"}} /></Box>) : error ? (<AlertComponent typeOfAlert="error" >{error}</AlertComponent>) : (
                         <>
                           { posts?.map( post =>{
-                            
-                            // const postInArray = seenPostsArray.includes(post.post_id)
-                            //   let count = 0;
-                            //   postViewsCounter.forEach(x =>{
-                            //     if(x.postId === post.post_id){
-                            //       count = x.count;
-                            //     }
-                               
-                            //   }) 
-                            // if(post){
+
                             const hrsAndMin = hrsAndMins(post?.created_on)
                             let is_viewed;
                             let is_pinned;
@@ -87,9 +77,9 @@ export default function Community(props) {
                               is_pinned = post.is_pinned_to_dashboard_array?.includes(username)  
                             }
     
-                            return <Paper key={post.post_id} sx={{mb:2}}>
+                            return <Card elevation={0} key={post.post_id} sx={{mt:2, border:"1px solid rgba(0,0,0,0.12)", "&:hover": { border: "1px solid #3b5998" },}}>
                                 <BasicCard hrsAndMin={hrsAndMin} post={post} is_viewed={is_viewed} is_pinned={is_pinned} viewCount={count} likeCount={likeCount} />
-                              </Paper> 
+                              </Card> 
                             // }
                            
                             })
@@ -141,8 +131,7 @@ export default function Community(props) {
                       </Paper>  
                         
                     </CardContent>
-                    <Paper elevation={2}>
-                      <CardContent sx={{display:"flex", justifyContent:"space-between", alignItems:"center", backgroundColor:"rgba(0, 0, 0, 0.04)"}}>
+                      <CardContent elevation={0} sx={{ border:"1px solid rgba(0,0,0,0.12)",padding:"0.5rem !important", display:"flex", justifyContent:"space-between", alignItems:"center", backgroundColor:"background.paper", borderRadius:"4px"}}>
                       <Typography variant="body2" color="text.secondary">
                         
                       </Typography>
@@ -154,19 +143,16 @@ export default function Community(props) {
                           CREATE POST
                         </Typography>
                       </Link>
-                    </CardContent>
-                    </Paper>
-                    
+                    </CardContent>                    
                   </Card>
                 </Paper>
             </Grid>
           <Grid item xs={11.5} sm={11} md={4} lg={3} >
             <Box sx={ style }>
-              <Box sx={ style }>
-                <PageTitle name="#Trending Now" width="30vw" />
-              </Box>
-              <Communities />
+              <PageTitle name="#Trending Now" />
+              <TrendingNow />
               <Advertisement passedIndex={1} />
+              <Communities />
             </Box>
           </Grid>
         </Grid>

@@ -134,7 +134,7 @@ function CreatePost(props) {
               <Box sx={ style }>
                 <PageTitle name="Make a Post" />
               </Box>
-              <section style={{mx: "auto"}}>
+              <section style={{display:"grid", mx: "auto"}}>
                 <div style={{display: "flex", justifyContent: "center", overflowX:"auto", paddingTop:"0.5rem"}}>
                   {
                       file && Object.keys(file).map((key,currentIndex) =>{
@@ -148,7 +148,9 @@ function CreatePost(props) {
                 </div>
                   <form id="postCreationForm" style={{ display:"flex", flexDirection:"column", alignItems:"center"}}>
                       <div style={{display:"flex", width:"100%", justifyContent:"space-between"}}>
-                          <div style={{ display:"flex", width:"100%", justifyContent:"center", overflowX:"auto"}}><TextEditor iframeName="postCreationiframe" TextSelectionActions={TextSelectionActions} /></div>
+                          {/* <div style={{ display:"flex", width:"100%", justifyContent:"center", overflowX:"auto"}}>
+                            <TextEditor iframeName="postCreationiframe" TextSelectionActions={TextSelectionActions} />
+                          </div> */}
                           <label htmlFor="form__file" style={{display:"flex", alignItems:"center", justifyContent:"flex-end"}}>
                             <Tooltip title={<Typography sx={{ fontSize: "0.85rem" }}>Add images</Typography>}>
                               <ImageIcon sx={{ fontSize:"3rem",color:"#555555", cursor:"pointer", "&:hover":{color:"#333333"}}}/>
@@ -158,21 +160,30 @@ function CreatePost(props) {
                       </div>
                       <div style={{display:"grid", width:"100%"}}>
                           <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Title of post" style={{marginBottom:10, fontFamily:"Roboto",color:"#666666"}} autoFocus />
-                          <div id="iframeContainer" style={{display:"grid"}}>
+                          <div id="iframeContainer">
                             <textarea id="postCreationTextArea" style={{display:"none"}} />
                             <iframe name="postCreationiframe" id="postCreationiframe" title="iframeTextField" value={description} style={iframeTextArea}></iframe>
                             {/* <div style={{ fontSize: "1.2rem", color:"#404040" }}>{ iframeAreaRef.current?.value.length || 0 } of 3000</div> */}
-                            <Button type="submit" justifySelf="end"  largeContainedButton onClick={publishHandler}>Publish</Button>
                           </div>
                       </div>
                   </form>
+                  <Card sx={{ paddingBottom: 0, mb:"1rem" }}>
+                    <CardContent sx={{ paddingBottom: "1rem !important" }}>
+                      <TextEditor
+                        flexWrap="wrap"
+                        width="100%"
+                        border="none"
+                        TextSelectionActions={TextSelectionActions}
+                        iframeName="postCreationiframe"
+                      />
+                    </CardContent>
+                  </Card>
+                  <Button type="submit" justifySelf="end" largeContainedButton onClick={publishHandler}>Publish</Button>
               </section>
             </Grid>
             <Grid item xs={11.5} sm={11} md={4} lg={3} >
               <Box sx={ style }>
-                <Box sx={ style }>
-                  <PageTitle name="#Trending Now" width="30vw" />
-                </Box>
+                  <PageTitle name="#Trending Now" />
                 <Communities />
                 <Advertisement passedIndex={2} />
               </Box>
