@@ -100,7 +100,14 @@ export default function Home() {
                 </span>
               </Typography> */}
               {posts?.map((post, index) => {
-                // <CardComponent key={post.post_id} post={post} />
+                let community_name;
+
+              if(post.community_name.includes(" ")){
+                community_name = post.community_name.split(" ").join("-").toString().toLowerCase();
+              }else{
+                community_name = post.community_name.toLowerCase()
+              }
+
 
                 return (
                   <>
@@ -136,7 +143,7 @@ export default function Home() {
                             { index + 1 }
                           </span>
                           <Link
-                            to={`/communities/${post.community_name}/${post.post_id}`}
+                            to={`/communities/${community_name}/${post.post_id}`}
                           >
                             <ListItemText
                               primary={

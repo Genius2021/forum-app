@@ -8,6 +8,8 @@ import {
   getPostComments,
   postComment,
   viewACommunityPost,
+  followThread,
+  followAllThread,
 } from "../../Redux/Users/actions/communityActions";
 import {
   Avatar,
@@ -36,6 +38,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { v4 as uuidv4 } from "uuid";
 import MyModal from "../components/MyModal";
 import { openModal } from "../../Redux/Users/actions/generalActions";
+import PaginationComponent from "../components/PaginationComponent";
 
 function SinglePost({ location, match, history }) {
   const community = location.pathname.split("/")[2];
@@ -44,7 +47,10 @@ function SinglePost({ location, match, history }) {
   const { loading, post, seenPost, error } = useSelector(
     (state) => state.getACommunityPost
   );
-  let { comments, commentLiked, commentLikeCount } = useSelector(
+
+  const { value } = useSelector((state) => state.commentPagination);
+
+  let { comments, commentLiked, commentLikeCount, numOfPages, allCommentsFollowed } = useSelector(
     (state) => state.getAllComments
   );
   const { userInfo } = useSelector((state) => state.userSignin);
@@ -59,8 +65,7 @@ function SinglePost({ location, match, history }) {
   const [filterIndex, setFilterIndex] = useState(3);
   const [stateCommentId, setStateCommentId] = useState("");
 
-  console.log(filterComments)
-
+  console.log(filterComments);
 
   const style = {
     position: "sticky",
@@ -126,12 +131,12 @@ function SinglePost({ location, match, history }) {
 
   useEffect(() => {
     dispatch(viewACommunityPost(id, community, username));
-    dispatch(getPostComments(id, community));
-  }, [id, community, location]);
+    dispatch(getPostComments(id, community, `?page=${value}`));
+  }, [id, community, location, value]);
 
-  useEffect(()=>{
-    setFilterComments(comments)
-  }, [comments])
+  useEffect(() => {
+    setFilterComments([...comments]);
+  }, [comments]);
 
   // const postInArray = seenPostsArray.includes(id)  //this id is coming from match.params.id
   //   let count = 0;
@@ -201,7 +206,7 @@ function SinglePost({ location, match, history }) {
       }
 
       if (e.target.id === "share") {
-        dispatch(shareComment({ id, community, username }));
+        dispatch(shareComment({ id, community, commentId, username }));
       }
     }
   };
@@ -222,22 +227,27 @@ function SinglePost({ location, match, history }) {
 
   const filterHandler = (e, index, x) => {
     setFilterIndex(index);
-    if(x === "Most commented"){
-      filterComments.filter(()=>{
+    if (x === "Most replied") {
+      filterComments.filter(() => {});
+    } else if (x === "Most liked") {
+      filterComments.sort((a, b) => {
+        return b.liked_by.length - a.liked_by.length;
+      });
+    } else if (x === "Most shared") {
 
-      })
-    }else if(x ==="Most liked"){
-      filterComments.sort((a, b)=>{
-        return b.liked_by.length - a.liked_by.length
-      })
-
-    }else if(x === "Most shared"){
-
-    }else {
-      return comments;
+    } else {
+      setFilterComments([...comments]);
     }
   };
 
+  const followThreadHandler =(e, commentid)=>{
+    dispatch(followThread(commentid, id, username, community))
+  }
+  
+  const followAllThreadHandler =()=>{
+    dispatch(followAllThread(id, username, community))
+  }
+  
   return (
     <Grid container spacing={1} sx={{ justifyContent: "center" }}>
       <Grid item xs={11.5} sm={11} md={7} lg={6}>
@@ -386,7 +396,7 @@ function SinglePost({ location, match, history }) {
             </Paper>
             <Card variant="outlined" sx={{ mb: 3 }}>
               <Paper sx={{ padding: "0.3rem" }}>
-                <CardContent sx={{ paddingBottom: "0.5rem !important" }}>
+                <CardContent sx={{ padding: "0.5rem !important" }}>
                   <Typography
                     dangerouslySetInnerHTML={{ __html: post?.description }}
                     sx={{
@@ -420,7 +430,8 @@ function SinglePost({ location, match, history }) {
                     }}
                   >
                     <Typography style={{ color: "#777777" }}>
-                      <Tooltip
+                      {
+                        post.author === username && <Tooltip
                         title={
                           <Typography sx={{ fontSize: "0.85rem" }}>
                             Delete post
@@ -435,7 +446,9 @@ function SinglePost({ location, match, history }) {
                           ></i>
                         </span>
                       </Tooltip>
-                      <Tooltip
+                      }
+                      {
+                        post.author === username && <Tooltip
                         title={
                           <Typography sx={{ fontSize: "0.85rem" }}>
                             Edit post
@@ -450,12 +463,18 @@ function SinglePost({ location, match, history }) {
                           ></i>
                         </span>
                       </Tooltip>
+                      }
+
                     </Typography>
                     <div>
                       <Tooltip
-                          title={<Typography sx={{ fontSize: "1rem" }}>Share post</Typography>}
-                        >
-                          <span style={{marginRight:"1rem",}}>
+                        title={
+                          <Typography sx={{ fontSize: "1rem" }}>
+                            Share post
+                          </Typography>
+                        }
+                      >
+                        <span style={{ marginRight: "1rem" }}>
                           <i
                             className="fas fa-share"
                             style={{
@@ -463,8 +482,9 @@ function SinglePost({ location, match, history }) {
                               fontSize: "1.3rem",
                               cursor: "pointer",
                             }}
-                          ></i></span>
-                        </Tooltip>
+                          ></i>
+                        </span>
+                      </Tooltip>
                       <Button smallContainedButton>Next post</Button>
                     </div>
                   </span>
@@ -485,54 +505,6 @@ function SinglePost({ location, match, history }) {
                 }}
               >
                 Comments Section
-              </Box>
-              <Box>
-                <span style={{ color: "#555555", fontSize: "1rem" }}>
-                  Filter by<i className="fas fa-filter"></i>
-                </span>
-                <ul
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    // boxSizing:"contentBox",
-                    listStyle: "none",
-                    borderTop: "1px solid rgba(0, 0, 0, 0.12)",
-                    borderLeft: "1px solid rgba(0, 0, 0, 0.12)",
-                    borderBottom: "none",
-                    padding: 0,
-                    marginTop: 0,
-                    marginBottom: 0,
-                    borderRadius: "0.2rem",
-                    fontSize: "1rem",
-                    color: "#555555",
-                  }}
-                >
-                  {[
-                    "Most commented",
-                    "Most liked",
-                    "Most shared",
-                    "No filters",
-                  ].map((x, index) => {
-                    return (
-                      <li
-                        onClick={(e) => filterHandler(e, index, x)}
-                        key={index}
-                        style={{
-                          padding: "0.3rem",
-                          justifySelf: "flex-end",
-                          textAlign: "end",
-                          backgroundColor: `${
-                            filterIndex === index ? "#dedede" : ""
-                          }`,
-                          cursor: "pointer",
-                          borderRight: "1px solid rgba(0, 0, 0, 0.12)",
-                        }}
-                      >
-                        {x}
-                      </li>
-                    );
-                  })}
-                </ul>
               </Box>
             </div>
             <Card variant="outlined" sx={{ padding: 0 }}>
@@ -562,31 +534,20 @@ function SinglePost({ location, match, history }) {
                     Add comment
                   </Button>
                 </form>
-                {/* {sendMessage && (
-                  <Typography
-                    sx={{
-                      textAlign: "center",
-                      color: "green",
-                      backgroundColor: "none",
-                    }}
-                  >
-                    You have successfully added your comment boss!
-                  </Typography>
-                )} */}
               </CardContent>
             </Card>
-            <div style={{marginBottom: "2rem"}}>
-            {sendMessage && (
-                  <Typography
-                    sx={{
-                      textAlign: "center",
-                      color: "green",
-                      backgroundColor: "none",
-                    }}
-                  >
-                    You have successfully added your comment boss!
-                  </Typography>
-                )}
+            <div style={{ marginBottom: "2rem" }}>
+              {sendMessage && (
+                <Typography
+                  sx={{
+                    textAlign: "center",
+                    color: "green",
+                    backgroundColor: "none",
+                  }}
+                >
+                  You have successfully added your comment boss!
+                </Typography>
+              )}
             </div>
             <Card sx={{ paddingBottom: 0 }}>
               <CardContent sx={{ paddingBottom: "1rem !important" }}>
@@ -607,6 +568,87 @@ function SinglePost({ location, match, history }) {
                 Comments below
               </Typography>
             </Divider>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: "2rem",
+              }}
+            >
+              <span>
+                <Button smallContainedButton backgroundColor={allCommentsFollowed ? "#E8E8E8" : ""} color={allCommentsFollowed ? "#555555": ""} border="none" onClick={followAllThreadHandler}>
+                  
+                  {allCommentsFollowed ?
+                    (<span>
+                      Following all<i
+                      style={{ marginLeft: "0.3rem", fontSize: "1rem" }}
+                      className="fas fa-check"></i>
+                      </span>) : (
+                      <span>
+                      Follow all thread<i
+                      style={{ marginLeft: "0.3rem", fontSize: "1rem" }}
+                      className="fas fa-plus"></i>
+                    </span>)
+                  }
+                </Button>
+              </span>
+              <span>
+                <PaginationComponent
+                  numOfPages={numOfPages}
+                  page={value}
+                  size="small"
+                  comments
+                />
+              </span>
+              <Box>
+                <span style={{ color: "#555555", fontSize: "1rem" }}>
+                  Filter by<i className="fas fa-filter"></i>
+                </span>
+                <ul
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    listStyle: "none",
+                    borderTop: "1px solid rgba(0, 0, 0, 0.12)",
+                    borderLeft: "1px solid rgba(0, 0, 0, 0.12)",
+                    borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+                    padding: 0,
+                    marginTop: 0,
+                    marginBottom: 0,
+                    borderRadius: "0.2rem",
+                    fontSize: "1rem",
+                    color: "#555555",
+                  }}
+                >
+                  {[
+                    "Most replied",
+                    "Most liked",
+                    "Most shared",
+                    "No filters",
+                  ].map((x, index) => {
+                    return (
+                      <li
+                        onClick={(e) => filterHandler(e, index, x)}
+                        key={index}
+                        style={{
+                          padding: "0.3rem",
+                          justifySelf: "flex-end",
+                          textAlign: "end",
+                          backgroundColor: `${
+                            filterIndex === index ? "#dedede" : ""
+                          }`,
+                          cursor: "pointer",
+                          borderRight: "1px solid rgba(0, 0, 0, 0.12)",
+                        }}
+                      >
+                        {x}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </Box>
+            </div>
 
             {filterComments.map((comment, index) => {
               const commentDate = new Date(comment?.created_on)
@@ -646,16 +688,18 @@ function SinglePost({ location, match, history }) {
 
               // htmlDecode(comment?.comment_text)
               let liked_by;
+              let followed_by;
 
               if (username) {
                 liked_by = comment.liked_by?.includes(username);
+                followed_by = comment.followed_by?.includes(username);
                 // is_pinned = post.is_pinned_to_dashboard_array?.includes(username)
               }
 
               return (
                 <Card key={index} sx={{ mb: 3 }}>
                   <CardContent
-                    sx={{ paddingBottom: "0 !important", paddingTop: 0 }}
+                    sx={{ px:"0 !important", paddingBottom: "0 !important", paddingTop: 0 }}
                   >
                     <Box sx={{ width: { md: "90%" }, mx: "auto" }}>
                       <CardMedia
@@ -677,7 +721,7 @@ function SinglePost({ location, match, history }) {
                           sx={{
                             fontSize: "1.5rem",
                             margin: "0.2rem",
-                            marginLeft: "0.5rem",
+                    
                           }}
                         >
                           <span
@@ -715,30 +759,10 @@ function SinglePost({ location, match, history }) {
                           <span>{`${hours}:${minutes}${AmOrPm(time)}`}</span>
                         </Typography>
                         <Typography
-                          style={{ color: "#777777", marginRight: "0.5rem" }}
+                          style={{ color: "#777777" }}
                         >
-                          <Tooltip
-                            title={
-                              <Typography sx={{ fontSize: "0.85rem" }}>
-                                Share
-                              </Typography>
-                            }
-                          >
-                            <span style={iconStyle}>
-                              <i
-                                className="fas fa-share"
-                                id="share"
-                                onClick={commentActionHandler}
-                                style={{ marginRight: "0.2rem" }}
-                              ></i>
-                              <span style={{ fontSize: "1.1rem" }}>
-                                {shareCount ||
-                                  (comment.shared_by?.length > 0 &&
-                                    comment.shared_by?.length)}
-                              </span>
-                            </span>
-                          </Tooltip>
-                          <Tooltip
+                          
+                          {/* <Tooltip
                             title={
                               <Typography
                                 sx={{ fontSize: "0.85rem", cursor: "pointer" }}
@@ -754,7 +778,7 @@ function SinglePost({ location, match, history }) {
                               ></i>
                               <span style={{ fontSize: "1.1rem" }}>4</span>
                             </span>
-                          </Tooltip>
+                          </Tooltip> */}
                           <Tooltip
                             title={
                               <Typography
@@ -839,9 +863,9 @@ function SinglePost({ location, match, history }) {
                             alignItems: "center",
                           }}
                         >
-                          <Button smallContainedButton>Next post</Button>
                           <Typography style={{ color: "#777777" }}>
-                            <Tooltip
+                            {
+                              comment.author_username === username && <Tooltip
                               title={
                                 <Typography sx={{ fontSize: "0.85rem" }}>
                                   Delete comment
@@ -860,7 +884,9 @@ function SinglePost({ location, match, history }) {
                                 ></i>
                               </span>
                             </Tooltip>
-                            <Tooltip
+                            }
+                            {
+                              comment.author_username === username && <Tooltip
                               title={
                                 <Typography sx={{ fontSize: "0.85rem" }}>
                                   Edit comment
@@ -879,7 +905,42 @@ function SinglePost({ location, match, history }) {
                                 ></i>
                               </span>
                             </Tooltip>
+                            }
+
                           </Typography>
+                            <span>
+                            <Tooltip
+                              title={
+                                <Typography sx={{ fontSize: "0.85rem" }}>
+                                  Share thread
+                                </Typography>
+                              }
+                            >
+                              <span style={{ marginRight: "1rem", color:"#777777", fontSize: "1.3rem" }}>
+                                <i
+                                  className="fas fa-share"
+                                  id="share"
+                                  onClick={commentActionHandler}
+                                ></i>
+                              </span>
+                            </Tooltip>
+                            
+                            <Button smallContainedButton backgroundColor={followed_by ? "#E8E8E8" : ""} color={followed_by ? "#555555": ""} border="none" onClick={(e)=>followThreadHandler(e, comment.comment_id)}>
+                              {followed_by ?
+                                (<span>
+                                  Following<i
+                                  style={{ marginLeft: "0.3rem", fontSize: "1rem" }}
+                                  className="fas fa-check"></i>
+                                  </span>) : (
+                                  <span>
+                                  Follow thread<i
+                                  style={{ marginLeft: "0.3rem", fontSize: "1rem" }}
+                                  className="fas fa-plus"></i>
+                                </span>)
+                              }
+                            
+                            </Button>
+                          </span>
                         </span>
                       </CardContent>
                     </Box>

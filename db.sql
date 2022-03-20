@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS posts (
         community_name VARCHAR(25) NOT NULL,
         liked_by VARCHAR[], /* NOTE: When I push to this array, I can get some pieces of information such as the like count i.e by getting the array length and even know those who have liked it and get a yes or no boolean value for those who have liked the post. Arrays are so powerful and give much info*/
         shared_by VARCHAR[],
+        followed_by VARCHAR[] DEFAULT '{}',
         viewed_by_registered_users VARCHAR[],
         viewed_by_unregistered_users VARCHAR[],
         is_pinned_to_dashboard_array VARCHAR[],
@@ -17,6 +18,7 @@ CREATE TABLE IF NOT EXISTS posts (
         REFERENCES users(username)
         ON DELETE NO ACTION);
 
+-- ALTER TABLE posts ALTER COLUMN liked_by SET DEFAULT '{}'
 
         
         -- ALTER TABLE posts
@@ -89,6 +91,7 @@ CREATE TABLE IF NOT EXISTS posts (
         comment_text VARCHAR(2500) NOT NULL, 
         liked_by VARCHAR[],
         shared_by VARCHAR[],
+        followed_by VARCHAR[] DEFAULT '{}',
         created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
         edited_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 		CONSTRAINT fk_posts_and_users
@@ -111,3 +114,10 @@ CREATE TABLE IF NOT EXISTS posts (
 		-- FOREIGN KEY (author_id)
 		-- REFERENCES  users(user_id)
         -- ON DELETE CASCADE);
+
+
+        -- ALTER TABLE comments 
+        -- ADD followed_by VARCHAR[] DEFAULT '{}';
+
+        -- ALTER TABLE comments 
+        -- DROP COLUMN shared_by;

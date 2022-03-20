@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require("uuid");
 
 const likeCommunityPost = async (req, res) => {
     const { username, community } = req.body;
-    const post_id = req.params.id
+    const post_id = req.params.postId
     try {
         let likeCount;
         const find = await db.query("SELECT liked_by FROM posts WHERE post_id = $1 AND $2 = ANY(liked_by);", [post_id, username] )
@@ -56,9 +56,9 @@ const pinCommunityPostToDashboard = async (req, res) => {
 
 const deleteAComment = async (req, res) => {
     console.log("inside deleteAComment controller at backend ")
-    const post_id = req.params.id;
+    const post_id = req.params.postId;
     const username = req.body.username;
-    const commentId = req.body.stateCommentId;
+    const commentId = req.params.commentId;
     const capitalizeCommunity = capitalizeStringWithDash(req.baseUrl.split("/")[2])
 
 
@@ -81,9 +81,64 @@ const deleteAComment = async (req, res) => {
      }
  }
 
+const CommunityAllCommentsFollow = async (req, res) => {
+    const { username } = req.body;
+    const postId = req.params.postId;
+    try {
+        let followed_by;
+        let length;
+        let post_id;
+        const find = await db.query("SELECT followed_by FROM comments WHERE post_id = $1 AND $2 = ANY(followed_by);", [postId, username] )
+        if(find.rows.length > 0){
+            const removed = await db.query("UPDATE comments SET followed_by = array_remove(followed_by, $1) WHERE post_id = $2 RETURNING followed_by, post_id, author_username;", [username, postId ] )
+            followed_by = removed.rows[0].followed_by;
+            post_id = removed.rows[0].post_id;
+            length = removed.rows[0].followed_by.length;
+            res.status(200).json({followed_by, username, length, followAllAction: false, post_id});
+        }else{
+            const addedAllFollow = await db.query("UPDATE comments SET followed_by = array_append(followed_by, $1) WHERE post_id = $2 RETURNING followed_by, post_id, author_username;", [username, postId ] )
+            followed_by = addedAllFollow.rows[0].followed_by;
+            post_id = addedAllFollow.rows[0].post_id;
+            length = addedAllFollow.rows[0].followed_by.length;
+            res.status(200).json({followed_by, username, length, followAllAction: true, post_id});
+        }
+        
+    } catch (err) {
+        res.status(500).json(err);
+    }
+}
+
+const CommunityCommentFollow = async (req, res) => {
+    const { username } = req.body;
+    const commentId = req.params.commentId;
+    try {
+        let followed_by;
+        let length;
+        let comment_id;
+        const find = await db.query("SELECT followed_by FROM comments WHERE comment_id = $1 AND $2 = ANY(followed_by);", [commentId, username] )
+        if(find.rows.length > 0){
+            const removed = await db.query("UPDATE comments SET followed_by = array_remove(followed_by, $1) WHERE comment_id = $2 RETURNING followed_by, comment_id, author_username;", [username, commentId ] )
+            followed_by = removed.rows[0].followed_by;
+            comment_id = removed.rows[0].comment_id;
+            length = removed.rows[0].followed_by.length;
+            res.status(200).json({followed_by, username, length, followAction: false, comment_id});
+        }else{
+            const addedFollow = await db.query("UPDATE comments SET followed_by = array_append(followed_by, $1) WHERE comment_id = $2 RETURNING followed_by, comment_id, author_username;", [username, commentId ] )
+            followed_by = addedFollow.rows[0].followed_by;
+            comment_id = addedFollow.rows[0].comment_id;
+            length = addedFollow.rows[0].followed_by.length;
+            res.status(200).json({followed_by, username, length, followAction: true, comment_id});
+        }
+        
+    } catch (err) {
+        res.status(500).json(err);
+    }
+}
+
+
 const CommunityCommentLike = async (req, res) => {
-    const { user_name, commentId} = req.body;
-    const post_id = req.params.id
+    const { user_name } = req.body;
+    const commentId = req.params.commentId;
     console.log(user_name, commentId)
     try {
         let liked_by;
@@ -114,7 +169,7 @@ const CommunityCommentLike = async (req, res) => {
 
 const CommunityCommentShare = async (req, res) => {
     const { username, community } = req.body;
-    const post_id = req.params.id
+    const commentId = req.params.commentId
    
     try {
         const find = await db.query("SELECT shared_by FROM comments WHERE $1 = ANY(shared_by);", [username] )
@@ -132,7 +187,7 @@ const CommunityCommentShare = async (req, res) => {
 
 const postAComment = async (req, res) => {
     const comment_id = req.params.commentId
-    const post_id = req.params.id
+    const post_id = req.params.postId
     const {author_username, is_admin, comment_text} = req.body
     const capitalizeCommunity = capitalizeStringWithDash(req.baseUrl.split("/")[2])
 
@@ -146,13 +201,23 @@ const postAComment = async (req, res) => {
 }
 
 const getAllComments = async (req, res) => {
-    const post_id = req.params.id
+    const pageNumber = req.query.page;
+    const pageLimit = 10;
+    const skipNumber = (pageNumber * pageLimit) - pageLimit;
+    let documentsCount;
+    let numOfPages;
+    const post_id = req.params.postId
     const capitalizeCommunity = capitalizeStringWithDash(req.baseUrl.split("/")[2])
     try {
         //NOTE: When doing an inner join, after the SELECT, you specify the columns in both table A and table B which you want. NOTE again, they come immediately after the SELECT syntax.
-        const allComments = await db.query("SELECT comment_id, post_id,community_name, author_username, comments.is_admin, comment_text, liked_by, shared_by, comments.created_on, edited_on, users.firstname, users.username FROM comments INNER JOIN users ON comments.author_username = users.username WHERE post_id = $1 AND community_name = $2 ORDER BY comments.created_on DESC LIMIT 15;", [ post_id, capitalizeCommunity ])
-        const createdPost = allComments.rows
-        res.status(200).json(createdPost);
+        const count = await db.query('SELECT count(comment_id) FROM comments WHERE post_id = $1 AND community_name = $2 ', [post_id, capitalizeCommunity])
+        let result = await db.query(`SELECT comment_id, post_id,community_name, author_username, comments.is_admin, comment_text, shared_by, followed_by, comments.created_on, edited_on, users.firstname, users.username, CASE WHEN liked_by is NULL THEN '{}' ELSE liked_by END FROM comments INNER JOIN users ON comments.author_username = users.username WHERE post_id = $1 AND community_name = $2 ORDER BY comments.created_on DESC LIMIT ${pageLimit} OFFSET ${skipNumber};`, [ post_id, capitalizeCommunity ]);
+        documentsCount = count.rows[0].count;
+        console.log(documentsCount, "documentsCount")
+        numOfPages = Math.ceil(documentsCount / pageLimit); //e.g there are 10 pages which will be sent to the frontend
+        console.log(numOfPages, "numOfPages")
+        comments = result.rows
+        res.status(200).json({comments, documentsCount, numOfPages, pageLimit});
     } catch (err) {
         res.status(500).json(err);
     }
@@ -174,7 +239,7 @@ const createACommunityPost = async (req, res) => {
 }
 
 const editACommunityPost = async (req, res) => {
-        const id = req.params.id;
+        const id = req.params.postId;
     try{
         const postById = await db.query("SELECT * FROM posts WHERE post_id = $1;", [id] )
         const { author, title, description, picture, likes, is_shared, views, last_updated, is_pinned_to_dashboard } = postById.rows[0];
@@ -208,7 +273,7 @@ const editACommunityPost = async (req, res) => {
 
 const deleteACommunityPost = async (req, res) => {
     console.log(req.body)
-    const id = req.params.id
+    const id = req.params.postId
     const capitalizeCommunity = capitalizeStringWithDash(req.baseUrl.split("/")[2])
 
     try{
@@ -234,7 +299,7 @@ const deleteACommunityPost = async (req, res) => {
  }
 
  const getSingleCommunityPost = async (req, res) =>{
-    const id = req.params.id
+    const id = req.params.postId
     const username = req.query.username
     const communityFromParams = capitalizeStringWithDash(req.baseUrl.split("/")[2])
     console.log(id, username, "these are data from backend")
@@ -316,7 +381,7 @@ const getCommunityPosts = async (req, res) => {
             console.log("Just got here")
                 const doc = async(pageNumber=1)=>{
                 const count = await db.query('SELECT count(post_id) FROM posts WHERE community_name = $1', [communityFromParams])
-                const result = await db.query(`SELECT * FROM posts WHERE community_name = $1 ORDER BY posts.created_on DESC LIMIT ${pageLimit} OFFSET ${skipNumber}`, [communityFromParams])
+                const result = await db.query(`SELECT * FROM posts WHERE community_name = $1 ORDER BY posts.created_on DESC LIMIT ${pageLimit} OFFSET ${skipNumber};`, [communityFromParams])
                 documentsCount = count.rows[0].count;
                 numOfPages = Math.ceil(documentsCount / pageLimit); //e.g there are 10 pages which will be sent to the frontend
                 posts = result.rows;
@@ -382,6 +447,8 @@ const getCommunityPosts = async (req, res) => {
 
 
 module.exports ={
+    CommunityAllCommentsFollow,
+    CommunityCommentFollow,
     pinCommunityPostToDashboard,
     deleteAComment,
     likeCommunityPost,

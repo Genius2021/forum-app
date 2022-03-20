@@ -3,7 +3,7 @@ import thunk from "redux-thunk";
 import { userProfileReducer, userRegisterReducer, userSigninReducer } from "./Users/reducers/userReducer";
 import { getPinnedPostsReducer, getPostsReducer } from "./Users/reducers/postReducer";
 import { sidebarStateReducer } from "./Users/reducers/sidebarReducers";
-import { communityPaginationReducer, homePaginationReducer, messageReducer, modalReducer } from "./Users/reducers/generalReducers";
+import { commentPaginationReducer, communityPaginationReducer, homePaginationReducer, messageReducer, modalReducer } from "./Users/reducers/generalReducers";
 import { viewCommunityPostReducer, likeCommunityPostReducer, shareCommunityCommentReducer, likeCommunityCommentReducer, getAllCommentsReducer, postCommentReducer, createCommunityPostReducer, deleteCommunityPostReducer, editCommunityPostReducer, getACommunityPostReducer, getCommunityPostsReducer, seenPostReducer } from "./Users/reducers/communityReducers";
 
 
@@ -29,10 +29,9 @@ const reducer = combineReducers({
     getACommunityPost: getACommunityPostReducer,
     communityPagination: communityPaginationReducer,
     homePagination: homePaginationReducer,
+    commentPagination: commentPaginationReducer,
     getAllComments: getAllCommentsReducer,
-    // likeCommunityComment: likeCommunityCommentReducer,
     shareCommunityComment:shareCommunityCommentReducer,
-    // likeCommunityPost: likeCommunityPostReducer,
     getPinnedPosts: getPinnedPostsReducer,
     userProfile: userProfileReducer,
 });

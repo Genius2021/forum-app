@@ -44,6 +44,10 @@ import {
   LIKE_COMMUNITY_POST_COMMENT,
   PIN_COMMUNITY_POST_SUCCESS,
   UNPIN_COMMUNITY_POST_SUCCESS,
+  FOLLOW_THREAD_SUCCESS,
+  UNFOLLOW_THREAD_SUCCESS,
+  FOLLOW_ALL_THREAD_SUCCESS,
+  UNFOLLOW_ALL_THREAD_SUCCESS,
 } from "../constants/communityConstants";
 
 export const createCommunityPostReducer = (state = { newPost: {} }, action) => {
@@ -64,39 +68,6 @@ export const createCommunityPostReducer = (state = { newPost: {} }, action) => {
   }
 };
 
-// export const likeCommunityPostReducer = (state = {postLikeCount: 0, postLiked: false}, action) => {
-//     switch (action.type) {
-//         case LIKE_COMMUNITY_POST_REQUEST:
-//             return { ...state, loading: true };
-//         case LIKE_COMMUNITY_POST_SUCCESS:
-//             return { ...state, postLiked: action.payload.liked, postLikeCount: action.payload.likeCount}
-//         case LIKE_COMMUNITY_POST_FAIL:
-//             return { ...state, postLiked: false, loading: false, error: action.payload }
-//         default:
-//             return state;
-//     }
-// }
-
-// export const likeCommunityCommentReducer = (state = {commentLikeArray: [], commentLiked: false}, action) => {
-//     switch (action.type) {
-//         case LIKE_COMMUNITY_COMMENT_REQUEST:
-//             return { ...state, loading: true };
-//         case LIKE_COMMUNITY_COMMENT_SUCCESS:
-//             action.payload.liked_by.map(()=>{
-//                 if(action.payload.liked_by.includes(action.payload.username)){
-//                     return { ...state, commentLikeArray: [...state.commentLikeArray, action.payload.username], commentLiked: true}
-
-//                 }else{
-//                     let newCommentsLike = state.commentLikeArray.filter((x)=>(x.author_username !== action.payload.username))
-//                     return { ...state, commentLikeArray: newCommentsLike, commentLiked: false}
-//                 }
-//             })
-//         case LIKE_COMMUNITY_COMMENT_FAIL:
-//             return { ...state, commentLiked: false, loading: false, error: action.payload }
-//         default:
-//             return state;
-//     }
-// }
 
 export const shareCommunityCommentReducer = (
   state = { shareCount: 0, shared: false },
@@ -303,7 +274,7 @@ export const getACommunityPostReducer = (
 //     }
 // }
 
-export const getAllCommentsReducer = (state = { comments: [] }, action) => {
+export const getAllCommentsReducer = (state = { comments: [], allCommentsFollowed:false }, action) => {
   switch (action.type) {
     case GET_COMMUNITY_POST_COMMENTS_REQUEST:
       return { ...state, loading: true };
@@ -312,7 +283,9 @@ export const getAllCommentsReducer = (state = { comments: [] }, action) => {
         ...state,
         loading: false,
         success: true,
-        comments: action.payload,
+        comments: action.payload.comments,
+        numOfPages: action.payload.numOfPages,
+        documentsCount: action.payload.documentsCount,
       };
     case GET_COMMUNITY_POST_COMMENTS_FAIL:
       return { ...state, loading: false, error: action.payload };
@@ -355,6 +328,72 @@ export const getAllCommentsReducer = (state = { comments: [] }, action) => {
         comments: newArr,
         commentLiked: action.payload.likeAction,
         commentLikeCount: action.payload.length,
+      };
+    case FOLLOW_THREAD_SUCCESS:
+      const newFollowedArray = state.comments.map((x) => {
+        if (x.comment_id === action.payload.comment_id) {
+          const newFollowed_by = [...x.followed_by, action.payload.username];
+          return { ...x, followed_by: newFollowed_by };
+        } else {
+          return x;
+        }
+      });
+      return {
+        ...state,
+        comments: newFollowedArray,
+        commentFollowed: action.payload.followAction,
+        commentFollowCount: action.payload.length,
+      };
+    case UNFOLLOW_THREAD_SUCCESS:
+      const newUnfollowedArray = state.comments.map((x) => {
+        if (x.comment_id === action.payload.comment_id) {
+          let filteredFollow = x.followed_by.filter(
+            (p) => p !== action.payload.username
+          );
+          return { ...x, followed_by: filteredFollow };
+        } else {
+          return x;
+        }
+      });
+
+      return {
+        ...state,
+        comments: newUnfollowedArray,
+        commentFollowed: action.payload.followAction,
+        commentFollowCount: action.payload.length,
+      };
+    case FOLLOW_ALL_THREAD_SUCCESS:
+      const newFollowedAllArray = state.comments.map((x) => {
+        if (x.post_id === action.payload.post_id) {
+          const followedBy = [...x.followed_by, action.payload.username];
+          return { ...x, followed_by: followedBy };
+        } else {
+          return x;
+        }
+      });
+      return {
+        ...state,
+        comments: newFollowedAllArray,
+        allCommentsFollowed: action.payload.followAllAction,
+        commentsFollowCount: action.payload.length,
+      };
+    case UNFOLLOW_ALL_THREAD_SUCCESS:
+      const newUnfollowedAllArray = state.comments.map((x) => {
+        if (x.post_id === action.payload.post_id) {
+          let filteredFollowAll = x.followed_by.filter(
+            (p) => p !== action.payload.username
+          );
+          return { ...x, followed_by: filteredFollowAll };
+        } else {
+          return x;
+        }
+      });
+
+      return {
+        ...state,
+        comments: newUnfollowedAllArray,
+        allCommentsFollowed: action.payload.followAction,
+        commentsFollowCount: action.payload.length,
       };
     default:
       return state;

@@ -54,7 +54,7 @@ export default function Community(props) {
                           God
                         </Typography>
                         <Box>
-                          <PaginationComponent numOfPages={numOfPages} page={value} size="small" />
+                          <PaginationComponent numOfPages={numOfPages} page={value} size="small" community />
                         </Box>
                         <Link to={`/communities/${community}/create-post`}>
                           <Typography variant="body2" sx={{cursor:"pointer", color:"white", backgroundColor:"#3b5998", opacity:"0.95", padding: "0.5rem 0.5rem", borderRadius:"0.5rem"}}>
@@ -136,7 +136,7 @@ export default function Community(props) {
                         
                       </Typography>
                       <Box>
-                        <PaginationComponent numOfPages={numOfPages} page={value} size="small" />
+                        <PaginationComponent numOfPages={numOfPages} page={value} size="small" community />
                       </Box>
                       <Link to={`/communities/${community}/create-post`}>
                         <Typography variant="body2" sx={{cursor:"pointer", color:"white", backgroundColor:"#3b5998", opacity:"0.95", padding: "0.5rem 0.5rem", borderRadius:"0.5rem" }}>

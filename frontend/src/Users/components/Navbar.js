@@ -59,7 +59,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const toolbarStyles = styled(Toolbar)(({theme}) =>({
+const toolbarStyles = styled('div')(({theme}) =>({
   appBarSpacer: theme.mixins.toolbar
 }))
 
@@ -82,7 +82,7 @@ const toolbarStyles = styled(Toolbar)(({theme}) =>({
 
   return (
     <>
-    <Box sx={{ flexGrow: 1 }}>
+    {/* <Box sx={{ flexGrow: 1 }}> */}
       <AppBar position="fixed" sx={{ backgroundColor: "white", color:"gray", boxShadow:"-1px 5px 9px -7px #000000" }}>
         <Toolbar>
           {userInfo && <IconButton
@@ -144,7 +144,7 @@ const toolbarStyles = styled(Toolbar)(({theme}) =>({
         <MyModal  question="Are you sure you want to continue?" signOutAction modalName="navbarModal" /> 
         </Toolbar>
       </AppBar>
-    </Box>
+    {/* </Box> */}
     <Toolbar />
     </>
   );

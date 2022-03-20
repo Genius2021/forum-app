@@ -1,4 +1,4 @@
-import { CLEAR__MESSAGE, CLOSE__MODAL, MESSAGE__ERROR, MESSAGE__SUCCESS, MESSAGE__WARNING, OPEN__MODAL, CHANGE__HOME__PAGINATION__VALUE, CHANGE__COMMUNITY__PAGINATION__VALUE } from "../constants/generalConstants"
+import { CLEAR__MESSAGE, CLOSE__MODAL, MESSAGE__ERROR, MESSAGE__SUCCESS, MESSAGE__WARNING, OPEN__MODAL, CHANGE__HOME__PAGINATION__VALUE, CHANGE__COMMUNITY__PAGINATION__VALUE, CHANGE__COMMENT__PAGINATION__VALUE } from "../constants/generalConstants"
 import { USER_REGISTER_ERROR_MESSAGE_CLEAR, USER_SIGNIN_ERROR_MESSAGE_CLEAR } from "../constants/userConstants";
 
 
@@ -39,5 +39,9 @@ export const changeCommunityPaginationValue = (value) => (dispatch) =>{
 
 export const changeHomePaginationValue = (value) => (dispatch) =>{
     dispatch({type: CHANGE__HOME__PAGINATION__VALUE , payload: value})
+}
+
+export const changeCommentPaginationValue = (value) => (dispatch) =>{
+    dispatch({type: CHANGE__COMMENT__PAGINATION__VALUE , payload: value})
 }
 

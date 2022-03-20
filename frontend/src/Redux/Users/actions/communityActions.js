@@ -44,10 +44,56 @@ import { CREATE_COMMUNITY_POST_FAIL,
     PIN_COMMUNITY_POST_SUCCESS,
     UNPIN_COMMUNITY_POST_SUCCESS,
     PIN_COMMUNITY_POST_FAIL,
+    FOLLOW_THREAD_REQUEST,
+    FOLLOW_THREAD_SUCCESS,
+    FOLLOW_THREAD_FAIL,
+    UNFOLLOW_THREAD_SUCCESS,
+    FOLLOW_ALL_THREAD_REQUEST,
+    FOLLOW_ALL_THREAD_SUCCESS,
+    UNFOLLOW_ALL_THREAD_SUCCESS,
+    FOLLOW_ALL_THREAD_FAIL,
     SEEN__POST} from "../constants/communityConstants";
     
     import axios from "axios";
 
+
+export const followAllThread = (postId, username, community) => async (dispatch) => {
+    dispatch({ type: FOLLOW_ALL_THREAD_REQUEST });
+    try {
+        const { data } = await axios.put(`/${community}/posts/${postId}/comments/follow`, {username});
+        console.log(data, "Followed all thread is back from the backend", data);
+        if(data.followAllAction === true){
+            dispatch({ type: FOLLOW_ALL_THREAD_SUCCESS, payload: data });
+            
+        }else{
+            dispatch({ type: UNFOLLOW_ALL_THREAD_SUCCESS, payload: data });
+        }
+    } catch (error) {
+        dispatch({
+            type: FOLLOW_ALL_THREAD_FAIL,
+            payload: error.response && error.response.data.message ? error.response.data.message : error.message,
+        });
+    }
+};
+
+export const followThread = (commentId, postId, username, community) => async (dispatch) => {
+    dispatch({ type: FOLLOW_THREAD_REQUEST });
+    try {
+        const { data } = await axios.put(`/${community}/posts/${postId}/comments/${commentId}/follow`, {username});
+        console.log("Followed thread is back from the backend", data);
+        if(data.followAction === true){
+            dispatch({ type: FOLLOW_THREAD_SUCCESS, payload: data });
+            
+        }else{
+            dispatch({ type: UNFOLLOW_THREAD_SUCCESS, payload: data });
+        }
+    } catch (error) {
+        dispatch({
+            type: FOLLOW_THREAD_FAIL,
+            payload: error.response && error.response.data.message ? error.response.data.message : error.message,
+        });
+    }
+};
 
 export const pinToDashboard = (thePostId, community, username) => async (dispatch) => {
     dispatch({ type: PIN_COMMUNITY_POST_REQUEST });
@@ -185,11 +231,12 @@ export const postComment = (comment) => async (dispatch) => {
 };
 
 
-export const getPostComments = (id, community) => async (dispatch) => {
+export const getPostComments = (id, community,commentPage) => async (dispatch) => {
     dispatch({ type: GET_COMMUNITY_POST_COMMENTS_REQUEST });
 
     try {
-        const { data } = await axios.get(`/${community}/posts/${id}/comments`);
+        const { data } = await axios.get(`/${community}/posts/${id}/comments` + commentPage );
+        console.log(data, "gotten comments from backend")
         dispatch({ type: GET_COMMUNITY_POST_COMMENTS_SUCCESS, payload: data });
         // localStorage.setItem("postDetails", JSON.stringify(data));
     } catch (error) {
@@ -206,7 +253,7 @@ export const deleteComment = (deleteObject) => async (dispatch) => {
     dispatch({ type: DELETE_COMMUNITY_POST_COMMENT_REQUEST });
 
     try {
-        const { data } = await axios.delete(`/${community}/posts/${id}/comments/delete`, { data: { username, stateCommentId } });
+        const { data } = await axios.delete(`/${community}/posts/${id}/comments/${stateCommentId}`, { data: { username } });
         dispatch({ type: DELETE_COMMUNITY_POST_COMMENT, payload: data });
         // localStorage.setItem("postDetails", JSON.stringify(data));
     } catch (error) {
@@ -218,12 +265,13 @@ export const deleteComment = (deleteObject) => async (dispatch) => {
 };
 
 export const likeComment = (likeDetails) => async (dispatch) => {
-    const {id, community, ...rest} = likeDetails;
+    const {id, community, commentId,...rest} = likeDetails;
+    console.log(rest)
 
     dispatch({ type: LIKE_COMMUNITY_COMMENT_REQUEST });
 
     try {
-        const { data } = await axios.put(`/${community}/posts/${id}/comments/likes`, rest);
+        const { data } = await axios.put(`/${community}/posts/${id}/comments/${commentId}/like`, rest);
         console.log(data)
         console.log("returned liked data")
         if(data.likeAction === true ){
@@ -246,7 +294,7 @@ export const likePost = (likeDetails) => async (dispatch) => {
     dispatch({ type: LIKE_COMMUNITY_POST_REQUEST });
 
     try {
-        const { data } = await axios.put(`/${community}/posts/${id}`, rest);
+        const { data } = await axios.put(`/${community}/posts/${id}/like`, rest);
         console.log(data)
         if(data.liked === true){
             dispatch({ type: LIKE_COMMUNITY_POST_SUCCESS, payload: data });
@@ -281,11 +329,11 @@ export const likePost = (likeDetails) => async (dispatch) => {
 
 
 export const shareComment = (shareDetails) => async (dispatch) => {
-    const { id, community, ...rest } = shareDetails;
+    const { id, community, commentId, ...rest } = shareDetails;
     dispatch({ type: SHARE_COMMUNITY_COMMENT_REQUEST });
 
     try {
-        const { data } = await axios.put(`/${community}/posts/${id}/comments/shares`, rest);
+        const { data } = await axios.put(`/${community}/posts/${id}/comments/${commentId}/share`, rest);
         dispatch({ type: SHARE_COMMUNITY_COMMENT_SUCCESS, payload: data });
     } catch (error) {
         dispatch({

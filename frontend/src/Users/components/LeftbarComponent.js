@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 import { capitalize } from '../../commonFunctions';
 
 
-const communities = [ "Politics", "Science and Tech", "Sports", "Entertainment", "Education", "Business", "Programming", "Love", "Food and Agriculture", "Earth Sustainability", "Gaming", "Culture and Tradition", "Religion"]
+const communities = [ "Politics", "Science and Tech", "Sports", "Entertainment", "Education", "Business", "Programming", "Love", "Food and Agriculture", "Earth Sustainability", "Gaming", "Culture and Tradition", "Religion", "Humanitarian"]
 
 export default function LeftbarComponent() {
 

@@ -1,4 +1,4 @@
-import { CLEAR__MESSAGE, MESSAGE__ERROR, MESSAGE__SUCCESS, MESSAGE__WARNING, CLOSE__MODAL, OPEN__MODAL, CHANGE__HOME__PAGINATION__VALUE, CHANGE__COMMUNITY__PAGINATION__VALUE } from "../constants/generalConstants";
+import { CLEAR__MESSAGE, MESSAGE__ERROR, MESSAGE__SUCCESS, MESSAGE__WARNING, CLOSE__MODAL, OPEN__MODAL, CHANGE__HOME__PAGINATION__VALUE, CHANGE__COMMUNITY__PAGINATION__VALUE, CHANGE__COMMENT__PAGINATION__VALUE } from "../constants/generalConstants";
 
 
 export const messageReducer = (state = {}, action) => {
@@ -40,6 +40,15 @@ export const communityPaginationReducer = (state = {value: 1}, action) =>{
 export const homePaginationReducer = (state = {value: 1}, action) =>{
     switch (action.type) {
         case CHANGE__HOME__PAGINATION__VALUE:
+            return { ...state, value: action.payload };
+        default:
+            return state;
+    }
+}
+
+export const commentPaginationReducer = (state = {value: 1}, action) =>{
+    switch (action.type) {
+        case CHANGE__COMMENT__PAGINATION__VALUE:
             return { ...state, value: action.payload };
         default:
             return state;

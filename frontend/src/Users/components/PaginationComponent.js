@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
-import { changeCommunityPaginationValue, changeHomePaginationValue } from '../../Redux/Users/actions/generalActions';
+import { changeCommentPaginationValue, changeCommunityPaginationValue, changeHomePaginationValue } from '../../Redux/Users/actions/generalActions';
 import { useDispatch } from 'react-redux';
 // import { useLocation } from 'react-router-dom';
 
-export default function PaginationComponent({ numOfPages, size, page, home }) {
+export default function PaginationComponent({ numOfPages, size, page, home, community, comments }) {
     const dispatch = useDispatch();
     // let { search } = useLocation();
  
@@ -16,8 +16,14 @@ export default function PaginationComponent({ numOfPages, size, page, home }) {
         event.preventDefault();
         if(home){
           dispatch(changeHomePaginationValue(value))
-        }else{
+        }
+        
+        if(community){
           dispatch(changeCommunityPaginationValue(value))
+        }
+
+        if(comments){
+          dispatch(changeCommentPaginationValue(value))
         }
     }
 
