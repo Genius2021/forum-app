@@ -107,14 +107,12 @@ function TextEditor({ TextSelectionActions, iframeName, flexWrap, width, border}
                      }else if(el.command === "foreColor"){
                         return  <Tooltip key={index} title={<Typography sx={style}>{capitalize(el.tooltip)}</Typography>}>
                                  <Card elevation={0} sx={iconStyle}>
-                                    {/* <i style={iconStyle} className={el.className} onClick={(e)=> TextSelectionActions(e, el)}></i> */}
                                     <div><label htmlFor="colorPicker"><i style={iconStyle} className={el.className}></i></label><input id="colorPicker" value={textColorPicker} onChange={(e) =>colorPickerHandler(e, el)} style={{display: "none" }} type="color" /></div>
                                  </Card>
                              </Tooltip>
                      }else if(el.command === "backColor"){
                         return  <Tooltip key={index} title={<Typography sx={style}>{capitalize(el.tooltip)}</Typography>}>
                                  <Card elevation={0} sx={iconStyle}>
-                                    {/* <i style={iconStyle} className={el.className} onClick={(e)=> TextSelectionActions(e, el)}></i> */}
                                     <div><label htmlFor="backgroundColorPicker"><i style={backStyle} className={el.className}></i></label><input id="backgroundColorPicker" value={backgroundColorPicker} onChange={(e) =>colorPickerHandler(e, el)} style={{display: "none" }} type="color" /></div>
                                  </Card>
                              </Tooltip>

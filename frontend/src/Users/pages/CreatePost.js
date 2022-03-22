@@ -3,7 +3,7 @@ import { Box, Card, CardContent, Divider, Grid, Paper, Typography, IconButton } 
 import { useDispatch, useSelector } from 'react-redux';
 import ImageIcon from '@mui/icons-material/Image';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { createCommunityPost, CommunityImageUpload } from '../../Redux/Users/actions/communityActions';
+import { createCommunityPost } from '../../Redux/Users/actions/communityActions';
 import Advertisement from '../components/Advertisement';
 import Communities from "../components/LeftbarComponent";
 import PageTitle from '../components/PageTitle';
@@ -11,6 +11,8 @@ import TextSelectionActions from '../components/TextSelectionActions';
 import Tooltip from '@mui/material/Tooltip';
 import TextEditor from '../components/TextEditor';
 import Button from '../components/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+
 
 // import axios from "axios";
 
@@ -21,6 +23,7 @@ function CreatePost(props) {
     let [file, setFile] = useState(null);
 
     const dispatch = useDispatch();
+    const { loading } = useSelector(state => state.createCommunityPost);
     const { userInfo } = useSelector(state => state.userSignin);
     const username = userInfo?.username;          
     const community = props.location.pathname.split("/")[2];
@@ -34,20 +37,24 @@ function CreatePost(props) {
 
     const publishHandler = (e) => {
         e.preventDefault();
-        let theForm = document.getElementById("postCreationForm");
-        theForm.elements["postCreationTextArea"].value = window.frames["postCreationiframe"].document.body.innerHTML;
-        const textAreaValue = document.getElementById("postCreationTextArea").value
-        const filename = Date.now() + file?.name
-        if (file) {
-            const data = new FormData();
-            console.log(data);
-            data.append("name", filename);
-            data.append("file", file);
-            console.log(data);
-            // dispatch(CommunityImageUpload(data));
-          }
+        if(title === ""){
+          alert("You did not fill the title field.")
+        }else if(window.frames["postCreationiframe"].document.body.innerHTML === ""){
+          alert("Your post does not have a description!")
+        }else{
+          let theForm = document.getElementById("postCreationForm");
+          theForm.elements["postCreationTextArea"].value = window.frames["postCreationiframe"].document.body.innerHTML;
+          const textAreaValue = document.getElementById("postCreationTextArea").value
+          let imgdata = new FormData();
+              [...file].forEach((x, index)=>{
+                // let filename = `${community}/${Date.now()}/${x?.name}`
+                // imgdata.append("name", filename)
+                imgdata.append("files", x)              
+              })
+            dispatch(createCommunityPost(imgdata, title, textAreaValue, username, community));
+        }
+        
 
-        dispatch(createCommunityPost(title, textAreaValue, filename, username, community));
       };
 
 
@@ -108,22 +115,30 @@ function CreatePost(props) {
     const deleteImageHandler =(e, key)=>{
       e.preventDefault();
       console.log("inside the delete handler, the key is...", key)
+      console.log(file)
       let newValue;
       // let keys = Object.keys(file)
       
     if(file){
 
-      const filteredArray = Array.from(file).filter((eachfile, currentIndex) =>{
-        return file[currentIndex] !== file[key];  
+      // const filteredArray = Array.from(file).filter((eachfile, currentIndex) =>{
+      console.log([...file], "before the iteration filter")
+      // const filteredArray = Array.from(file).filter((eachfile, currentIndex) =>{
+      const filteredArray = Object.values(file).filter((eachfile, currentIndex) =>{
+      return file[currentIndex] !== file[key];  
+    
     })
-      const result = new File(filteredArray);
-      console.log(result);
-      console.log(filteredArray);
+
+      console.log({...filteredArray}, "filteredArray");
+      // const result = new File(filteredArray);
+      // console.log(result, "result");
+      setFile({...filteredArray})
 
     }
      
     // const files = Object.assign({}, newValue)
     // setFile(newValue)
+
     
   }
 
@@ -135,34 +150,34 @@ function CreatePost(props) {
                 <PageTitle name="Make a Post" />
               </Box>
               <section style={{display:"grid", mx: "auto"}}>
-                <div style={{display: "flex", justifyContent: "center", overflowX:"auto", paddingTop:"0.5rem"}}>
+                <div style={{display: "flex", overflowX:"auto", paddingTop:"0.5rem"}}>
                   {
                       file && Object.keys(file).map((key,currentIndex) =>{
                         console.log(key, currentIndex)
-                        return <div key={currentIndex} style={{ display:"relative",marginRight:"0.5rem"}}>
+                        return <div key={currentIndex} style={{ display:"relative", marginRight:"0.5rem"}}>
                               <img src={URL.createObjectURL(file[key])} style={{maxWidth: "30vw", maxHeight:"35vh", borderRadius:"0.5rem", border:"1px solid #a4a4a4" }} alt="post_image" />
                               <Tooltip title={<Typography sx={{ fontSize: "1rem" }}>Delete image</Typography>}><DeleteIcon sx={{display:"absolute", right:"0", bottom:"0", color:"red", "&:hover":{cursor:"pointer"}}} onClick={(e) =>deleteImageHandler(e, key)}/></Tooltip>
                         </div> 
                         }) 
                   }
                 </div>
-                  <form id="postCreationForm" style={{ display:"flex", flexDirection:"column", alignItems:"center"}}>
+                  <form id="postCreationForm" style={{ display:"flex", flexDirection:"column", alignItems:"center"}} enctype="multipart/form-data">
                       <div style={{display:"flex", width:"100%", justifyContent:"space-between"}}>
-                          {/* <div style={{ display:"flex", width:"100%", justifyContent:"center", overflowX:"auto"}}>
-                            <TextEditor iframeName="postCreationiframe" TextSelectionActions={TextSelectionActions} />
-                          </div> */}
-                          <label htmlFor="form__file" style={{display:"flex", alignItems:"center", justifyContent:"flex-end"}}>
-                            <Tooltip title={<Typography sx={{ fontSize: "0.85rem" }}>Add images</Typography>}>
-                              <ImageIcon sx={{ fontSize:"3rem",color:"#555555", cursor:"pointer", "&:hover":{color:"#333333"}}}/>
-                            </Tooltip>
-                          </label>                        
-                        <input type="file" id="form__file" onChange={e => {e.preventDefault(); setFile(e.target.files)}} multiple style={{ display: "none" }} />
+                        <label htmlFor="form__file" style={{display:"flex", alignItems:"center", justifyContent:"flex-end"}}>
+                          <Tooltip title={<Typography sx={{ fontSize: "0.85rem" }}>Add images</Typography>}>
+                            <ImageIcon sx={{ fontSize:"3rem", color:"#555555", cursor:"pointer", "&:hover":{color:"#333333"}}}/>
+                          </Tooltip>
+                        </label>                        
+                        <input type="file" id="form__file" onChange={e => setFile(e.target.files)} multiple name="files" style={{ display:"none" }} />
                       </div>
                       <div style={{display:"grid", width:"100%"}}>
-                          <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Title of post" style={{marginBottom:10, fontFamily:"Roboto",color:"#666666"}} autoFocus />
+                          <div style={{ textAlign: "end", fontSize: "1rem", color:"#555555"}}>
+                            {title.length} of 70
+                          </div>
+                          <input type="text" value={title} onChange={e => setTitle(e.target.value)} maxLength="70" placeholder="Title of post" style={{marginBottom:10, fontFamily:"Roboto",color:"#666666"}} autoFocus />
                           <div id="iframeContainer">
                             <textarea id="postCreationTextArea" style={{display:"none"}} />
-                            <iframe name="postCreationiframe" id="postCreationiframe" title="iframeTextField" value={description} style={iframeTextArea}></iframe>
+                            <iframe name="postCreationiframe" maxLength="70" id="postCreationiframe" title="iframeTextField" value={description} style={iframeTextArea}></iframe>
                             {/* <div style={{ fontSize: "1.2rem", color:"#404040" }}>{ iframeAreaRef.current?.value.length || 0 } of 3000</div> */}
                           </div>
                       </div>
@@ -178,7 +193,7 @@ function CreatePost(props) {
                       />
                     </CardContent>
                   </Card>
-                  <Button type="submit" justifySelf="end" largeContainedButton onClick={publishHandler}>Publish</Button>
+                  <Button type="submit" justifySelf="end" largeContainedButton onClick={publishHandler}>Publish{loading && <CircularProgress size="2rem" sx={{ color:"white" }} />}</Button>
               </section>
             </Grid>
             <Grid item xs={11.5} sm={11} md={4} lg={3} >

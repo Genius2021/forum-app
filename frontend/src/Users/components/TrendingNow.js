@@ -41,9 +41,9 @@ function TrendingNow() {
                     >
                         {/* {index + 1} */}
                     </span>
-                    <Link
-                        // to={`/communities/${post.community_name}/${post.post_id}`}
-                    >
+                    {/* <Link
+                        to={`/communities/${post.community_name}/${post.post_id}`}
+                    > */}
                         <ListItemText
                         primary={
                             <Typography sx={{ color: "#3b5998" }}>
@@ -54,7 +54,7 @@ function TrendingNow() {
                         // secondary={monthAndDay(post.created_on)}
                         secondary="may 23"
                         />
-                    </Link>
+                    {/* </Link> */}
                     </div>
                     <ListItemText
                     sx={{ flex: "none" }}

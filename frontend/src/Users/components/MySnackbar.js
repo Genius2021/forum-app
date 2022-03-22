@@ -1,15 +1,15 @@
-import * as React from 'react';
+import { forwardRef, useState } from 'react';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
 const { userInfo } = useSelector(state => state.userSignin);
 const username = userInfo?.username;
 
-const Alert = React.forwardRef(function Alert(props, ref) {
+const Alert = forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
 export default function MySnackbar({ severity, message }) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
   const handleClick = () => {
     setOpen(true);

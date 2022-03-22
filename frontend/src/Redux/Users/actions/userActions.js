@@ -75,7 +75,7 @@ export const getUserProfile = (username, someoneElse) => async (dispatch) => {
   }
 };
 
-export const signin = (email, password) => async (dispatch) => {
+export const signin = (email, password, isChecked) => async (dispatch) => {
   dispatch({ type: USER_SIGNIN_REQUEST, payload: { email, password } });
   try {
     const { data } = await axios.post("/users/login", { email, password });

@@ -1,7 +1,9 @@
 const express = require("express");
 const { db } = require("./db.js");
 const dotenv = require("dotenv");
-
+const fs = require("fs");
+const { promisify } = require("util");
+const unlinkAsync = promisify(fs.unlink)
 const app = express();
 // const authRoutes = require("./routes/authRoutes.js");
 const userRoutes = require("./routes/userRoutes.js")
@@ -21,18 +23,37 @@ db.connect().then(() => console.log("Database connected successfully"))
 const storage = multer.diskStorage({
     //    destination:(req, file, callback function to handle error)
     destination: (req, file, cb) => {
-        cb(null, "images");
+          cb(null, "images");
     },
     filename: (req, file, cb) => {
-        cb(null, req.body.name);
+        console.log(file)
+        cb(null, `${file.fieldname}-${Date.now()}-${file.originalname}`);
     },
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({
+    storage: storage,
+    fileFilter: (req, file, cb)=>{
+        if(file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg" || file.mimetype == "gif"){
+            cb(null, true);
+        }else{
+            cb(null, false);
+            return cb(new Error("Allowed file types are .png, .jpg, .jpeg and .gif"));
+        }
+    }
+})
 
-app.post("/api/upload", upload.single("file"), (req, res) => {
-    console.log(req.file)
-    res.status(200).json("File has been uploaded");
+app.post("/api/photos/upload", upload.array("files", 15), (req, res) => {
+    console.log(req.files, "at the ...")
+    res.status(200).json({message: "File has been uploaded", thedata: req.files});
+})
+
+app.delete("/api/photos/upload",  (req, res) => {
+    req.body.picture.forEach(async (x)=>{
+        await unlinkAsync(`images/${x}`);
+        console.log("file has been deleted successfully!")
+    })
+    res.status(200).json({message: "File has been deleted"});
 })
 
 app.use("/api/users", userRoutes);

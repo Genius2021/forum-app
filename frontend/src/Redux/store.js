@@ -4,7 +4,7 @@ import { userProfileReducer, userRegisterReducer, userSigninReducer } from "./Us
 import { getPinnedPostsReducer, getPostsReducer } from "./Users/reducers/postReducer";
 import { sidebarStateReducer } from "./Users/reducers/sidebarReducers";
 import { commentPaginationReducer, communityPaginationReducer, homePaginationReducer, messageReducer, modalReducer } from "./Users/reducers/generalReducers";
-import { viewCommunityPostReducer, likeCommunityPostReducer, shareCommunityCommentReducer, likeCommunityCommentReducer, getAllCommentsReducer, postCommentReducer, createCommunityPostReducer, deleteCommunityPostReducer, editCommunityPostReducer, getACommunityPostReducer, getCommunityPostsReducer, seenPostReducer } from "./Users/reducers/communityReducers";
+import { communityPictureDeleteReducer, viewCommunityPostReducer, likeCommunityPostReducer, shareCommunityCommentReducer, likeCommunityCommentReducer, getAllCommentsReducer, postCommentReducer, createCommunityPostReducer, deleteCommunityPostReducer, editCommunityPostReducer, getACommunityPostReducer, getCommunityPostsReducer, seenPostReducer } from "./Users/reducers/communityReducers";
 
 
 
@@ -34,6 +34,7 @@ const reducer = combineReducers({
     shareCommunityComment:shareCommunityCommentReducer,
     getPinnedPosts: getPinnedPostsReducer,
     userProfile: userProfileReducer,
+    communityPictureDelete: communityPictureDeleteReducer,
 });
 
 

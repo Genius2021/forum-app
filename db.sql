@@ -2,12 +2,13 @@ CREATE TABLE IF NOT EXISTS posts (
         post_id VARCHAR(150) PRIMARY KEY NOT NULL, 
         title VARCHAR(70) NOT NULL,
         description VARCHAR(2000) NOT NULL,
-        picture VARCHAR(150),
+        picture VARCHAR[],
         author VARCHAR(50) NOT NULL,
         community_name VARCHAR(25) NOT NULL,
         liked_by VARCHAR[], /* NOTE: When I push to this array, I can get some pieces of information such as the like count i.e by getting the array length and even know those who have liked it and get a yes or no boolean value for those who have liked the post. Arrays are so powerful and give much info*/
         shared_by VARCHAR[],
         followed_by VARCHAR[] DEFAULT '{}',
+        follow_all_comments VARCHAR[] DEFAULT '{}',
         viewed_by_registered_users VARCHAR[],
         viewed_by_unregistered_users VARCHAR[],
         is_pinned_to_dashboard_array VARCHAR[],
@@ -64,9 +65,19 @@ CREATE TABLE IF NOT EXISTS posts (
         email VARCHAR(100) UNIQUE NOT NULL, 
         password VARCHAR(100) NOT NULL, 
         profile_pic VARCHAR(150),  
+        about_myself VARCHAR(350),
+        nationality VARCHAR(50) DEFAULT Nigerian,
+        gender VARCHAR(50),
+        state VARCHAR(50),
         is_admin BOOLEAN DEFAULT FALSE NOT NULL, 
         created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
         last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL );
+
+        -- ALTER TABLE users 
+        -- ADD COLUMN nationality VARCHAR(50);
+
+        -- ALTER TABLE users 
+        -- ADD COLUMN gender VARCHAR(50);
         
         
         CREATE TABLE IF NOT EXISTS friends ( 

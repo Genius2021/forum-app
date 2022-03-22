@@ -110,7 +110,6 @@ export default function Home() {
 
 
                 return (
-                  <>
                     <List
                       sx={{
                         width: "100%",
@@ -172,7 +171,6 @@ export default function Home() {
                       </ListItem>
                       <Divider />
                     </List>
-                  </>
                 );
               })}
             </div>

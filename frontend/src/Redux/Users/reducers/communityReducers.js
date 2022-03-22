@@ -48,6 +48,11 @@ import {
   UNFOLLOW_THREAD_SUCCESS,
   FOLLOW_ALL_THREAD_SUCCESS,
   UNFOLLOW_ALL_THREAD_SUCCESS,
+  DELETE_COMMUNITY_PICTURE_REQUEST,
+  DELETE_COMMUNITY_PICTURE_SUCCESS,
+  DELETE_COMMUNITY_PICTURE_FAIL,
+  REMOVE_FROM_ALL_COMMENTS_ARRAY,
+  ADD_TO_ALL_COMMENTS_ARRAY,
 } from "../constants/communityConstants";
 
 export const createCommunityPostReducer = (state = { newPost: {} }, action) => {
@@ -96,6 +101,19 @@ export const communityImageUploadReducer = (state = {}, action) => {
     case COMMUNITY_IMAGE_UPLOAD_SUCCESS:
       return { ...state, loading: false, successUpload: true };
     case COMMUNITY_IMAGE_UPLOAD_FAIL:
+      return { ...state, loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const communityPictureDeleteReducer = (state = {}, action) => {
+  switch (action.type) {
+    case DELETE_COMMUNITY_PICTURE_REQUEST:
+      return { ...state, loading: true };
+    case DELETE_COMMUNITY_PICTURE_SUCCESS:
+      return { ...state, loading: false, successUpload: true };
+    case DELETE_COMMUNITY_PICTURE_FAIL:
       return { ...state, loading: false, error: action.payload };
     default:
       return state;
@@ -214,6 +232,19 @@ export const getACommunityPostReducer = (
         error: action.payload,
         seenPost: false,
       };
+    case ADD_TO_ALL_COMMENTS_ARRAY:
+      return {
+        ...state,
+        post: {
+          ...state.post,
+          follow_all_comments: [...state.post.follow_all_comments, action.payload.username],
+        },
+      };
+    case REMOVE_FROM_ALL_COMMENTS_ARRAY:
+      let removeUsername = state.post.follow_all_comments.filter(
+        (x) => x !== action.payload.username
+      );
+      return { ...state, post: { ...state.post, follow_all_comments: removeUsername } };
     case LIKE_COMMUNITY_POST_SUCCESS:
       return {
         ...state,

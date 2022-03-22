@@ -10,7 +10,7 @@ import PaginationComponent from "../components/PaginationComponent";
 import TrendingNow from "../components/TrendingNow";
 import BasicCard from "../components/BasicCard";
 import { getCommunityPosts } from "../../Redux/Users/actions/communityActions";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import CircularProgress from '@mui/material/CircularProgress';
 import { hrsAndMins } from "../../commonFunctions";
 

@@ -45,7 +45,7 @@ export default function BasicCard({
   const community = location.pathname.split("/")[2];
 
   const { userInfo } = useSelector((state) => state.userSignin);
-  const username = userInfo.username;
+  const username = userInfo?.username;
 
   const [shareIcon, setShareIcon] = useState(false);
 
@@ -63,7 +63,11 @@ export default function BasicCard({
     history.push(`/communities/${community}/${thePostId}`);
   };
 
-  const dotStyle = { mx: 0.3, fontSize: "1.1rem", color: "#555555" };
+  const dotStyle = {
+    fontSize: "1rem",
+    color: "#555555",
+    paddingBottom:"0.3rem"
+  };
 
   return (
     <Card
@@ -71,11 +75,11 @@ export default function BasicCard({
         minWidth: 275,
         maxHeight: 125,
         // pb: 1,
-        // "&:hover": { transform: "scale(1.02)" },              
+        // "&:hover": { transform: "scale(1.02)" },
       }}
     >
       <CardHeader
-        sx={{ padding:"0.7rem", paddingTop: 1.5 }}
+        sx={{ padding: "0.7rem", paddingTop: 1.5 }}
         action={
           <Tooltip
             title={<Typography sx={{ fontSize: "1rem" }}>More</Typography>}
@@ -93,10 +97,12 @@ export default function BasicCard({
               fontSize: "1.3rem",
               cursor: "pointer",
               "&:hover": { color: "#3b5998" },
-              width:"fit-content"
+              width: "fit-content",
             }}
           >
-            {post ? `${post.title.substring(0, 55)}...` : "Shrimp and Chorizo Paella"}
+            {post
+              ? `${post.title.substring(0, 55)}...`
+              : "Shrimp and Chorizo Paella"}
           </Typography>
         }
         subheader={
@@ -110,30 +116,22 @@ export default function BasicCard({
             }}
           >
             By
-            <Link
-              to={`/users/${
-                post ? post.author : "Goat Messi"
-              }`}
-            >
-              <Typography
-                sx={{
+            <Link style={{marginLeft: "0.3rem", marginRight: "0.3rem",}} to={`/users/${post ? post.author : "Goat Messi"}`}>
+              <span
+                style={{
                   color: "#3b5998",
                   cursor: "pointer",
                   fontSize: "0.9rem",
-                  ml: 0.3,
+                  
                 }}
               >
                 {post ? post.author : "Goat Messi"}
-              </Typography>
+              </span>
             </Link>{" "}
-            <Typography component="span" sx={dotStyle}>
-              •
-            </Typography>
-            {monthAndDay(post?.created_on)}
-            <Typography component="span" sx={dotStyle}>
-              •
-            </Typography>{" "}
-            {`${hrsAndMin}${AmOrPm(post?.created_on)}`}
+            <span style={dotStyle}>•</span>
+            <span style={{marginLeft:"0.3rem", marginRight: "0.3rem"}}>{monthAndDay(post?.created_on)}</span>
+            <span style={dotStyle}> •</span>{" "}
+            <span style={{marginLeft:"0.3rem", marginRight: "0.3rem"}}>{`${hrsAndMin}${AmOrPm(post?.created_on)}`}</span>
           </Typography>
         }
       />
@@ -152,7 +150,7 @@ export default function BasicCard({
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                cursor:"default",
+                cursor: "default",
               }}
             >
               <FavoriteIcon />
@@ -172,7 +170,7 @@ export default function BasicCard({
                 color: "#777777",
                 fontSize: "1.3rem",
                 // cursor: "pointer",
-                cursor:"default",
+                cursor: "default",
               }}
             ></i>
             <span style={{ fontSize: "1.1rem", color: "#777777" }}>4</span>
@@ -193,7 +191,6 @@ export default function BasicCard({
               sx={{
                 color: `${is_viewed && "green"}`,
                 backgroundColor: `${is_viewed && "rgba(0, 0, 0, 0.04)"}`,
-
               }}
             >
               <Visibility />

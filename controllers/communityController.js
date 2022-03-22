@@ -28,24 +28,18 @@ const likeCommunityPost = async (req, res) => {
 const pinCommunityPostToDashboard = async (req, res) => {
     const { username } = req.body;
     const postId = req.params.postId
-    console.log(username, postId, "yep")
     const capitalizeCommunity = capitalizeStringWithDash(req.baseUrl.split("/")[2])
 
     try {
         const find = await db.query("SELECT is_pinned_to_dashboard_array FROM posts WHERE post_id = $1 AND $2 = ANY(is_pinned_to_dashboard_array);", [postId, username] )
-       console.log("after query")
         if(find.rowCount > 0){
             const removed = await db.query("UPDATE posts SET is_pinned_to_dashboard_array = array_remove(is_pinned_to_dashboard_array, $1) WHERE post_id = $2 RETURNING is_pinned_to_dashboard_array, post_id;", [username, postId ] )
             //  = removed.rows[0].is_pinned_to_dashboard_array.length
             const post_id = removed.rows[0].post_id
-            console.log("before res.send post_id when removed from dashboard")
             res.status(200).json({ pinned: false, post_id, username });
         }else{
-            console.log("got to else statement")
             const addedToDashboard = await db.query("UPDATE posts SET is_pinned_to_dashboard_array = array_append(is_pinned_to_dashboard_array, $1) WHERE post_id = $2 RETURNING is_pinned_to_dashboard_array, post_id;", [username, postId ] )
-           console.log("after else statement query")
             const post_id = addedToDashboard.rows[0].post_id
-            console.log("before res.send post_id when added from dashboard")
             res.status(200).json({ pinned: true, post_id, username });
         }
         
@@ -55,7 +49,6 @@ const pinCommunityPostToDashboard = async (req, res) => {
 }
 
 const deleteAComment = async (req, res) => {
-    console.log("inside deleteAComment controller at backend ")
     const post_id = req.params.postId;
     const username = req.body.username;
     const commentId = req.params.commentId;
@@ -88,19 +81,24 @@ const CommunityAllCommentsFollow = async (req, res) => {
         let followed_by;
         let length;
         let post_id;
-        const find = await db.query("SELECT followed_by FROM comments WHERE post_id = $1 AND $2 = ANY(followed_by);", [postId, username] )
+        let follow_all_comments
+        const find = await db.query("SELECT followed_by FROM comments WHERE post_id = $1 AND $2 = ANY(followed_by);", [postId, username])
         if(find.rows.length > 0){
             const removed = await db.query("UPDATE comments SET followed_by = array_remove(followed_by, $1) WHERE post_id = $2 RETURNING followed_by, post_id, author_username;", [username, postId ] )
+            const notFollowingAll = await db.query("UPDATE posts SET follow_all_comments = array_remove(follow_all_comments, $1) WHERE post_id = $2 RETURNING follow_all_comments;", [username, postId ] )
             followed_by = removed.rows[0].followed_by;
+            follow_all_comments = notFollowingAll.rows[0].follow_all_comments;
             post_id = removed.rows[0].post_id;
             length = removed.rows[0].followed_by.length;
-            res.status(200).json({followed_by, username, length, followAllAction: false, post_id});
+            res.status(200).json({followed_by, username, length, follow_all_comments, followAllAction: false, post_id});
         }else{
             const addedAllFollow = await db.query("UPDATE comments SET followed_by = array_append(followed_by, $1) WHERE post_id = $2 RETURNING followed_by, post_id, author_username;", [username, postId ] )
+            const followingAll = await db.query("UPDATE posts SET follow_all_comments = array_append(follow_all_comments, $1) WHERE post_id = $2 RETURNING follow_all_comments;", [username, postId ] )
             followed_by = addedAllFollow.rows[0].followed_by;
+            follow_all_comments = followingAll.rows[0].follow_all_comments
             post_id = addedAllFollow.rows[0].post_id;
             length = addedAllFollow.rows[0].followed_by.length;
-            res.status(200).json({followed_by, username, length, followAllAction: true, post_id});
+            res.status(200).json({followed_by, username, length, follow_all_comments, followAllAction: true, post_id});
         }
         
     } catch (err) {
@@ -139,7 +137,6 @@ const CommunityCommentFollow = async (req, res) => {
 const CommunityCommentLike = async (req, res) => {
     const { user_name } = req.body;
     const commentId = req.params.commentId;
-    console.log(user_name, commentId)
     try {
         let liked_by;
         let length;
@@ -213,9 +210,7 @@ const getAllComments = async (req, res) => {
         const count = await db.query('SELECT count(comment_id) FROM comments WHERE post_id = $1 AND community_name = $2 ', [post_id, capitalizeCommunity])
         let result = await db.query(`SELECT comment_id, post_id,community_name, author_username, comments.is_admin, comment_text, shared_by, followed_by, comments.created_on, edited_on, users.firstname, users.username, CASE WHEN liked_by is NULL THEN '{}' ELSE liked_by END FROM comments INNER JOIN users ON comments.author_username = users.username WHERE post_id = $1 AND community_name = $2 ORDER BY comments.created_on DESC LIMIT ${pageLimit} OFFSET ${skipNumber};`, [ post_id, capitalizeCommunity ]);
         documentsCount = count.rows[0].count;
-        console.log(documentsCount, "documentsCount")
         numOfPages = Math.ceil(documentsCount / pageLimit); //e.g there are 10 pages which will be sent to the frontend
-        console.log(numOfPages, "numOfPages")
         comments = result.rows
         res.status(200).json({comments, documentsCount, numOfPages, pageLimit});
     } catch (err) {
@@ -226,6 +221,7 @@ const getAllComments = async (req, res) => {
 
 const createACommunityPost = async (req, res) => {
   const { title, description, picture, author } = req.body;
+  console.log(picture, "picture at backend...")
     const capitalizeCommunity = capitalizeStringWithDash(req.baseUrl.split("/")[2])
 
     try {
@@ -272,7 +268,6 @@ const editACommunityPost = async (req, res) => {
 
 
 const deleteACommunityPost = async (req, res) => {
-    console.log(req.body)
     const id = req.params.postId
     const capitalizeCommunity = capitalizeStringWithDash(req.baseUrl.split("/")[2])
 
@@ -281,9 +276,7 @@ const deleteACommunityPost = async (req, res) => {
         const post = await db.query("SELECT post_id, author FROM posts WHERE post_id = $1 AND community_name = $2;", [id, capitalizeCommunity ])
         if(post.rowCount > 0 ){
              const post_id = post.rows[0].post_id
-             console.log("I found a post that can be deleted")
             if(post.rows[0].author === req.body.username){
-                console.log("The post owner has been verified")
 
                 await db.query("DELETE FROM posts WHERE post_id = $1;", [id])
                 res.status(200).json({message: "Post has been deleted", post_id });
@@ -302,14 +295,11 @@ const deleteACommunityPost = async (req, res) => {
     const id = req.params.postId
     const username = req.query.username
     const communityFromParams = capitalizeStringWithDash(req.baseUrl.split("/")[2])
-    console.log(id, username, "these are data from backend")
 
     try{
         const findPost = await db.query("SELECT post_id FROM posts WHERE post_id = $1", [id])
         if(findPost.rowCount > 0){
             if(username !== "undefined"){
-                console.log(username)
-                console.log("got inside username")
                 if(communityFromParams && id ){
                     const addedView = await db.query("UPDATE posts SET viewed_by_registered_users = array_append(viewed_by_registered_users, $1) WHERE post_id = $2 AND community_name = $3 RETURNING *;", [username, id, communityFromParams ] )
                     if(addedView.rowCount > 0){
@@ -322,7 +312,7 @@ const deleteACommunityPost = async (req, res) => {
                 }else if(id){
                     const postById = await db.query("SELECT * FROM posts INNER JOIN community ON posts.community_name = community.community_name INNER JOIN users ON posts.author = users.username WHERE post_id = $1;", [id])                                                                                                                                                                                                                                                                                                                                                                                                   
                     if(postById.rowCount > 0){
-                        postById = postById.rows[0]
+                        postById = postById.rows[0];
                         res.status(200).send(postById);
                     }else{
                         res.status(404).json("Post was not found");
@@ -331,7 +321,6 @@ const deleteACommunityPost = async (req, res) => {
                     res.status(404).json("No ID was found")
                 }   
             }else{
-                console.log("the username came back undefined at backend")
                 let ipAddress = (req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress).split(",")[0] 
                 const addedUnregisteredUsersView = await db.query("UPDATE posts SET viewed_by_unregistered_users = array_append(viewed_by_unregistered_users, $1) WHERE post_id = $2 AND community_name = $3 RETURNING *;", [ipAddress, id, communityFromParams ] )
                 if(addedUnregisteredUsersView.rowCount > 0){
@@ -378,7 +367,6 @@ const getCommunityPosts = async (req, res) => {
                 res.status(404).json("Post was not found");
             }
         }else if(pageNumber && communityFromParams){
-            console.log("Just got here")
                 const doc = async(pageNumber=1)=>{
                 const count = await db.query('SELECT count(post_id) FROM posts WHERE community_name = $1', [communityFromParams])
                 const result = await db.query(`SELECT * FROM posts WHERE community_name = $1 ORDER BY posts.created_on DESC LIMIT ${pageLimit} OFFSET ${skipNumber};`, [communityFromParams])

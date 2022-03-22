@@ -48,6 +48,8 @@ function SinglePost({ location, match, history }) {
     (state) => state.getACommunityPost
   );
 
+  const picture = post.picture;
+
   const { value } = useSelector((state) => state.commentPagination);
 
   let { comments, commentLiked, commentLikeCount, numOfPages, allCommentsFollowed } = useSelector(
@@ -69,7 +71,7 @@ function SinglePost({ location, match, history }) {
 
   const style = {
     position: "sticky",
-    top: "62.5px",
+    top: {md: "62.5px", xs: "56px" },
     zIndex: 20,
   };
 
@@ -241,11 +243,25 @@ function SinglePost({ location, match, history }) {
   };
 
   const followThreadHandler =(e, commentid)=>{
-    dispatch(followThread(commentid, id, username, community))
+    if(!username){
+      history.push("/login")
+    }else{
+      dispatch(followThread(commentid, id, username, community))
+    }
   }
   
   const followAllThreadHandler =()=>{
-    dispatch(followAllThread(id, username, community))
+    if(!username){
+      history.push("/login")
+    }else{
+      dispatch(followAllThread(id, username, community))
+    }
+  }
+
+
+  let follow_all_comments;
+  if(username){
+    follow_all_comments = post.follow_all_comments?.includes(username);
   }
   
   return (
@@ -268,32 +284,20 @@ function SinglePost({ location, match, history }) {
           <AlertComponent typeOfAlert="error">{error}</AlertComponent>
         ) : (
           <Box>
-            {/* {
-                    post && post.picture?.map((pic,currentIndex) =>{
-                      return <div key={currentIndex} style={{ display:"relative",marginRight:"0.5rem"}}>
-                            <img src="/assets/images/img3.jpg" style={{maxWidth: "30vw", maxHeight:"35vh", borderRadius:"0.5rem", border:"1px solid #a4a4a4" }} alt="singlePost_image" />
-                      </div> 
-                      }) 
-                  } */}
-
             <div
               style={{
                 display: "flex",
-                justifyContent: "center",
                 overflowX: "auto",
                 marginBottom: "3px",
               }}
             >
-              <img
-                src="/assets/images/img3.jpg"
-                style={{
-                  maxHeight: "40vh",
-                  maxWidth: "100%",
-                  borderRadius: "0.5rem",
-                  border: "1px solid rgba(0, 0, 0, 0.12)",
-                }}
-                alt="singlePost_image"
-              />
+                {
+                  post && post.picture?.map((pic,currentIndex) =>{
+                    return <div key={currentIndex} style={{ display:"relative",marginRight:"0.5rem"}}>
+                        <img src={`http://localhost:5000/images/${pic}`} style={{maxWidth: "30vw", maxHeight:"35vh", borderRadius:"0.5rem", border: "1px solid rgba(0, 0, 0, 0.12)" }} alt="singlePost_image" />
+                    </div> 
+                    }) 
+                }
             </div>
             <Paper
               variant="outlined"
@@ -419,7 +423,7 @@ function SinglePost({ location, match, history }) {
                   />
                   <MyModal
                     question="Do you really want to delete this post?"
-                    dispatchAction={deletePost({ id, community, username })}
+                    dispatchAction={deletePost({ id, community, username, picture })}
                     modalName="deletePostModal"
                   />
                   <span
@@ -577,9 +581,9 @@ function SinglePost({ location, match, history }) {
               }}
             >
               <span>
-                <Button smallContainedButton backgroundColor={allCommentsFollowed ? "#E8E8E8" : ""} color={allCommentsFollowed ? "#555555": ""} border="none" onClick={followAllThreadHandler}>
+                <Button smallContainedButton backgroundColor={follow_all_comments ? "#E8E8E8" : ""} color={follow_all_comments ? "#555555": ""} border="none" onClick={followAllThreadHandler}>
                   
-                  {allCommentsFollowed ?
+                  {follow_all_comments ?
                     (<span>
                       Following all<i
                       style={{ marginLeft: "0.3rem", fontSize: "1rem" }}
@@ -601,7 +605,7 @@ function SinglePost({ location, match, history }) {
                   comments
                 />
               </span>
-              <Box>
+              <Box sx={{display:"grid"}}>
                 <span style={{ color: "#555555", fontSize: "1rem" }}>
                   Filter by<i className="fas fa-filter"></i>
                 </span>
@@ -616,7 +620,7 @@ function SinglePost({ location, match, history }) {
                     padding: 0,
                     marginTop: 0,
                     marginBottom: 0,
-                    borderRadius: "0.2rem",
+                    borderRadius: "0.5rem",
                     fontSize: "1rem",
                     color: "#555555",
                   }}
@@ -627,24 +631,54 @@ function SinglePost({ location, match, history }) {
                     "Most shared",
                     "No filters",
                   ].map((x, index) => {
-                    return (
-                      <li
-                        onClick={(e) => filterHandler(e, index, x)}
-                        key={index}
-                        style={{
-                          padding: "0.3rem",
-                          justifySelf: "flex-end",
-                          textAlign: "end",
-                          backgroundColor: `${
-                            filterIndex === index ? "#dedede" : ""
-                          }`,
-                          cursor: "pointer",
-                          borderRight: "1px solid rgba(0, 0, 0, 0.12)",
-                        }}
-                      >
-                        {x}
-                      </li>
-                    );
+
+                    if(x === "No filters"){
+                      return (
+                        <li
+                          onClick={(e) => filterHandler(e, index, x)}
+                          key={index}
+                          style={{
+                            borderTopRightRadius: "0.5rem",
+                            borderBottomRightRadius: "0.5rem",
+                            width:"min-content",
+                            padding: "0.3rem",
+                            justifySelf: "flex-end",
+                            textAlign: "center",
+                            backgroundColor: `${
+                              filterIndex === index ? "#dedede" : ""
+                            }`,
+                            cursor: "pointer",
+                            borderRight: "1px solid rgba(0, 0, 0, 0.12)",
+                          }}
+                        >
+                          {x}
+                        </li>
+                      );
+                    }else{
+                      return (
+                        <li
+                          onClick={(e) => filterHandler(e, index, x)}
+                          key={index}
+                          style={{
+  
+                            width:"min-content",
+                            padding: "0.3rem",
+                            justifySelf: "flex-end",
+                            textAlign: "center",
+                            backgroundColor: `${
+                              filterIndex === index ? "#dedede" : ""
+                            }`,
+                            cursor: "pointer",
+                            borderRight: "1px solid rgba(0, 0, 0, 0.12)",
+                          }}
+                        >
+                          {x}
+                        </li>
+                      );
+                    }
+
+                    
+                    
                   })}
                 </ul>
               </Box>
@@ -715,6 +749,7 @@ function SinglePost({ location, match, history }) {
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "center",
+                          paddingRight:"0.5rem",
                         }}
                       >
                         <Typography
@@ -908,7 +943,7 @@ function SinglePost({ location, match, history }) {
                             }
 
                           </Typography>
-                            <span>
+                            <span style={{display:"flex", alignItems:"center"}}>
                             <Tooltip
                               title={
                                 <Typography sx={{ fontSize: "0.85rem" }}>

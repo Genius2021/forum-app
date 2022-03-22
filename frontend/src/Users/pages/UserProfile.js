@@ -94,7 +94,6 @@ function UserProfile(props) {
     "Zamfara",
   ];
 
-  const genders = ["Male", "Female", "Transgender"];
 
   return (
     <Grid container sx={{ justifyContent: "center" }}>
@@ -113,6 +112,7 @@ function UserProfile(props) {
               textAlign: "center",
               fontWeight: "bold",
               fontSize: "2rem",
+              marginTop: "1rem",
             }}
           >
             {paramsUsername === username ? (`Your profile ${paramsUsername}!`) : (`${paramsUsername}'s profile`)}
@@ -180,13 +180,16 @@ function UserProfile(props) {
             <textarea
               style={{
                 width: "100%",
-                resize: "vertical",
+                resize: "none",
                 boxSizing: "border-box",
                 color: "#555555",
                 fontSize: "1.3rem",
+                paddingTop:"0.5rem",
+                paddingBottom:"0.5rem"
               }}
               rows="6"
               value={textareaState}
+              maxLength="350"
               onChange={(e) => setTextareaState(e.target.value)}
             ></textarea>
             <div style={{ textAlign: "end", fontSize: "1.2rem" }}>
@@ -217,7 +220,7 @@ function UserProfile(props) {
                   outline: "none",
                 }}
               >
-                {genders.map((gender, index) => {
+                {["Male", "Female", "Transgender"].map((gender, index) => {
                   return (
                     <option key={index} value={gender}>
                       {gender}

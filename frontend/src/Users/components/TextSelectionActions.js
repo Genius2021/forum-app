@@ -1,86 +1,103 @@
-
- const TextSelectionActions = (e, currentElem, iframeName)=>{
-    // e.target.value, e.target.selectedIndex ...the value gives you the value directly. But the selectedIndex gives you the index of the selected option
-      e.preventDefault();
-      let command = currentElem.command;
-      console.log(command, e.target)
-      let showCode = false;
-      if(currentElem.type === "button"){
-
-      if(currentElem.command === 'viewSourceCode'){
-
-        function execViewSourceCommand(element, contentEditable, showCode) {
-          if (!showCode) {
-            contentEditable.contentDocument.getElementsByTagName('body')[0].textContent = contentEditable.contentDocument.getElementsByTagName('body')[0].innerHTML;
-            showCode = true;
-          } else {
-            contentEditable.contentDocument.getElementsByTagName('body')[0].innerHTML = contentEditable.contentDocument.getElementsByTagName('body')[0].textContent;
-            showCode = false;
-          }
-      
-          return showCode;
+const TextSelectionActions = (e, currentElem, iframeName) => {
+  // e.target.value, e.target.selectedIndex ...the value gives you the value directly. But the selectedIndex gives you the index of the selected option
+  e.preventDefault();
+  let command = currentElem.command;
+  console.log(command, e.target);
+  let showCode = false;
+  if (currentElem.type === "button") {
+    if (currentElem.command === "viewSourceCode") {
+      function execViewSourceCommand(element, contentEditable, showCode) {
+        if (!showCode) {
+          contentEditable.contentDocument.getElementsByTagName(
+            "body"
+          )[0].textContent =
+            contentEditable.contentDocument.getElementsByTagName(
+              "body"
+            )[0].innerHTML;
+          showCode = true;
+        } else {
+          contentEditable.contentDocument.getElementsByTagName(
+            "body"
+          )[0].innerHTML =
+            contentEditable.contentDocument.getElementsByTagName(
+              "body"
+            )[0].textContent;
+          showCode = false;
         }
 
-      //  execViewSourceCommand(currentElem, iframeState, showCode);
-
-      }else{
-
-        let isPrompt = false; 
-        let argument = null;
-
-        switch (command) {  
-
-          //for insert image
-          case 'insertImage':
-            argument = prompt('Enter your image URL: ');
-            isPrompt = true;
-            document.getElementById(iframeName).contentWindow.document.execCommand(command, false, argument); 
-            break;
-
-          case 'foreColor':
-            argument = e.target.value;
-            document.getElementById(iframeName).contentWindow.document.execCommand(command, false, argument); 
-            break;
-
-          case 'backColor':
-            argument = e.target.value;
-            document.getElementById(iframeName).contentWindow.document.execCommand(command, false, argument); 
-            break;
-         
-          //for bold and others
-          default:
-            document.getElementById(iframeName).contentWindow.document.execCommand(command, false, argument); 
-        }
-
-        // document.getElementById(iframeName).contentWindow.document.execCommand(command, false, null); 
-        // if ((isPrompt && argument !== null) || !isPrompt){
-        //   iframeState.execCommand(command, false, argument);
-        // }
+        return showCode;
       }
 
-    }else{
+      //  execViewSourceCommand(currentElem, iframeState, showCode);
+    } else {
+      let isPrompt = false;
       let argument = null;
-      switch(command){
 
-        case 'fontName':
-          argument = e.target.value
-          document.getElementById(iframeName).contentWindow.document.execCommand(command, false, argument); 
+      switch (command) {
+        //for insert image
+        case "insertImage":
+          argument = prompt("Enter your image URL: ");
+          isPrompt = true;
+          document
+            .getElementById(iframeName)
+            .contentWindow.document.execCommand(command, false, argument);
+          break;
+        case "createLink":
+          argument = prompt("Enter the link: ");
+          isPrompt = true;
+          document.getElementById(iframeName).contentWindow.document.execCommand(command, false, argument);
           break;
 
-        case 'fontSize':
-          argument = e.target.value
-          document.getElementById(iframeName).contentWindow.document.execCommand(command, false, argument); 
+        case "foreColor":
+          argument = e.target.value;
+          document
+            .getElementById(iframeName)
+            .contentWindow.document.execCommand(command, false, argument);
           break;
-        case 'formatBlock':
-          argument = e.target.value
-          document.getElementById(iframeName).contentWindow.document.execCommand(command, false, argument); 
-          break;
-        }
 
+        case "backColor":
+          argument = e.target.value;
+          document
+            .getElementById(iframeName)
+            .contentWindow.document.execCommand(command, false, argument);
+          break;
+
+        //for bold and others
+        default:
+          document
+            .getElementById(iframeName)
+            .contentWindow.document.execCommand(command, false, argument);
+      }
+
+      // document.getElementById(iframeName).contentWindow.document.execCommand(command, false, null);
+      // if ((isPrompt && argument !== null) || !isPrompt){
+      //   iframeState.execCommand(command, false, argument);
+      // }
     }
-     
-    
+  } else {
+    let argument = null;
+    switch (command) {
+      case "fontName":
+        argument = e.target.value;
+        document
+          .getElementById(iframeName)
+          .contentWindow.document.execCommand(command, false, argument);
+        break;
+
+      case "fontSize":
+        argument = e.target.value;
+        document
+          .getElementById(iframeName)
+          .contentWindow.document.execCommand(command, false, argument);
+        break;
+      case "formatBlock":
+        argument = e.target.value;
+        document
+          .getElementById(iframeName)
+          .contentWindow.document.execCommand(command, false, argument);
+        break;
+    }
   }
+};
 
-
-export default TextSelectionActions
+export default TextSelectionActions;

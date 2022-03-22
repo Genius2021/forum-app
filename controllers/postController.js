@@ -51,9 +51,7 @@ const deletePost = async (req, res) => {
     try{
          const post = await db.query("SELECT * FROM posts INNER JOIN users ON users.username = posts.author WHERE post_id = $1;", [req.params.id])
          if(post.rowCount > 0 ){
-             console.log("I found a post that can be deleted")
             if(post.rows[0].username === req.user.username){
-                console.log("The post owner has been verified")
 
                 await db.query("DELETE FROM posts WHERE post_id = $1;", [req.params.id])
                 res.status(200).json("Post has been deleted");
@@ -92,7 +90,6 @@ const getAllPosts = async (req, res) => {
     const title = req.query.title;
     const community = req.query.community;
     const pageNumber = req.query.page;
-    console.log(req.query)
     const pageLimit = 10;
     // const skipNumber = 2;
     const skipNumber = (pageNumber * pageLimit) - pageLimit;
@@ -150,11 +147,10 @@ const getAllPosts = async (req, res) => {
                 res.status(404).json("Post was not found");
             }
        }else{
+           console.log("there...")
            count = await db.query("SELECT COUNT(post_id) FROM posts")
-           console.log(count)
-           const result = await db.query(`SELECT * FROM posts INNER JOIN community ON posts.community_name = community.community_name ORDER BY posts.created_on DESC LIMIT ${pageLimit} `)
+           const result = await db.query(`SELECT * FROM posts ORDER BY posts.created_on DESC LIMIT ${pageLimit} `)
            if(result.rowCount > 0){
-               console.log("gotten here")
                 documentsCount = count.rows[0].count;
                 numOfPages = Math.ceil(documentsCount / pageLimit);
                 posts = result.rows

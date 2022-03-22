@@ -9,18 +9,34 @@ import CreatePost from "./Users/pages/CreatePost";
 import SinglePost from "./Users/pages/SinglePost";
 import UserDashboard from "./Users/pages/UserDashboard";
 import UserProfile from "./Users/pages/UserProfile";
+import PageNotFound from "./Users/pages/PageNotFound";
 import { useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
+
 
 
 export default function App() {
   const { userInfo } = useSelector((state) => state.userSignin);
   const username = userInfo?.username;
 
+  const { pathname } = useLocation();
+  const communityName = pathname.split("/")[2]
+
+  const communities = [ "Politics", "Science and Tech", "Sports", "Entertainment", "Education", "Business", "Programming", "Love", "Food and Agriculture", "Earth Sustainability", "Gaming", "Culture and Tradition", "Religion", "Humanitarian"]
+
+      let newCommunity = communities.map((community, index) =>{
+        if(community.includes(" ")){
+            const joinedWords = community.split(" ").join("-").toString().toLowerCase();
+            return joinedWords;
+          }else{
+            community = community.toLowerCase();
+            return community;
+          }
+    })
 
 
   return (
     <div className="App">
-      <Router>
         <Navbar />
         <Sidebar />
         <Switch>
@@ -28,12 +44,12 @@ export default function App() {
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
           <Route path="/dashboard" component={username && UserDashboard} />
-          <Route path="/users/:username" component={username && UserProfile} />
-          <Route exact path="/communities/:community" component={Community} />
-          <Route exact path="/communities/:community/create-post" component={username && CreatePost} />
-          <Route path="/communities/:community/:id" component={SinglePost} />
+          <Route path="/users/:username" component={username && UserProfile || Login} />
+          <Route exact path="/communities/:community" component={newCommunity.includes(communityName) && Community} />
+          <Route exact path="/communities/:community/create-post" component={newCommunity.includes(communityName) && username && CreatePost || Login} />
+          <Route path="/communities/:community/:id" component={newCommunity.includes(communityName) && SinglePost} />
+          <Route path="*" component={PageNotFound} />
         </Switch>
-      </Router>
     </div>
   );
 }

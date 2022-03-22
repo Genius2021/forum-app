@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import List from '@mui/material/List';
@@ -68,7 +67,7 @@ export default function Sidebar() {
               <SidebarDropdown communitiesArray={el.communities} />
               </ListItem>
           }else{
-            return <Link to={el.link} key={index}>
+            return <Link to={el.link} onClick={menuClose} key={index}>
               <ListItem button>
                 <ListItemIcon>
                   {el.font}
@@ -84,7 +83,7 @@ export default function Sidebar() {
       <List>
         {sidebarBottomElements.map((el, index) => {
          if(el.text === "Messages"){
-           return <Link to={el.link} key={index}>
+           return <Link to={el.link} onClick={menuClose} key={index}>
             <ListItem button>
               <ListItemIcon>
                 <Badge badgeContent={4} color="error">
@@ -97,7 +96,7 @@ export default function Sidebar() {
 
          }else{
 
-           return <Link to={el.link} key={index}>
+           return <Link to={el.link} onClick={menuClose} key={index}>
             <ListItem button>
               <ListItemIcon>
                 {el.font}

@@ -20,10 +20,15 @@ export default function Login(props) {
 
     const [ email, setEmail ] = useState("");
     const [ password, setPassword ] = useState("");
-
+    const [isChecked, setIsChecked] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    
     const handleShowPassword =()=>{
       setShowPassword(!showPassword)
+    }
+
+    const handleChecked =()=>{
+      setIsChecked(!isChecked)
     }
 
     const redirect = props.location.search && props.location.search.split("=")[1]
@@ -43,7 +48,7 @@ export default function Login(props) {
       }else if( !password || !email ){
           alert("Some fields were left empty! Fill them.");
       }else{
-          dispatch(signin( email, password ));
+          dispatch(signin( email, password, isChecked ));
           setEmail("");
           setPassword("");
       }
@@ -93,6 +98,8 @@ export default function Login(props) {
             <FormControlLabel
               value="top"
               control={<Checkbox color="success" 
+              onClick={handleChecked}
+              checked={isChecked} 
               sx={{ '& .MuiSvgIcon-root': { fontSize: 15 }, display:"flex", alignSelf: "center"}}/>}
               label={<Typography variant="subtitle2" sx={{color:"#444444"}} >Remember me</Typography>}
             />
