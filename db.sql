@@ -2,16 +2,16 @@ CREATE TABLE IF NOT EXISTS posts (
         post_id VARCHAR(150) PRIMARY KEY NOT NULL, 
         title VARCHAR(70) NOT NULL,
         description VARCHAR(2000) NOT NULL,
-        picture VARCHAR[],
+        picture VARCHAR[] DEFAULT '{}',
         author VARCHAR(50) NOT NULL,
         community_name VARCHAR(25) NOT NULL,
-        liked_by VARCHAR[], /* NOTE: When I push to this array, I can get some pieces of information such as the like count i.e by getting the array length and even know those who have liked it and get a yes or no boolean value for those who have liked the post. Arrays are so powerful and give much info*/
-        shared_by VARCHAR[],
+        liked_by VARCHAR[] DEFAULT '{}', /* NOTE: When I push to this array, I can get some pieces of information such as the like count i.e by getting the array length and even know those who have liked it and get a yes or no boolean value for those who have liked the post. Arrays are so powerful and give much info*/
+        shared_by VARCHAR[] DEFAULT '{}',
         followed_by VARCHAR[] DEFAULT '{}',
         follow_all_comments VARCHAR[] DEFAULT '{}',
-        viewed_by_registered_users VARCHAR[],
-        viewed_by_unregistered_users VARCHAR[],
-        is_pinned_to_dashboard_array VARCHAR[],
+        viewed_by_registered_users VARCHAR[] DEFAULT '{}',
+        viewed_by_unregistered_users VARCHAR[] DEFAULT '{}',
+        is_pinned_to_dashboard_array VARCHAR[] DEFAULT '{}',
         created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
         last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
         CONSTRAINT posts_author_foreignkey_constraint
@@ -82,9 +82,9 @@ CREATE TABLE IF NOT EXISTS posts (
         
         CREATE TABLE IF NOT EXISTS friends ( 
         username VARCHAR(50) PRIMARY KEY NOT NULL, 
-        friends_list VARCHAR[],
-        followers_list VARCHAR[],
-        following_list VARCHAR[], 
+        friends_list VARCHAR[] DEFAULT '{}',
+        followers_list VARCHAR[] DEFAULT '{}',
+        following_list VARCHAR[] DEFAULT '{}', 
         CONSTRAINT friends_username_foreignkey_constraint
         FOREIGN KEY (username)
         REFERENCES users(username)
@@ -95,13 +95,14 @@ CREATE TABLE IF NOT EXISTS posts (
         post_id VARCHAR(150) NOT NULL, 
         community_name VARCHAR(25) NOT NULL,
         author_username VARCHAR(150), 
+        picture VARCHAR[] DEFAULT '{}',
         is_reply BOOLEAN DEFAULT FALSE NOT NULL,
         reply_to VARCHAR(150), 
-        replied_by VARCHAR[], 
+        replied_by VARCHAR[] DEFAULT '{}', 
         is_admin BOOLEAN DEFAULT FALSE NOT NULL, 
         comment_text VARCHAR(2500) NOT NULL, 
-        liked_by VARCHAR[],
-        shared_by VARCHAR[],
+        liked_by VARCHAR[] DEFAULT '{}',
+        shared_by VARCHAR[] DEFAULT '{}',
         followed_by VARCHAR[] DEFAULT '{}',
         created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
         edited_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,

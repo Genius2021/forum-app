@@ -152,16 +152,16 @@ function CreatePost(props) {
               <section style={{display:"grid", mx: "auto"}}>
                 <div style={{display: "flex", overflowX:"auto", paddingTop:"0.5rem"}}>
                   {
-                      file && Object.keys(file).map((key,currentIndex) =>{
-                        console.log(key, currentIndex)
-                        return <div key={currentIndex} style={{ display:"relative", marginRight:"0.5rem"}}>
-                              <img src={URL.createObjectURL(file[key])} style={{maxWidth: "30vw", maxHeight:"35vh", borderRadius:"0.5rem", border:"1px solid #a4a4a4" }} alt="post_image" />
-                              <Tooltip title={<Typography sx={{ fontSize: "1rem" }}>Delete image</Typography>}><DeleteIcon sx={{display:"absolute", right:"0", bottom:"0", color:"red", "&:hover":{cursor:"pointer"}}} onClick={(e) =>deleteImageHandler(e, key)}/></Tooltip>
-                        </div> 
-                        }) 
+                    file && Object.keys(file).map((key,currentIndex) =>{
+                      console.log(key, currentIndex)
+                      return <div key={currentIndex} style={{ display:"relative", marginRight:"0.5rem"}}>
+                            <img src={URL.createObjectURL(file[key])} style={{maxWidth: "30vw", maxHeight:"35vh", borderRadius:"0.5rem", border:"1px solid #a4a4a4" }} alt="post_image" />
+                            <Tooltip title={<Typography sx={{ fontSize: "1rem" }}>Delete image</Typography>}><DeleteIcon sx={{display:"absolute", right:"0", bottom:"0", color:"red", "&:hover":{cursor:"pointer"}}} onClick={(e) =>deleteImageHandler(e, key)}/></Tooltip>
+                      </div> 
+                      }) 
                   }
                 </div>
-                  <form id="postCreationForm" style={{ display:"flex", flexDirection:"column", alignItems:"center"}} enctype="multipart/form-data">
+                  <form id="postCreationForm" style={{ display:"flex", flexDirection:"column", alignItems:"center"}} encType="multipart/form-data">
                       <div style={{display:"flex", width:"100%", justifyContent:"space-between"}}>
                         <label htmlFor="form__file" style={{display:"flex", alignItems:"center", justifyContent:"flex-end"}}>
                           <Tooltip title={<Typography sx={{ fontSize: "0.85rem" }}>Add images</Typography>}>

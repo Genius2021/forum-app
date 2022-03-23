@@ -383,7 +383,6 @@ function SinglePost({ location, match, history }) {
                         fontSize: "1rem",
                         cursor: "pointer",
                         color: `${
-                          // (postLiked === true ? "green" : "") ||
                           post.liked_by?.includes(username) ? "green" : ""
                         }`,
                       }}
@@ -391,7 +390,6 @@ function SinglePost({ location, match, history }) {
                   </Tooltip>
                   <span style={{ fontSize: "1.1rem" }}>
                     {
-                      // postLikeCount ||
                       post.liked_by?.length > 0 && post.liked_by?.length
                     }
                   </span>
@@ -736,13 +734,13 @@ function SinglePost({ location, match, history }) {
                     sx={{ px:"0 !important", paddingBottom: "0 !important", paddingTop: 0 }}
                   >
                     <Box sx={{ width: { md: "90%" }, mx: "auto" }}>
-                      <CardMedia
+                      {/* <CardMedia
                         component="img"
                         // height="300"
                         image="/assets/images/img6.jpg"
                         alt="passport"
                         sx={{ borderRadius: "0.5rem", maxHeight: "400px" }}
-                      />
+                      /> */}
                       <div
                         id="actions"
                         style={{

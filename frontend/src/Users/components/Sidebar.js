@@ -59,10 +59,10 @@ export default function Sidebar() {
                 <ListItemIcon>
                   {el.font}
                 </ListItemIcon>
-                <Typography sx={{display:"flex", alignItems:"center"}}>
+                <div style={{display:"flex", alignItems:"center"}}>
                   <ListItemText primary={el.text} />
                   <i style={{marginLeft:"0.5rem"}} className="fas fa-caret-down"></i>
-                </Typography>
+                </div>
               
               <SidebarDropdown communitiesArray={el.communities} />
               </ListItem>

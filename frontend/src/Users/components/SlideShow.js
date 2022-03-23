@@ -11,11 +11,11 @@ import { autoPlay } from 'react-swipeable-views-utils';
 const AutoPlaySwipeableViews = autoPlay(SwipeableViews);
 
 const images = [
-  {
-    label: 'Second image',
-    imgPath:
-    '/assets/images/Atiku.jpg',
-  },
+  // {
+  //   label: 'Second image',
+  //   imgPath:
+  //   '/assets/images/Atiku.jpg',
+  // },
   {
     label: 'Third image',
     imgPath:
@@ -59,6 +59,7 @@ export default function SlideShow() {
         onChangeIndex={handleStepChange}
         enableMouseEvents
       >
+        <>
         {images.map((step, index) => (
           <div key={step.label}>
             {Math.abs(activeStep - index) <= 2 ? (
@@ -79,6 +80,7 @@ export default function SlideShow() {
             ) : null}
           </div>
         ))}
+        </>
       </AutoPlaySwipeableViews>
       <MobileStepper
       sx={{ height:"10px" }}

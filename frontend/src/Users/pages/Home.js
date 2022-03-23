@@ -139,7 +139,7 @@ export default function Home() {
                               marginRight: "0.5rem",
                             }}
                           >
-                            { index + 1 }
+                            { index > 5 ? "" : index + 1 }
                           </span>
                           <Link
                             to={`/communities/${community_name}/${post.post_id}`}
