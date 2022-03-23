@@ -59,7 +59,6 @@ export default function SlideShow() {
         onChangeIndex={handleStepChange}
         enableMouseEvents
       >
-        <>
         {images.map((step, index) => (
           <div key={step.label}>
             {Math.abs(activeStep - index) <= 2 ? (
@@ -80,7 +79,6 @@ export default function SlideShow() {
             ) : null}
           </div>
         ))}
-        </>
       </AutoPlaySwipeableViews>
       <MobileStepper
       sx={{ height:"10px" }}
