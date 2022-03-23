@@ -19,7 +19,7 @@ app.use("/images", express.static(path.join(__dirname, "/images")));
 
 dotenv.config();
 
-db.connect(process.env.DATABASE_URL).then(() => console.log("Database connected successfully"))
+db.connect().then(() => console.log("Database connected successfully"))
 .catch(error => console.log(error));
 
 const storage = multer.diskStorage({

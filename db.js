@@ -4,12 +4,17 @@ const Pool = require("pg").Pool;
 // const  Client  = require("pg").Client
 
 
+    const connectionString = `postgresql://${process.env.user}:${process.env.password}@${process.env.host}:${process.env.port}/${process.env.database}`
+
+    const isProduction = process.env.NODE_ENV === "production";
+
+   const DATABASE_URL = process.env.DATABASE_URL
+
 const db = new Pool({
-    user: process.env.user || "postgres",
-    host: process.env.host || "localhost",
-    database: process.env.database || "blog",
-    password: process.env.password,
-    port: process.env.port || "5432",
+    connectionString: isProduction ? process.env.DATABASE_URL : connectionString,
+    ssl:{
+        rejectUnauthorized: false,
+    },
 });
 
 // const db = new Client({
