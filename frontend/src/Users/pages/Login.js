@@ -94,6 +94,7 @@ export default function Login(props) {
             { (errorMessage || error) && <AlertComponent typeOfAlert="error">{errorMessage || error }</AlertComponent> }
             { registerInfo && successMessage && <AlertComponent typeOfAlert="success">{ successMessage }</AlertComponent> }
             <TextField required id="outlined-basic" label="Email" InputProps={{style:{fontSize: "1.2rem", color: "#777777"}}} InputLabelProps={{style:{fontSize: "1.5rem" }}} variant="outlined" autoFocus onChange={e => setEmail(e.target.value)} />
+            <div style={{margin:"0.5rem 0"}}></div>
             <TextField required id="outlined-basic" label="Password" variant="outlined" type={ showPassword ? "text": "password" } InputProps={{style:{fontSize: "1.2rem", color: "#777777" },  endAdornment: <InputAdornment position="end" sx={{ "&:hover": {cursor: "pointer"} }} onClick={handleShowPassword}>{ showPassword ? <VisibilityOff sx={visibility} /> : <Visibility sx={visibility} /> }</InputAdornment> }} InputLabelProps={{style:{fontSize:"1.5rem"}}} onChange={e => setPassword(e.target.value)}/>
             <FormControlLabel
               value="top"

@@ -294,7 +294,7 @@ function SinglePost({ location, match, history }) {
                 {
                   post && post.picture?.map((pic,currentIndex) =>{
                     return <div key={currentIndex} style={{ display:"relative",marginRight:"0.5rem"}}>
-                        <img src={`http://localhost:5000/images/${pic}`} style={{maxWidth: "30vw", maxHeight:"35vh", borderRadius:"0.5rem", border: "1px solid rgba(0, 0, 0, 0.12)" }} alt="singlePost_image" />
+                        <img src={`https://forum-2022.herokuapp.com/images/${pic}`} style={{maxWidth: "30vw", maxHeight:"35vh", borderRadius:"0.5rem", border: "1px solid rgba(0, 0, 0, 0.12)" }} alt="singlePost_image" />
                     </div> 
                     }) 
                 }
