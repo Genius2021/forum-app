@@ -1,5 +1,6 @@
-// import { axiosInstance } from "../../config.js";
-import axios from "axios";
+// import axios from "axios";
+import { axiosInstance } from "../../../config"
+
 import {
   MESSAGE__ERROR,
   MESSAGE__SUCCESS,
@@ -34,7 +35,7 @@ import {
 export const follow = (username, recipient) => async (dispatch) => {
   dispatch({ type: FOLLOW_USER_REQUEST });
   try {
-    const { data } = await axios.put(`/users/${username}/profile`, {recipient});
+    const { data } = await axiosInstance.put(`/users/${username}/profile`, {recipient});
     console.log(data)
     if(data.unfollowed){
         dispatch({ type: UNFOLLOW_USER_SUCCESS, payload: data });
@@ -56,7 +57,7 @@ export const follow = (username, recipient) => async (dispatch) => {
 export const getUserProfile = (username, someoneElse) => async (dispatch) => {
   dispatch({ type: GET_USER_PROFILE_REQUEST });
   try {
-    const { data } = await axios.get(`/users/${username}/profile?someoneElse=${someoneElse}`);
+    const { data } = await axiosInstance.get(`/users/${username}/profile?someoneElse=${someoneElse}`);
     console.log(data)
     // if(data.someoneElse){
     //     dispatch({ type: GET_ANOTHER_USER_PROFILE_SUCCESS, payload: data });
@@ -78,7 +79,7 @@ export const getUserProfile = (username, someoneElse) => async (dispatch) => {
 export const signin = (email, password, isChecked) => async (dispatch) => {
   dispatch({ type: USER_SIGNIN_REQUEST, payload: { email, password } });
   try {
-    const { data } = await axios.post("/users/login", { email, password });
+    const { data } = await axiosInstance.post("/users/login", { email, password });
     if (data.user_id) {
       const { message, ...rest } = data;
       dispatch({ type: USER_SIGNIN_SUCCESS, payload: rest });
@@ -109,7 +110,7 @@ export const register =
   async (dispatch) => {
     dispatch({ type: USER_REGISTER_REQUEST });
     try {
-      const { data } = await axios.post("/users/register", {
+      const { data } = await axiosInstance.post("/users/register", {
         firstname,
         lastname,
         username,
@@ -143,7 +144,7 @@ export const editProfileData =
       payload: { email, password, profilePic },
     });
     try {
-      const { data } = await axios.put(`/users/${id}`, {
+      const { data } = await axiosInstance.put(`/users/${id}`, {
         email,
         password,
         profilePic,
@@ -164,7 +165,7 @@ export const editProfileData =
 export const photoUpload = (file) => async (dispatch) => {
   dispatch({ type: USER_PHOTO_UPLOAD_REQUEST, payload: { file } });
   try {
-    const { data } = await axios.post("/upload", file);
+    const { data } = await axiosInstance.post("/upload", file);
     dispatch({ type: USER_PHOTO_UPLOAD_SUCCESS, payload: data });
     console.log("success in uploading image file");
   } catch (error) {
@@ -181,7 +182,7 @@ export const photoUpload = (file) => async (dispatch) => {
 export const photoUpdate = (file) => async (dispatch) => {
   dispatch({ type: USER_PHOTO_UPDATE_REQUEST, payload: { file } });
   try {
-    const { data } = await axios.post("/upload", file);
+    const { data } = await axiosInstance.post("/upload", file);
     dispatch({ type: USER_PHOTO_UPDATE_SUCCESS, payload: data });
     console.log("success in updating image file");
   } catch (error) {

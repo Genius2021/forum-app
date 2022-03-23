@@ -61,13 +61,14 @@ import {
   ADD_TO_ALL_COMMENTS_ARRAY,
 } from "../constants/communityConstants";
 
-import axios from "axios";
+// import axios from "axios";
+import { axiosInstance } from "../../../config"
 
 export const followAllThread =
   (postId, username, community) => async (dispatch) => {
     dispatch({ type: FOLLOW_ALL_THREAD_REQUEST });
     try {
-      const { data } = await axios.put(
+      const { data } = await axiosInstance.put(
         `/${community}/posts/${postId}/comments/follow`,
         { username }
       );
@@ -96,7 +97,7 @@ export const followThread =
   (commentId, postId, username, community) => async (dispatch) => {
     dispatch({ type: FOLLOW_THREAD_REQUEST });
     try {
-      const { data } = await axios.put(
+      const { data } = await axiosInstance.put(
         `/${community}/posts/${postId}/comments/${commentId}/follow`,
         { username }
       );
@@ -121,7 +122,7 @@ export const pinToDashboard =
   (thePostId, community, username) => async (dispatch) => {
     dispatch({ type: PIN_COMMUNITY_POST_REQUEST });
     try {
-      const { data } = await axios.put(`/${community}/posts/${thePostId}/pin`, {
+      const { data } = await axiosInstance.put(`/${community}/posts/${thePostId}/pin`, {
         username,
       });
       console.log("Pinned post data is back from the backend", data);
@@ -144,7 +145,7 @@ export const pinToDashboard =
 // export const CommunityImageUpload = (file) => async (dispatch) => {
 //     dispatch({ type: COMMUNITY_IMAGE_UPLOAD_REQUEST });
 //     try {
-//         const { data } = await axios.post("/photos/upload", file);
+//         const { data } = await axiosInstance.post("/photos/upload", file);
 //         dispatch({ type: COMMUNITY_IMAGE_UPLOAD_SUCCESS, payload: data });
 //         console.log("image upload data is", data);
 //         console.log("success in uploading image file");
@@ -161,7 +162,7 @@ export const viewACommunityPost =
     dispatch({ type: GET_A_COMMUNITY_POST_REQUEST });
     try {
       console.log("got to single post actions");
-      const { data } = await axios.get(
+      const { data } = await axiosInstance.get(
         `/${community}/posts/${id}?username=${username}`
       );
       dispatch({ type: GET_A_COMMUNITY_POST_SUCCESS, payload: data });
@@ -182,7 +183,7 @@ export const createCommunityPost =
     dispatch({ type: COMMUNITY_IMAGE_UPLOAD_REQUEST });
 
     try {
-      const { data } = await axios.post("/photos/upload", imgdata);
+      const { data } = await axiosInstance.post("/photos/upload", imgdata);
     
       console.log("back with data", data);
       dispatch({ type: COMMUNITY_IMAGE_UPLOAD_SUCCESS, payload: data });
@@ -193,7 +194,7 @@ export const createCommunityPost =
         return x.filename;
       });
       console.log(picture);
-      const returnedData  = await axios.post(`/${community}/posts/create-post`, { title, description, picture, author, community });
+      const returnedData  = await axiosInstance.post(`/${community}/posts/create-post`, { title, description, picture, author, community });
       dispatch({ type: ADD_NEW_COMMUNITY_POST, payload: returnedData,data });
       window.location.replace(`/communities/${community}/${returnedData.data.post_id}`);
     } catch (error) {
@@ -212,16 +213,16 @@ export const deletePost = (deleteDetails) => async (dispatch) => {
   dispatch({ type: DELETE_COMMUNITY_POST_REQUEST });
   dispatch({type: DELETE_COMMUNITY_PICTURE_REQUEST});
   try {
-    await axios.delete(
+    await axiosInstance.delete(
         "/photos/upload",
         { data: { picture } }
       ); 
 
   dispatch({type: DELETE_COMMUNITY_PICTURE_SUCCESS})
-    const  thedata  = await axios.delete(
+    const  thedata  = await axiosInstance.delete(
       `/${community}/posts/${id}/delete-post`,
       { data: { username } }
-    ); //NOTE: the axios delete method needs to have a "data" key in the body to work
+    ); //NOTE: the axiosInstance delete method needs to have a "data" key in the body to work
     dispatch({ type: DELETE_COMMUNITY_POST, payload: thedata.data });
     window.location.replace(`/communities/${community}`);
   } catch (error) {
@@ -242,7 +243,7 @@ export const editPost =
       payload: { title, description, username },
     });
     try {
-      const { data } = await axios.put(`/${community}/posts/${id}/edit-post`, {
+      const { data } = await axiosInstance.put(`/${community}/posts/${id}/edit-post`, {
         username,
         title,
         description,
@@ -268,7 +269,7 @@ export const getCommunityPosts = (search, community) => async (dispatch) => {
   try {
     console.log(community, "got");
     console.log("community get posts");
-    const { data } = await axios.get(`/${community}/posts` + search);
+    const { data } = await axiosInstance.get(`/${community}/posts` + search);
     console.log(data);
     dispatch({ type: GET_COMMUNITY_POSTS_SUCCESS, payload: data });
   } catch (error) {
@@ -292,7 +293,7 @@ export const postComment = (comment) => async (dispatch) => {
   dispatch({ type: POST_COMMUNITY_COMMENT_REQUEST });
 
   try {
-    const { data } = await axios.post(
+    const { data } = await axiosInstance.post(
       `/${community_name}/posts/${post_id}/comments/${comment_id}`,
       rest
     );
@@ -315,7 +316,7 @@ export const getPostComments =
     dispatch({ type: GET_COMMUNITY_POST_COMMENTS_REQUEST });
 
     try {
-      const { data } = await axios.get(
+      const { data } = await axiosInstance.get(
         `/${community}/posts/${id}/comments` + commentPage
       );
       console.log(data, "gotten comments from backend");
@@ -338,7 +339,7 @@ export const deleteComment = (deleteObject) => async (dispatch) => {
   dispatch({ type: DELETE_COMMUNITY_POST_COMMENT_REQUEST });
 
   try {
-    const { data } = await axios.delete(
+    const { data } = await axiosInstance.delete(
       `/${community}/posts/${id}/comments/${stateCommentId}`,
       { data: { username } }
     );
@@ -362,7 +363,7 @@ export const likeComment = (likeDetails) => async (dispatch) => {
   dispatch({ type: LIKE_COMMUNITY_COMMENT_REQUEST });
 
   try {
-    const { data } = await axios.put(
+    const { data } = await axiosInstance.put(
       `/${community}/posts/${id}/comments/${commentId}/like`,
       rest
     );
@@ -390,7 +391,7 @@ export const likePost = (likeDetails) => async (dispatch) => {
   dispatch({ type: LIKE_COMMUNITY_POST_REQUEST });
 
   try {
-    const { data } = await axios.put(`/${community}/posts/${id}/like`, rest);
+    const { data } = await axiosInstance.put(`/${community}/posts/${id}/like`, rest);
     console.log(data);
     if (data.liked === true) {
       dispatch({ type: LIKE_COMMUNITY_POST_SUCCESS, payload: data });
@@ -414,7 +415,7 @@ export const likePost = (likeDetails) => async (dispatch) => {
 //     dispatch({ type: LIKE_COMMUNITY_POST_REQUEST });
 
 //     try {
-//         const { data } = await axios.put(`/${community}/posts/${id}`, rest);
+//         const { data } = await axiosInstance.put(`/${community}/posts/${id}`, rest);
 //         console.log(data)
 //         dispatch({ type: LIKE_COMMUNITY_POST_SUCCESS, payload: data });
 //     } catch (error) {
@@ -430,7 +431,7 @@ export const shareComment = (shareDetails) => async (dispatch) => {
   dispatch({ type: SHARE_COMMUNITY_COMMENT_REQUEST });
 
   try {
-    const { data } = await axios.put(
+    const { data } = await axiosInstance.put(
       `/${community}/posts/${id}/comments/${commentId}/share`,
       rest
     );

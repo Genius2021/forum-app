@@ -5,6 +5,8 @@ const fs = require("fs");
 const { promisify } = require("util");
 const unlinkAsync = promisify(fs.unlink)
 const app = express();
+
+
 // const authRoutes = require("./routes/authRoutes.js");
 const userRoutes = require("./routes/userRoutes.js")
 const postRoutes = require("./routes/postRoutes.js")
@@ -60,13 +62,13 @@ app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/:community/posts", communityRoutes);
 
-// if (process.env.NODE_ENV === "production") {
-//     app.use(express.static("frontend/build"));
-// }
+if (process.env.NODE_ENV === "production") {
+    app.use(express.static("frontend/build"));
+}
 
-// app.get("*", (req, res) =>{
-//     res.sendFile(path.join(__dirname, "/frontend/build", "index.html"));
-// })
+app.get("*", (req, res) =>{
+    res.sendFile(path.join(__dirname, "/frontend/build", "index.html"));
+})
 
 
 const PORT = process.env.PORT || 5000;

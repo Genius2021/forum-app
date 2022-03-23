@@ -21,13 +21,14 @@ import {
   GET_PINNED_POSTS_SUCCESS,
   GET_PINNED_POSTS_FAIL,
 } from "../constants/postConstants";
-import axios from "axios";
-// import { axiosInstance } from "../../config";
+// import axios from "axios";
+import { axiosInstance } from "../../../config"
+
 
 export const postImageUpload = (file) => async (dispatch) => {
   dispatch({ type: POST_IMAGE_UPLOAD_REQUEST, payload: { file } });
   try {
-    const { data } = await axios.post("/upload", file);
+    const { data } = await axiosInstance.post("/upload", file);
     dispatch({ type: POST_IMAGE_UPLOAD_SUCCESS, payload: data });
     console.log("success in uploading image file");
   } catch (error) {
@@ -49,7 +50,7 @@ export const createNewPost =
     });
 
     try {
-      const { data } = await axios.post("/posts", {
+      const { data } = await axiosInstance.post("/posts", {
         title,
         description,
         picture,
@@ -57,7 +58,7 @@ export const createNewPost =
         categories: category,
       });
       console.log("succeeded");
-      await axios.post("/category", {
+      await axiosInstance.post("/category", {
         name: category,
         postId: data._id,
         username,
@@ -79,7 +80,7 @@ export const createNewPost =
 export const getAPost = (id) => async (dispatch) => {
   dispatch({ type: GET_A_POST_REQUEST });
   try {
-    const { data } = await axios.get(`/posts/${id}`);
+    const { data } = await axiosInstance.get(`/posts/${id}`);
     dispatch({ type: GET_A_POST_SUCCESS, payload: data });
     localStorage.setItem("postDetails", JSON.stringify(data));
   } catch (error) {
@@ -94,9 +95,9 @@ export const getAPost = (id) => async (dispatch) => {
 };
 
 export const deletePost = (id, username) => async (dispatch) => {
-  dispatch({ type: DELETE_POST_REQUEST, payload: { data: { username } } }); //NOTE: the axios delete method needs to have a "data" key in the body to work
+  dispatch({ type: DELETE_POST_REQUEST, payload: { data: { username } } }); //NOTE: the axiosInstance delete method needs to have a "data" key in the body to work
   try {
-    await axios.delete(`/posts/${id}`, { data: { username } });
+    await axiosInstance.delete(`/posts/${id}`, { data: { username } });
     dispatch({ type: DELETE_POST_SUCCESS, payload: {} });
     localStorage.removeItem("postDetails");
   } catch (error) {
@@ -124,7 +125,7 @@ export const editPost =
   async (dispatch) => {
     dispatch({ type: EDIT_POST_REQUEST });
     try {
-      const { data } = await axios.put(`/posts/${id}`, {
+      const { data } = await axiosInstance.put(`/posts/${id}`, {
         title,
         newDescription,
         newPicture,
@@ -150,7 +151,7 @@ export const editPost =
 export const getPosts = (search) => async (dispatch) => {
   dispatch({ type: GET_POSTS_REQUEST });
   try {
-    const { data } = await axios.get("/posts" + search);
+    const { data } = await axiosInstance.get("/posts" + search);
     dispatch({ type: GET_POSTS_SUCCESS, payload: data });
   } catch (error) {
     dispatch({
@@ -166,7 +167,7 @@ export const getPosts = (search) => async (dispatch) => {
 export const getPinnedPosts = (username) => async (dispatch) => {
   dispatch({ type: GET_PINNED_POSTS_REQUEST });
   try {
-    const { data } = await axios.get(`/posts/pinned-posts/${username}`);
+    const { data } = await axiosInstance.get(`/posts/pinned-posts/${username}`);
     dispatch({ type: GET_PINNED_POSTS_SUCCESS, payload: data });
   } catch (error) {
     dispatch({
