@@ -35,7 +35,7 @@ export default function Community(props) {
 
   const style = {
     position:"sticky", 
-    top: "62.5px",
+    top: {md: "62.5px", xs: "56px" },
     zIndex: 20,
   }
 
